@@ -1,0 +1,10 @@
+  //   filePath,
+                  pdf text on hold
+          // info list
+          // option list
+
+
+          //   notification progrees notification,
+                  //   intent actions,
+                  //   listview and gridview for the for the opened pdf list,
+                  https://pub.dev/packages/media_store_plus use this for storing pdfs 
