@@ -10,7 +10,8 @@ import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:media_store_plus/media_store_plus.dart';
 import 'package:open_pdf/models/pdf_model.dart';
-import 'package:open_pdf/utils/enumarates.dart';
+import 'package:open_pdf/utils/enumerates.dart';
+import 'package:open_pdf/utils/extensions/file_extension.dart';
 import 'package:open_pdf/utils/toast_utils.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
@@ -27,27 +28,31 @@ class PdfProvider with ChangeNotifier {
     filePath: "assets/dart_flutter.pdf",
     fileName: "dart_flutter.pdf",
     pageNumber: 1,
+    fileSize: 5.0,
     lastOpened: DateTime.now(),
     createdAt: DateTime.now(),
   );
   bool _isLoading = false;
+  bool _btnLoading = false;
+  bool _isInternetConnected = false;
   PDFViewController? _pdfController;
   List<SharedMediaFile> sharedFiles = [];
-  Map<String, PdfModel> _totalPdfs = {};
+  Map<String, PdfModel> _totalPdfList = {};
   late StreamSubscription _intentSubscription;
   late StreamSubscription _internetSubscription;
-  int _pdfCurrentPage = 0;
   ViewMode _viewMode = ViewMode.grid;
+  int _pdfCurrentPage = 0;
   int _totalPages = 0;
   String _errorMessage = '';
   double _curentZoomLevel = 0;
-  bool _btnLoading = false;
-  bool _isInternetConnected = false;
+  int _currentIndex = 0;
   double _downloadProgress = 0.0;
   String _uriPath = "";
+  DownloadStatus? _downloadStatus = DownloadStatus.ongoing;
 
   PdfModel? get currentPDF => _currentPDF;
   bool get isLoading => _isLoading;
+  DownloadStatus? get downloadStatus => _downloadStatus!;
   bool get btnLoading => _btnLoading;
   int get pdfCurrentPage => _pdfCurrentPage;
   int get totalPage => _totalPages;
@@ -55,16 +60,17 @@ class PdfProvider with ChangeNotifier {
   String get errorMessage => _errorMessage;
   bool get isInternetConnected => _isInternetConnected;
   PDFViewController get pdfController => _pdfController!;
-  Map<String, PdfModel> get totalPdfs => _totalPdfs;
+  Map<String, PdfModel> get totalPdfList => _totalPdfList;
   double get downloadProgress => _downloadProgress;
   ViewMode get selectedViewMode => _viewMode;
+  int get currentIndex => _currentIndex;
 
   Dio dio = Dio();
 
   Future<void> askPermissions() async {
     List<Permission> permissions = [
       Permission.storage,
-      // Permission.notification,
+      Permission.notification,
     ];
 
     Map<Permission, PermissionStatus> permissionStatus =
@@ -165,6 +171,7 @@ class PdfProvider with ChangeNotifier {
   Future<void> downloadAndSavePdf(String url) async {
     setBtnLoading(true);
     setDownloadProgress(0.0);
+    setDownloadStatus(DownloadStatus.ongoing);
 
     bool validUrl = await isValidUrl(url);
     if (url.isEmpty && validUrl) {
@@ -209,6 +216,7 @@ class PdfProvider with ChangeNotifier {
           if (saveInfo.isSuccessful) {
             final pdf = PdfModel(
               id: fileName,
+              fileSize: filePath.sizeInKb,
               filePath: _uriPath,
               fileName: saveInfo.name,
               networkUrl: url,
@@ -284,14 +292,24 @@ class PdfProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  void setCurrentIndex(int index) {
+    _currentIndex = index;
+    notifyListeners();
+  }
+
+  void setDownloadStatus(DownloadStatus status) {
+    _downloadStatus = status;
+    notifyListeners();
+  }
+
   void setBtnLoading(bool value) {
     _btnLoading = value;
     notifyListeners();
   }
 
   void setTotalPdfList(PdfModel pdf) {
-    if (!_totalPdfs.containsKey(pdf.fileName)) {
-      _totalPdfs[pdf.id] = pdf;
+    if (!_totalPdfList.containsKey(pdf.fileName)) {
+      _totalPdfList[pdf.id] = pdf;
       notifyListeners();
     } else {
       ToastUtils.showErrorToast("File already exists");
@@ -327,7 +345,7 @@ class PdfProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void setErrorMesasge(String message) {
+  void setErrorMessage(String message) {
     _errorMessage = message;
     notifyListeners();
   }
@@ -375,6 +393,7 @@ class PdfProvider with ChangeNotifier {
       final pdf = PdfModel(
         id: getFileNameFromPath(file.path),
         filePath: file.path,
+        fileSize: file.sizeInKb,
         fileName: getFileNameFromPath(file.path),
         pageNumber: 0,
         lastOpened: DateTime.now(),
@@ -412,9 +431,12 @@ class PdfProvider with ChangeNotifier {
 
     if (result != null) {
       final file = File(result.files.single.path!);
+      final length = await file.length();
+      debugPrint("length ${file.lengthSync()} ${length}");
       final pdf = PdfModel(
         id: getFileNameFromPath(file.path),
         filePath: file.path,
+        fileSize: file.sizeInKb,
         fileName: getFileNameFromPath(file.path),
         pageNumber: 0,
         lastOpened: DateTime.now(),

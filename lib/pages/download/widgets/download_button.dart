@@ -20,7 +20,10 @@ class _DownloadButtonState extends State<DownloadButton> {
       return provider.btnLoading
           ? const GlobalLoadingWidget()
           : IconButton(
-              icon: const Icon(Icons.download),
+              icon: const Icon(
+                Icons.download,
+                size: 30,
+              ),
               onPressed: () async {
                 // context.push(
                 //     navigateTo: DocumentSaveScreen(dirType: DirType.download));

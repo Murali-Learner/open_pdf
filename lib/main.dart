@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:media_store_plus/media_store_plus.dart';
-import 'package:open_pdf/pages/home/home_page.dart';
+import 'package:open_pdf/main/main_page.dart';
 import 'package:open_pdf/providers/dictionary_provider.dart';
 import 'package:open_pdf/providers/pdf_provider.dart';
 import 'package:open_pdf/utils/theme_data.dart';
@@ -28,7 +28,7 @@ class MyApp extends StatelessWidget {
         title: 'Open PDF',
         debugShowCheckedModeBanner: false,
         theme: lightTheme,
-        home: const HomePage(),
+        home: const MainPage(),
       ),
     );
   }

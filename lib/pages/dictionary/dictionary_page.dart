@@ -1,9 +1,9 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
+import 'package:open_pdf/global_widgets/global_text_form_fields.dart';
 import 'package:open_pdf/pages/dictionary/widgets/search_list_builder.dart';
 import 'package:open_pdf/providers/dictionary_provider.dart';
 import 'package:open_pdf/utils/extensions/context_extension.dart';
+import 'package:open_pdf/utils/extensions/spacer_extension.dart';
 import 'package:provider/provider.dart';
 
 class DictionaryPage extends StatefulWidget {
@@ -39,43 +39,38 @@ class DictionaryPageState extends State<DictionaryPage> {
         title: const Text('Dictionary'),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
         child: Column(
           children: [
-            TextField(
+            10.vSpace,
+            GlobalTextFormField(
+              controller: _searchController,
+              labelText: 'Enter word to search',
+              onFieldSubmitted: (value) {
+                provider.searchWord(value.trim());
+              },
               onChanged: (value) {
-                provider.toggleClearButton(value.isNotEmpty ? true : false);
+                provider.toggleClearButton(value.isNotEmpty);
                 if (value.isEmpty) {
                   provider.fetchAllWords();
-                  return;
+                } else {
+                  provider.searchWord(value.trim());
                 }
-
-                provider.searchWord(value.trim());
               },
-              controller: _searchController,
-              decoration: InputDecoration(
-                labelText: 'Enter word to search',
-                border: const OutlineInputBorder(),
-                suffixIcon: Consumer<DictionaryProvider>(
-                    builder: (context, provider, _) {
-                  log("provider.showClearButton: ${provider.showClearButton}");
-                  return provider.showClearButton
-                      ? IconButton(
-                          icon: const Icon(Icons.clear),
-                          onPressed: () {
-                            _searchController.clear();
-                            provider.fetchAllWords();
-                            provider.toggleClearButton(false);
-
-                            context.hideKeyBoard();
-                          },
-                        )
-                      : const SizedBox.shrink();
-                }),
-              ),
-              onSubmitted: (value) {
-                provider.searchWord(value.trim());
-              },
+              suffixIcon:
+                  Consumer<DictionaryProvider>(builder: (context, provider, _) {
+                return provider.showClearButton
+                    ? IconButton(
+                        icon: const Icon(Icons.clear),
+                        onPressed: () {
+                          _searchController.clear();
+                          provider.fetchAllWords();
+                          provider.toggleClearButton(false);
+                          context.hideKeyBoard();
+                        },
+                      )
+                    : const SizedBox.shrink();
+              }),
             ),
             const SizedBox(height: 16),
             const SearchListBuilder(),

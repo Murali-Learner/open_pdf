@@ -42,11 +42,11 @@ class PdfViewerWidget extends StatelessWidget {
                   );
                 },
                 onError: (error) {
-                  provider.setErrorMesasge(error.toString());
+                  provider.setErrorMessage(error.toString());
                   debugPrint(error.toString());
                 },
                 onPageError: (page, error) {
-                  provider.setErrorMesasge(error.toString());
+                  provider.setErrorMessage(error.toString());
                   debugPrint('$page: ${error.toString()}');
                 },
                 onViewCreated: (PDFViewController controller) async {

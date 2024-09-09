@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:open_pdf/providers/pdf_provider.dart';
-import 'package:open_pdf/utils/enumarates.dart';
+import 'package:open_pdf/utils/enumerates.dart';
 import 'package:provider/provider.dart';
 
 Color? _getColor(bool isSelected) {

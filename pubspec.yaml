@@ -53,6 +53,7 @@ dependencies:
     path: /home/saimurali/Desktop/projects/flutter_projects/open_pdf_flutter/open_pdf/packages/flutter_pdfview
   hive: ^2.2.3
   hive_flutter: ^1.1.0
+  flutter_speed_dial: ^7.0.0
 
 
 dev_dependencies:

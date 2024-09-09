@@ -14,8 +14,12 @@ class WordTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      elevation: 2.0,
+      borderRadius: BorderRadius.circular(10),
       child: ListTile(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        tileColor: context.theme.primaryColor.withOpacity(0.5),
         onTap: () {
           context.hideKeyBoard();
           showModalBottomSheet(
@@ -26,7 +30,7 @@ class WordTile extends StatelessWidget {
           );
         },
         title: Text(word.word),
-        subtitle: Text(word.word),
+        subtitle: Text(word.definition),
       ),
     );
   }

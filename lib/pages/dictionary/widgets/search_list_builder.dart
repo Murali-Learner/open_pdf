@@ -3,6 +3,7 @@ import 'package:open_pdf/global_widgets/shimmer_loading.dart';
 import 'package:open_pdf/pages/dictionary/widgets/no_results_found.dart';
 import 'package:open_pdf/pages/dictionary/widgets/word_tile_widget.dart';
 import 'package:open_pdf/providers/dictionary_provider.dart';
+import 'package:open_pdf/utils/extensions/spacer_extension.dart';
 import 'package:provider/provider.dart';
 
 class SearchListBuilder extends StatelessWidget {
@@ -22,7 +23,8 @@ class SearchListBuilder extends StatelessWidget {
           return const NoResultsFound();
         }
 
-        return ListView.builder(
+        return ListView.separated(
+          separatorBuilder: (context, index) => 5.vSpace,
           shrinkWrap: true,
           itemCount: provider.results.length,
           itemBuilder: (context, index) {
