@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:open_pdf/models/pdf_model.dart';
 import 'package:open_pdf/pages/home/widgets/pdf_option_item.dart';
+import 'package:open_pdf/providers/pdf_provider.dart';
+import 'package:open_pdf/utils/extensions/context_extension.dart';
+import 'package:provider/provider.dart';
 
 class PdfOptionsBottomSheet extends StatelessWidget {
   final PdfModel pdf;
@@ -27,28 +30,29 @@ class PdfOptionsBottomSheet extends StatelessWidget {
         PdfOptionItem(
           icon: Icons.delete,
           text: "Delete",
-          onTap: () => _handleDelete(context),
+          onTap: () => _handleDelete(context, pdf),
         ),
       ],
     );
   }
 
   void _handleAddToFavorites(BuildContext context) {
-    Navigator.pop(context);
-    // TODO: Add logic to add to favorites
+    context.pop();
+    // TODO: add to favorites
   }
 
   void _handleSharePdf(BuildContext context, PdfModel pdf) {
-    Navigator.pop(context);
+    context.pop();
     sharePdf(pdf);
   }
 
-  void _handleDelete(BuildContext context) {
-    Navigator.pop(context);
-    // TODO: Add delete logic here
+  void _handleDelete(BuildContext context, PdfModel pdf) {
+    context.pop();
+    context.read<PdfProvider>().removeFromTotalPdfList(pdf);
   }
 
   void sharePdf(PdfModel pdf) {
+    // TODO: share pdf
     debugPrint("Sharing ${pdf.fileName}");
   }
 }

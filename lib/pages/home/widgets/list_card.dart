@@ -20,8 +20,9 @@ class ListPdfCard extends StatelessWidget {
         style: context.textTheme.bodyLarge,
       ),
       subtitle: Text(
-        "${pdf.fileSize}",
+        "${pdf.fileSize.toStringAsFixed(2)} KB",
         style: context.textTheme.bodyLarge,
+        overflow: TextOverflow.ellipsis,
       ),
       trailing: PdfCardOptions(
         pdf: pdf,

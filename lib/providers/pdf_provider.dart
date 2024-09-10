@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:media_store_plus/media_store_plus.dart';
+import 'package:open_pdf/helpers/hive_helper.dart';
 import 'package:open_pdf/models/pdf_model.dart';
 import 'package:open_pdf/utils/enumerates.dart';
 import 'package:open_pdf/utils/extensions/file_extension.dart';
@@ -21,7 +22,9 @@ import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 final mediaStorePlugin = MediaStore();
 
 class PdfProvider with ChangeNotifier {
-  PdfProvider() {}
+  PdfProvider() {
+    loadPdfListFromHive();
+  }
 
   PdfModel? _currentPDF = PdfModel(
     id: "1",
@@ -66,6 +69,12 @@ class PdfProvider with ChangeNotifier {
   int get currentIndex => _currentIndex;
 
   Dio dio = Dio();
+
+  Future<void> loadPdfListFromHive() async {
+    _totalPdfList = HiveHelper.getHivePdfList();
+    debugPrint("_totalPdfList ${_totalPdfList.length}");
+    notifyListeners();
+  }
 
   Future<void> askPermissions() async {
     List<Permission> permissions = [
@@ -184,20 +193,16 @@ class PdfProvider with ChangeNotifier {
     final File filePath = await getPdfDownloadDirectory(fileName);
 
     bool fileExists = await checkIfFileExists(fileName);
-    log("fileExists: $fileExists, fileName: ${filePath.path} fileName $fileName ");
+    log("fileExists: $fileExists, fileName: ${filePath} fileName $fileName ");
 
-    if (fileExists) {
-      ToastUtils.showErrorToast("File already exists");
-      resetValues();
-      return;
-    }
+    // if (fileExists && _totalPdfList.containsKey(fileName)) {
+    //   ToastUtils.showErrorToast("File already exists");
+    //   resetValues();
+    //   setBtnLoading(false);
+    //   return;
+    // }
 
     try {
-      String fileName = getFileNameFromPath(url);
-      final File filePath = await getPdfDownloadDirectory(fileName);
-
-      dio.options.sendTimeout = const Duration(minutes: 2);
-
       final response = await dio.download(
         url,
         filePath.path,
@@ -212,40 +217,35 @@ class PdfProvider with ChangeNotifier {
           dirType: DirType.download,
           dirName: DirType.download.defaults,
         );
-        if (saveInfo != null) {
-          if (saveInfo.isSuccessful) {
-            final pdf = PdfModel(
-              id: fileName,
-              fileSize: filePath.sizeInKb,
-              filePath: _uriPath,
-              fileName: saveInfo.name,
-              networkUrl: url,
-              pageNumber: 0,
-              lastOpened: DateTime.now(),
-              createdAt: DateTime.now(),
-            );
 
-            setTotalPdfList(pdf);
+        if (saveInfo != null && saveInfo.isSuccessful) {
+          debugPrint("here in the save info not null ${saveInfo.uri}");
+          final pdf = PdfModel(
+            id: fileName,
+            fileSize: 0.0, //filePath.sizeInKb,
+            filePath: _uriPath,
+            fileName: saveInfo.name,
+            networkUrl: url,
+            pageNumber: 0,
+            downloadProgress: downloadProgress,
+            lastOpened: DateTime.now(),
+            createdAt: DateTime.now(),
+          );
+          debugPrint("download pdf ${pdf.toJson()}");
+          addToTotalPdfList(pdf);
 
-            ToastUtils.showSuccessToast("File downloaded successfully");
-            return;
-          } else if (saveInfo.isDuplicated) {
-            ToastUtils.showErrorToast("File already exists");
-            debugPrint("saveInfo ${saveInfo.name}");
-          }
+          ToastUtils.showSuccessToast("File downloaded successfully");
+          return;
+        } else {
+          ToastUtils.showErrorToast("File downloading error");
         }
       } else {
         ToastUtils.showErrorToast("Failed to download file");
       }
-    } on DioException catch (e) {
-      if (e.type == DioExceptionType.connectionTimeout) {
-        ToastUtils.showErrorToast("Connection timeout, please try again.");
-      } else {
-        ToastUtils.showErrorToast("Failed to download file: ${e.message}");
-      }
     } catch (e) {
       log("file download error $e");
       ToastUtils.showErrorToast("Unexpected file error: $e");
+      setBtnLoading(false);
     } finally {
       setBtnLoading(false);
       resetValues();
@@ -307,12 +307,32 @@ class PdfProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void setTotalPdfList(PdfModel pdf) {
-    if (!_totalPdfList.containsKey(pdf.fileName)) {
-      _totalPdfList[pdf.id] = pdf;
-      notifyListeners();
-    } else {
-      ToastUtils.showErrorToast("File already exists");
+  void addToTotalPdfList(PdfModel pdf) async {
+    log("i'm here in the add pdf ");
+    try {
+      if (!_totalPdfList.containsKey(pdf.fileName)) {
+        await HiveHelper.addOrUpdatePdf(pdf);
+        _totalPdfList[pdf.id] = pdf;
+        notifyListeners();
+      } else {
+        ToastUtils.showErrorToast("File already exists");
+      }
+    } catch (e) {
+      debugPrint("adding file error $e");
+      ToastUtils.showErrorToast("Error while adding file");
+    }
+  }
+
+  void removeFromTotalPdfList(PdfModel pdf) async {
+    try {
+      if (_totalPdfList.isNotEmpty) {
+        await HiveHelper.removeFromCache(pdf.id);
+        _totalPdfList.remove(pdf.fileName);
+        notifyListeners();
+      }
+    } catch (e) {
+      debugPrint("deleting file error $e");
+      ToastUtils.showErrorToast("Error while deleting file");
     }
   }
 
@@ -321,14 +341,29 @@ class PdfProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void setCurrentPDF(PdfModel pdf) {
-    _currentPDF = pdf;
-    notifyListeners();
+  Future<void> setCurrentPDF(PdfModel pdf) async {
+    try {
+      await HiveHelper.addOrUpdatePdf(pdf);
+      _currentPDF = pdf;
+      notifyListeners();
+    } catch (e) {
+      debugPrint("setting current pdf error $e");
+      ToastUtils.showErrorToast("Error while setting pdf");
+    }
   }
 
-  void setCurrentPage(int page) {
-    _pdfCurrentPage = page;
-    notifyListeners();
+  void setCurrentPage(int page) async {
+    try {
+      _pdfCurrentPage = page;
+      if (_currentPDF != null) {
+        _currentPDF = _currentPDF!.copyWith(pageNumber: page);
+        await HiveHelper.addOrUpdatePdf(_currentPDF!);
+      }
+      notifyListeners();
+    } catch (e) {
+      debugPrint("deleting file error $e");
+      ToastUtils.showErrorToast("Error while setting page");
+    }
   }
 
   Future<void> setTotalPages(int pages) async {
@@ -400,7 +435,7 @@ class PdfProvider with ChangeNotifier {
         createdAt: DateTime.now(),
       );
 
-      setTotalPdfList(pdf);
+      addToTotalPdfList(pdf);
       handlePDF();
     }
   }
@@ -422,32 +457,36 @@ class PdfProvider with ChangeNotifier {
 
   Future<void> pickFile() async {
     setLoading(true);
-
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
-      allowMultiple: false,
-      type: FileType.custom,
-      allowedExtensions: ['pdf', 'doc'],
-    );
-
-    if (result != null) {
-      final file = File(result.files.single.path!);
-      final length = await file.length();
-      debugPrint("length ${file.lengthSync()} ${length}");
-      final pdf = PdfModel(
-        id: getFileNameFromPath(file.path),
-        filePath: file.path,
-        fileSize: file.sizeInKb,
-        fileName: getFileNameFromPath(file.path),
-        pageNumber: 0,
-        lastOpened: DateTime.now(),
-        createdAt: DateTime.now(),
+    try {
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        allowMultiple: false,
+        type: FileType.custom,
+        allowedExtensions: ['pdf', 'doc'],
       );
-      setTotalPdfList(pdf);
 
-      handlePDF();
-      setLoading(false);
-    } else {
-      ToastUtils.showErrorToast("No file selected");
+      if (result != null) {
+        final file = File(result.files.single.path!);
+        final length = await file.length();
+        debugPrint("length ${file.lengthSync()} ${length}");
+        final pdf = PdfModel(
+          id: getFileNameFromPath(file.path),
+          filePath: file.path,
+          fileSize: file.sizeInKb,
+          fileName: getFileNameFromPath(file.path),
+          pageNumber: 0,
+          lastOpened: DateTime.now(),
+          createdAt: DateTime.now(),
+        );
+        addToTotalPdfList(pdf);
+
+        handlePDF();
+        setLoading(false);
+      } else {
+        ToastUtils.showErrorToast("No file selected");
+        setLoading(false);
+      }
+    } catch (e) {
+      ToastUtils.showErrorToast("Error while picking file");
       setLoading(false);
     }
   }

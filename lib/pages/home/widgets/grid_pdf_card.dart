@@ -41,23 +41,27 @@ class GridPdfCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(
-                      child: Text(
-                        pdf.fileName,
-                        style: context.textTheme.bodyMedium,
+                Expanded(
+                  flex: 5,
+                  child: Wrap(
+                    // alignment: A,
+                    children: [
+                      SizedBox(
+                        child: Text(
+                          pdf.fileName,
+                          style: context.textTheme.bodyMedium,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
-                    ),
-                    4.vSpace,
-                    SizedBox(
-                      child: Text(
-                        "${pdf.fileSize.toStringAsFixed(2)} KB",
-                        style: context.textTheme.bodyMedium,
+                      4.vSpace,
+                      SizedBox(
+                        child: Text(
+                          "${pdf.fileSize.toStringAsFixed(2)} KB",
+                          style: context.textTheme.bodyMedium,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
                 PdfCardOptions(
                   pdf: pdf,

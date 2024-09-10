@@ -11,28 +11,32 @@ class DownloadPdfRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      mainAxisSize: MainAxisSize.max,
-      children: [
-        Expanded(
-          child: GlobalTextFormField(
-            controller: _searchController,
-            labelText: 'Provide link to download',
-            validator: (value) {
-              if (value != null && value.isEmpty) {
-                return 'Please provide a link';
-              } else {
-                return null;
-              }
-            },
-            onFieldSubmitted: (value) {},
+    return Container(
+      color: Colors.white,
+      padding: const EdgeInsets.only(top: 10, left: 10, right: 10),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.max,
+        children: [
+          Expanded(
+            child: GlobalTextFormField(
+              controller: _searchController,
+              labelText: 'Provide link to download',
+              validator: (value) {
+                if (value != null && value.isEmpty) {
+                  return 'Please provide a link';
+                } else {
+                  return null;
+                }
+              },
+              onFieldSubmitted: (value) {},
+            ),
           ),
-        ),
-        DownloadButton(
-          pdfUrl: _searchController.text.trim(),
-        ),
-      ],
+          DownloadButton(
+            pdfUrl: _searchController.text.trim(),
+          ),
+        ],
+      ),
     );
   }
 }

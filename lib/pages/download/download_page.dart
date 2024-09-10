@@ -34,17 +34,16 @@ class DownloadPageState extends State<DownloadPage> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         title: const Text('Downloads'),
+        elevation: 2.0,
+        scrolledUnderElevation: 5.0,
       ),
       body: context.watch<PdfProvider>().isLoading
           ? const GlobalLoadingWidget()
-          : Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10),
-              child: Column(
-                children: [
-                  DownloadPdfRow(),
-                  Expanded(child: DownloadTabBar()),
-                ],
-              ),
+          : Column(
+              children: [
+                DownloadPdfRow(),
+                Expanded(child: DownloadTabBar()),
+              ],
             ),
     );
   }

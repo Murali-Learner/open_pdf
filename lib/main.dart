@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:media_store_plus/media_store_plus.dart';
+import 'package:open_pdf/helpers/hive_helper.dart';
 import 'package:open_pdf/main/main_page.dart';
 import 'package:open_pdf/providers/dictionary_provider.dart';
 import 'package:open_pdf/providers/pdf_provider.dart';
@@ -8,8 +10,12 @@ import 'package:provider/provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
   await MediaStore.ensureInitialized();
   MediaStore.appFolder = "PdfReader";
+
+  HiveHelper hiveHelper = HiveHelper();
+  await hiveHelper.initHive();
 
   runApp(const MyApp());
 }
@@ -19,6 +25,9 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+    ]);
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => PdfProvider()),

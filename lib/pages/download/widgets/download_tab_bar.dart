@@ -39,16 +39,31 @@ class DownloadTabBarState extends State<DownloadTabBar>
   Widget build(BuildContext context) {
     return Column(
       children: [
-        TabBar(
-          controller: _tabController,
-          tabs: const [
-            Tab(text: 'Ongoing'),
-            Tab(text: 'Completed'),
-            Tab(text: 'Cancelled'),
-          ],
+        Container(
+          padding: const EdgeInsets.only(top: 10),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.3),
+                offset: Offset(0, 3),
+                blurRadius: 1,
+                spreadRadius: 1,
+              ),
+            ],
+          ),
+          child: TabBar(
+            controller: _tabController,
+            tabs: const [
+              Tab(text: 'Ongoing'),
+              Tab(text: 'Completed'),
+              Tab(text: 'Cancelled'),
+            ],
+          ),
         ),
         Expanded(
           child: TabBarView(
+            physics: const NeverScrollableScrollPhysics(),
             controller: _tabController,
             children: const [
               DownloadListView(),

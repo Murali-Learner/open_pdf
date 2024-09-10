@@ -1,17 +1,33 @@
+import 'package:hive/hive.dart';
 import 'package:open_pdf/utils/enumerates.dart';
 
+part 'pdf_model.g.dart';
+
+@HiveType(typeId: 0)
 class PdfModel {
+  @HiveField(0)
   final String id;
+  @HiveField(1)
   final String filePath;
+  @HiveField(3)
   final String fileName;
+  @HiveField(4)
   final int pageNumber;
+  @HiveField(5)
   final DateTime lastOpened;
+  @HiveField(6)
   final DateTime createdAt;
+  @HiveField(7)
   final String? networkUrl;
+  @HiveField(8)
   final double fileSize;
+  @HiveField(9)
   final double? downloadProgress;
+  @HiveField(10)
   final bool isOpened;
+  @HiveField(11)
   final bool isFav;
+  @HiveField(12)
   final DownloadStatus? downloadStatus;
 
   PdfModel({
@@ -59,7 +75,37 @@ class PdfModel {
       'downloadProgress': downloadProgress,
       'isOpened': isOpened,
       'isFav': isFav,
-      'downloadStatus': downloadStatus!.index,
+      'downloadStatus': downloadStatus?.index,
     };
+  }
+
+  PdfModel copyWith({
+    String? id,
+    String? filePath,
+    String? fileName,
+    int? pageNumber,
+    DateTime? lastOpened,
+    DateTime? createdAt,
+    String? networkUrl,
+    double? fileSize,
+    double? downloadProgress,
+    bool? isOpened,
+    bool? isFav,
+    DownloadStatus? downloadStatus,
+  }) {
+    return PdfModel(
+      id: id ?? this.id,
+      filePath: filePath ?? this.filePath,
+      fileName: fileName ?? this.fileName,
+      pageNumber: pageNumber ?? this.pageNumber,
+      lastOpened: lastOpened ?? this.lastOpened,
+      createdAt: createdAt ?? this.createdAt,
+      networkUrl: networkUrl ?? this.networkUrl,
+      fileSize: fileSize ?? this.fileSize,
+      downloadProgress: downloadProgress ?? this.downloadProgress,
+      isOpened: isOpened ?? this.isOpened,
+      isFav: isFav ?? this.isFav,
+      downloadStatus: downloadStatus ?? this.downloadStatus,
+    );
   }
 }

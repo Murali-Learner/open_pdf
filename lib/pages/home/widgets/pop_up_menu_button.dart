@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:open_pdf/pages/download/download_page.dart';
+import 'package:open_pdf/utils/extensions/context_extension.dart';
 
 class PopupMenuButtonWidget extends StatelessWidget {
   const PopupMenuButtonWidget({super.key});
@@ -11,7 +13,8 @@ class PopupMenuButtonWidget extends StatelessWidget {
       onSelected: (value) {
         switch (value) {
           case 1:
-            debugPrint("Option 1 selected");
+            debugPrint("Downloads selected");
+            context.push(navigateTo: const DownloadPage());
             break;
           case 2:
             debugPrint("Option 2 selected");

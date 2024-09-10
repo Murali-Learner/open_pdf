@@ -23,7 +23,7 @@ class DownloadListViewState extends State<DownloadListView> {
         //     .toList();
         return ListView.separated(
           shrinkWrap: true,
-          padding: const EdgeInsets.symmetric(vertical: 10),
+          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
           itemCount: 15, //filteredPdfList.length,
           separatorBuilder: (BuildContext context, int index) {
             return const SizedBox(height: 10);
