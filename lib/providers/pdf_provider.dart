@@ -41,6 +41,7 @@ class PdfProvider with ChangeNotifier {
   PDFViewController? _pdfController;
   List<SharedMediaFile> sharedFiles = [];
   Map<String, PdfModel> _totalPdfList = {};
+  Map<String, PdfModel> _favoritesList = {};
   late StreamSubscription _intentSubscription;
   late StreamSubscription _internetSubscription;
   ViewMode _viewMode = ViewMode.grid;
@@ -64,6 +65,7 @@ class PdfProvider with ChangeNotifier {
   bool get isInternetConnected => _isInternetConnected;
   PDFViewController get pdfController => _pdfController!;
   Map<String, PdfModel> get totalPdfList => _totalPdfList;
+  Map<String, PdfModel> get favoritesList => _favoritesList;
   double get downloadProgress => _downloadProgress;
   ViewMode get selectedViewMode => _viewMode;
   int get currentIndex => _currentIndex;
@@ -72,6 +74,7 @@ class PdfProvider with ChangeNotifier {
 
   Future<void> loadPdfListFromHive() async {
     _totalPdfList = HiveHelper.getHivePdfList();
+    _favoritesList = HiveHelper.getFavoritePdfList();
     debugPrint("_totalPdfList ${_totalPdfList.length}");
     notifyListeners();
   }
@@ -148,7 +151,6 @@ class PdfProvider with ChangeNotifier {
   Future<bool> isValidUrl(String url) async {
     try {
       final response = await dio.head(url);
-
       if (response.statusCode == 200 &&
           response.headers.value("content-type") == "application/pdf") {
         return true;
@@ -183,8 +185,11 @@ class PdfProvider with ChangeNotifier {
     setDownloadStatus(DownloadStatus.ongoing);
 
     bool validUrl = await isValidUrl(url);
-    if (url.isEmpty && validUrl) {
+    debugPrint("validUrl $validUrl");
+    if (url.isEmpty || !validUrl) {
       ToastUtils.showErrorToast("Enter a valid URL");
+      resetValues();
+      setBtnLoading(false);
       return;
     }
 
@@ -193,14 +198,14 @@ class PdfProvider with ChangeNotifier {
     final File filePath = await getPdfDownloadDirectory(fileName);
 
     bool fileExists = await checkIfFileExists(fileName);
-    log("fileExists: $fileExists, fileName: ${filePath} fileName $fileName ");
+    log("fileExists: $fileExists, fileName: $filePath fileName $fileName ");
 
-    // if (fileExists && _totalPdfList.containsKey(fileName)) {
-    //   ToastUtils.showErrorToast("File already exists");
-    //   resetValues();
-    //   setBtnLoading(false);
-    //   return;
-    // }
+    if (fileExists || _totalPdfList.containsKey(fileName)) {
+      ToastUtils.showErrorToast("File already exists");
+      resetValues();
+      setBtnLoading(false);
+      return;
+    }
 
     try {
       final response = await dio.download(
@@ -222,11 +227,12 @@ class PdfProvider with ChangeNotifier {
           debugPrint("here in the save info not null ${saveInfo.uri}");
           final pdf = PdfModel(
             id: fileName,
-            fileSize: 0.0, //filePath.sizeInKb,
+            fileSize: 0.0,
             filePath: _uriPath,
             fileName: saveInfo.name,
             networkUrl: url,
             pageNumber: 0,
+            downloadStatus: DownloadStatus.completed.name,
             downloadProgress: downloadProgress,
             lastOpened: DateTime.now(),
             createdAt: DateTime.now(),
@@ -307,6 +313,24 @@ class PdfProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> toggleFavorite(PdfModel pdf) async {
+    try {
+      await HiveHelper.toggleFavorite(pdf);
+
+      _totalPdfList[pdf.id] = pdf.copyWith(isFav: !pdf.isFav);
+
+      if (_totalPdfList[pdf.id]!.isFav) {
+        _favoritesList[pdf.id] = _totalPdfList[pdf.id]!;
+      } else {
+        _favoritesList.remove(pdf.id);
+      }
+
+      notifyListeners();
+    } catch (e) {
+      debugPrint("Error while toggling favorite: $e");
+    }
+  }
+
   void addToTotalPdfList(PdfModel pdf) async {
     log("i'm here in the add pdf ");
     try {
@@ -323,11 +347,32 @@ class PdfProvider with ChangeNotifier {
     }
   }
 
+  Future<void> deletePdfFormLocalStorage(PdfModel pdf) async {
+    try {
+      final bool status = await mediaStorePlugin.deleteFile(
+          fileName: pdf.fileName,
+          dirType: DirType.download,
+          dirName: DirType.download.defaults);
+      debugPrint("Delete Status: $status");
+
+      if (status) {
+        ToastUtils.showSuccessToast("File Deleted!");
+      }
+    } catch (e) {
+      debugPrint("File deleted Error $e");
+      ToastUtils.showErrorToast("Error while deleting file");
+    }
+  }
+
   void removeFromTotalPdfList(PdfModel pdf) async {
     try {
       if (_totalPdfList.isNotEmpty) {
         await HiveHelper.removeFromCache(pdf.id);
         _totalPdfList.remove(pdf.fileName);
+        _favoritesList.remove(pdf.fileName);
+        if (pdf.networkUrl != null) {
+          deletePdfFormLocalStorage(pdf);
+        }
         notifyListeners();
       }
     } catch (e) {

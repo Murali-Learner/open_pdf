@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:open_pdf/favourites/favorites_list_page.dart';
 import 'package:open_pdf/pages/download/download_page.dart';
 import 'package:open_pdf/utils/extensions/context_extension.dart';
 
@@ -17,7 +18,7 @@ class PopupMenuButtonWidget extends StatelessWidget {
             context.push(navigateTo: const DownloadPage());
             break;
           case 2:
-            debugPrint("Option 2 selected");
+            context.push(navigateTo: const FavoritesListPage());
             break;
           case 3:
             debugPrint("Option 3 selected");

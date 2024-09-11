@@ -19,7 +19,7 @@ class PdfOptionsBottomSheet extends StatelessWidget {
       children: [
         PdfOptionItem(
           icon: Icons.favorite,
-          text: "Add to Favorites",
+          text: "${pdf.isFav ? "Remove from" : "Add to"} Favorites",
           onTap: () => _handleAddToFavorites(context),
         ),
         PdfOptionItem(
@@ -37,8 +37,8 @@ class PdfOptionsBottomSheet extends StatelessWidget {
   }
 
   void _handleAddToFavorites(BuildContext context) {
+    context.read<PdfProvider>().toggleFavorite(pdf);
     context.pop();
-    // TODO: add to favorites
   }
 
   void _handleSharePdf(BuildContext context, PdfModel pdf) {

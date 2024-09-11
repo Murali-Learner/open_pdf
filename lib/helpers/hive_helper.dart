@@ -1,6 +1,6 @@
-import 'package:hive_flutter/adapters.dart';
+import 'package:flutter/foundation.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:open_pdf/models/pdf_model.dart';
-// import 'package:open_pdf/models/pdf_model.dart';
 import 'package:open_pdf/utils/enumerates.dart';
 
 class HiveHelper {
@@ -70,24 +70,27 @@ class HiveHelper {
     return pdf != null && pdf.isFav;
   }
 
-  static Future<void> updateFavoriteStatus(String id, bool isFav) async {
-    final pdf = _pdfBox?.get(id);
-    if (pdf != null) {
-      final updatedPdf = pdf.copyWith(isFav: isFav);
-      await _pdfBox?.put(id, updatedPdf);
-    }
-  }
-
   static Future<void> updateDownloadStatus(
       String id, DownloadStatus status) async {
     final pdf = _pdfBox?.get(id);
     if (pdf != null) {
-      final updatedPdf = pdf.copyWith(downloadStatus: status);
+      final updatedPdf = pdf.copyWith(downloadStatus: status.name);
       await _pdfBox?.put(id, updatedPdf);
     }
   }
 
   static Future<void> clearAllData() async {
     await _pdfBox?.clear();
+  }
+
+  static Future<void> toggleFavorite(PdfModel pdf) async {
+    try {
+      final isFav = pdf.isFav;
+
+      final updatedPdf = pdf.copyWith(isFav: !isFav);
+      await _pdfBox?.put(pdf.id, updatedPdf);
+    } catch (e) {
+      debugPrint("Error while toggling favorite status: $e");
+    }
   }
 }

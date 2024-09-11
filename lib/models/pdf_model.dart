@@ -28,7 +28,7 @@ class PdfModel {
   @HiveField(11)
   final bool isFav;
   @HiveField(12)
-  final DownloadStatus? downloadStatus;
+  final String? downloadStatus;
 
   PdfModel({
     required this.id,
@@ -58,7 +58,7 @@ class PdfModel {
       networkUrl: json['networkUrl'] ?? '',
       isOpened: json['isOpened'] ?? false,
       isFav: json['isFav'] ?? false,
-      downloadStatus: DownloadStatus.values[json['downloadStatus'] ?? 0],
+      downloadStatus: DownloadStatus.values[json['downloadStatus'] ?? 0].name,
     );
   }
 
@@ -75,7 +75,7 @@ class PdfModel {
       'downloadProgress': downloadProgress,
       'isOpened': isOpened,
       'isFav': isFav,
-      'downloadStatus': downloadStatus?.index,
+      'downloadStatus': downloadStatus,
     };
   }
 
@@ -91,7 +91,7 @@ class PdfModel {
     double? downloadProgress,
     bool? isOpened,
     bool? isFav,
-    DownloadStatus? downloadStatus,
+    String? downloadStatus,
   }) {
     return PdfModel(
       id: id ?? this.id,

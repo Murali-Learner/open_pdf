@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:open_pdf/models/pdf_model.dart';
 import 'package:open_pdf/pages/home/widgets/pdf_card_options.dart';
+import 'package:open_pdf/providers/pdf_provider.dart';
 import 'package:open_pdf/utils/extensions/context_extension.dart';
+import 'package:provider/provider.dart';
 
 class ListPdfCard extends StatelessWidget {
   final PdfModel pdf;
@@ -24,10 +26,26 @@ class ListPdfCard extends StatelessWidget {
         style: context.textTheme.bodyLarge,
         overflow: TextOverflow.ellipsis,
       ),
-      trailing: PdfCardOptions(
-        pdf: pdf,
-        index: index,
-      ),
+      trailing: pdf.isFav
+          ? IconButton(
+              hoverColor: Colors.transparent,
+              splashColor: Colors.transparent,
+              style: const ButtonStyle(
+                  alignment: Alignment.topRight,
+                  overlayColor: WidgetStateColor.transparent),
+              padding: EdgeInsets.zero,
+              onPressed: () {
+                context.read<PdfProvider>().toggleFavorite(pdf);
+              },
+              icon: Icon(
+                pdf.isFav ? Icons.favorite : Icons.favorite_border,
+                color: pdf.isFav ? Colors.red : null,
+              ),
+            )
+          : PdfCardOptions(
+              pdf: pdf,
+              index: index,
+            ),
     );
   }
 }

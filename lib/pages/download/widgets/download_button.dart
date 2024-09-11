@@ -28,9 +28,12 @@ class _DownloadButtonState extends State<DownloadButton> {
                 // context.push(
                 //     navigateTo: DocumentSaveScreen(dirType: DirType.download));
                 final provider = context.read<PdfProvider>();
-
+                // final link =
+                //     "https://drive.google.com/uc?export=download&id=1Ih15A30PS1HhpnEN_UYSfiILgDXntsMd";
+                // // "https://drive.google.com/file/d/1-4WtAEydQN5zNZ2mTWugNm_ERS8yiA4u/view?usp=sharing";
                 await provider.downloadAndSavePdf(
                   "https://enos.itcollege.ee/~jpoial/allalaadimised/reading/Android-Programming-Cookbook.pdf",
+                  // link,
                 );
               },
             );

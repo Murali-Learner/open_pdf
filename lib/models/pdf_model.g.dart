@@ -28,7 +28,7 @@ class PdfModelAdapter extends TypeAdapter<PdfModel> {
       downloadProgress: fields[9] as double?,
       isOpened: fields[10] as bool,
       isFav: fields[11] as bool,
-      downloadStatus: fields[12] as DownloadStatus?,
+      downloadStatus: fields[12] as String?,
     );
   }
 

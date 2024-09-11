@@ -18,9 +18,9 @@ class DownloadListViewState extends State<DownloadListView> {
   Widget build(BuildContext context) {
     return Consumer<PdfProvider>(
       builder: (context, provider, _) {
-        // final filteredPdfList = provider.totalPdfList.values
-        //     .where((pdf) => pdf.downloadStatus == provider.downloadStatus)
-        //     .toList();
+        final filteredPdfList = provider.totalPdfList.values
+            .where((pdf) => pdf.downloadStatus == provider.downloadStatus)
+            .toList();
         return ListView.separated(
           shrinkWrap: true,
           padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
