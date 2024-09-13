@@ -15,6 +15,7 @@ class PdfOptionsBottomSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final provider = context.read<PdfProvider>();
     return Wrap(
       children: [
         PdfOptionItem(
@@ -30,7 +31,10 @@ class PdfOptionsBottomSheet extends StatelessWidget {
         PdfOptionItem(
           icon: Icons.delete,
           text: "Delete",
-          onTap: () => _handleDelete(context, pdf),
+          onTap: () async {
+            await provider.removeFromTotalPdfList(pdf);
+            context.pop();
+          },
         ),
       ],
     );
@@ -44,11 +48,6 @@ class PdfOptionsBottomSheet extends StatelessWidget {
   void _handleSharePdf(BuildContext context, PdfModel pdf) {
     context.pop();
     sharePdf(pdf);
-  }
-
-  void _handleDelete(BuildContext context, PdfModel pdf) {
-    context.pop();
-    context.read<PdfProvider>().removeFromTotalPdfList(pdf);
   }
 
   void sharePdf(PdfModel pdf) {

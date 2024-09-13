@@ -8,19 +8,19 @@ class PdfModel {
   @HiveField(0)
   final String id;
   @HiveField(1)
-  final String filePath;
+  final String? filePath;
   @HiveField(3)
-  final String fileName;
+  final String? fileName;
   @HiveField(4)
-  final int pageNumber;
+  final int? pageNumber;
   @HiveField(5)
-  final DateTime lastOpened;
+  final DateTime? lastOpened;
   @HiveField(6)
-  final DateTime createdAt;
+  final DateTime? createdAt;
   @HiveField(7)
   final String? networkUrl;
   @HiveField(8)
-  final double fileSize;
+  final double? fileSize;
   @HiveField(9)
   final double? downloadProgress;
   @HiveField(10)
@@ -32,14 +32,14 @@ class PdfModel {
 
   PdfModel({
     required this.id,
-    required this.filePath,
-    required this.fileName,
-    required this.pageNumber,
-    required this.lastOpened,
-    required this.createdAt,
-    required this.fileSize,
+    this.filePath,
+    this.fileName,
+    this.pageNumber,
+    this.lastOpened,
+    this.createdAt,
+    this.fileSize,
     this.networkUrl,
-    this.downloadProgress,
+    this.downloadProgress = 0.0,
     this.isOpened = false,
     this.isFav = false,
     this.downloadStatus,
@@ -68,8 +68,8 @@ class PdfModel {
       'filePath': filePath,
       'fileName': fileName,
       'pageNumber': pageNumber,
-      'lastSeen': lastOpened.toIso8601String(),
-      'createdAt': createdAt.toIso8601String(),
+      'lastSeen': lastOpened!.toIso8601String(),
+      'createdAt': createdAt!.toIso8601String(),
       'networkUrl': networkUrl,
       'fileSize': fileSize,
       'downloadProgress': downloadProgress,

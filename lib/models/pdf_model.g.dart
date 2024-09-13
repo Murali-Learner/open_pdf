@@ -18,12 +18,12 @@ class PdfModelAdapter extends TypeAdapter<PdfModel> {
     };
     return PdfModel(
       id: fields[0] as String,
-      filePath: fields[1] as String,
-      fileName: fields[3] as String,
-      pageNumber: fields[4] as int,
-      lastOpened: fields[5] as DateTime,
-      createdAt: fields[6] as DateTime,
-      fileSize: fields[8] as double,
+      filePath: fields[1] as String?,
+      fileName: fields[3] as String?,
+      pageNumber: fields[4] as int?,
+      lastOpened: fields[5] as DateTime?,
+      createdAt: fields[6] as DateTime?,
+      fileSize: fields[8] as double?,
       networkUrl: fields[7] as String?,
       downloadProgress: fields[9] as double?,
       isOpened: fields[10] as bool,

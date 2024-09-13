@@ -54,6 +54,7 @@ class HiveHelper {
   }
 
   static Future<void> removeFromCache(String pdfId) async {
+    debugPrint("file deleted");
     await _pdfBox?.delete(pdfId);
   }
 

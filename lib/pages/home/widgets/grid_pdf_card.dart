@@ -48,7 +48,7 @@ class GridPdfCard extends StatelessWidget {
                     children: [
                       SizedBox(
                         child: Text(
-                          pdf.fileName,
+                          pdf.fileName!,
                           style: context.textTheme.bodyMedium,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -56,7 +56,7 @@ class GridPdfCard extends StatelessWidget {
                       4.vSpace,
                       SizedBox(
                         child: Text(
-                          "${pdf.fileSize.toStringAsFixed(2)} KB",
+                          "${pdf.fileSize!.toStringAsFixed(2)} KB",
                           style: context.textTheme.bodyMedium,
                         ),
                       ),

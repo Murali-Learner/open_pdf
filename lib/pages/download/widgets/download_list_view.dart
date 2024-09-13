@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:open_pdf/pages/download/widgets/download_card.dart';
+import 'package:open_pdf/pages/home/widgets/list_card.dart';
 import 'package:open_pdf/providers/pdf_provider.dart';
 import 'package:open_pdf/utils/enumerates.dart';
 import 'package:provider/provider.dart';
 
 class DownloadListView extends StatefulWidget {
   const DownloadListView({
+    required this.status,
     super.key,
   });
+  final DownloadStatus status;
 
   @override
   DownloadListViewState createState() => DownloadListViewState();
@@ -19,20 +21,29 @@ class DownloadListViewState extends State<DownloadListView> {
     return Consumer<PdfProvider>(
       builder: (context, provider, _) {
         final filteredPdfList = provider.totalPdfList.values
-            .where((pdf) => pdf.downloadStatus == provider.downloadStatus)
+            .where((pdf) =>
+                pdf.downloadStatus == widget.status.name &&
+                pdf.networkUrl != null &&
+                pdf.networkUrl!.isNotEmpty)
             .toList();
+
+        if (filteredPdfList.isEmpty) {
+          return const Center(
+            child: Text("No downloads available for this status"),
+          );
+        }
+
         return ListView.separated(
           shrinkWrap: true,
           padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-          itemCount: 15, //filteredPdfList.length,
+          itemCount: filteredPdfList.length,
           separatorBuilder: (BuildContext context, int index) {
             return const SizedBox(height: 10);
           },
           itemBuilder: (BuildContext context, int index) {
-            return DownloadCard(
-              pdf: provider.currentPDF!, //filteredPdfList[index],
+            return ListPdfCard(
+              pdf: filteredPdfList[index],
               index: index,
-              downloadStatus: provider.downloadStatus,
             );
           },
         );

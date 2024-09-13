@@ -36,11 +36,13 @@ class PdfProvider with ChangeNotifier {
     createdAt: DateTime.now(),
   );
   bool _isLoading = false;
-  bool _btnLoading = false;
+  bool _downloadBtnLoading = false;
+  bool _moreBtnLoading = false;
   bool _isInternetConnected = false;
   PDFViewController? _pdfController;
   List<SharedMediaFile> sharedFiles = [];
   Map<String, PdfModel> _totalPdfList = {};
+  Map<String, PdfModel> _downloadPdfList = {};
   Map<String, PdfModel> _favoritesList = {};
   late StreamSubscription _intentSubscription;
   late StreamSubscription _internetSubscription;
@@ -48,7 +50,7 @@ class PdfProvider with ChangeNotifier {
   int _pdfCurrentPage = 0;
   int _totalPages = 0;
   String _errorMessage = '';
-  double _curentZoomLevel = 0;
+  final double _currentZoomLevel = 0;
   int _currentIndex = 0;
   double _downloadProgress = 0.0;
   String _uriPath = "";
@@ -57,14 +59,16 @@ class PdfProvider with ChangeNotifier {
   PdfModel? get currentPDF => _currentPDF;
   bool get isLoading => _isLoading;
   DownloadStatus? get downloadStatus => _downloadStatus!;
-  bool get btnLoading => _btnLoading;
+  bool get downloadBtnLoading => _downloadBtnLoading;
+  bool get moreBtnLoading => _moreBtnLoading;
   int get pdfCurrentPage => _pdfCurrentPage;
   int get totalPage => _totalPages;
-  double get curentZoomLevel => _curentZoomLevel;
+  double get curentZoomLevel => _currentZoomLevel;
   String get errorMessage => _errorMessage;
   bool get isInternetConnected => _isInternetConnected;
   PDFViewController get pdfController => _pdfController!;
   Map<String, PdfModel> get totalPdfList => _totalPdfList;
+  Map<String, PdfModel> get downloadPdfList => _downloadPdfList;
   Map<String, PdfModel> get favoritesList => _favoritesList;
   double get downloadProgress => _downloadProgress;
   ViewMode get selectedViewMode => _viewMode;
@@ -151,6 +155,7 @@ class PdfProvider with ChangeNotifier {
   Future<bool> isValidUrl(String url) async {
     try {
       final response = await dio.head(url);
+      debugPrint("url headers ${response.headers}");
       if (response.statusCode == 200 &&
           response.headers.value("content-type") == "application/pdf") {
         return true;
@@ -180,16 +185,17 @@ class PdfProvider with ChangeNotifier {
   }
 
   Future<void> downloadAndSavePdf(String url) async {
-    setBtnLoading(true);
+    setDownloadBtnLoading(true);
     setDownloadProgress(0.0);
-    setDownloadStatus(DownloadStatus.ongoing);
+    // setDownloadStatus();
 
     bool validUrl = await isValidUrl(url);
     debugPrint("validUrl $validUrl");
     if (url.isEmpty || !validUrl) {
       ToastUtils.showErrorToast("Enter a valid URL");
       resetValues();
-      setBtnLoading(false);
+      setDownloadBtnLoading(false);
+
       return;
     }
 
@@ -197,13 +203,28 @@ class PdfProvider with ChangeNotifier {
 
     final File filePath = await getPdfDownloadDirectory(fileName);
 
+    PdfModel downloadPdf = PdfModel(
+      id: "",
+      filePath: '',
+      fileName: fileName,
+      pageNumber: 0,
+      lastOpened: DateTime.now(),
+      createdAt: DateTime.now(),
+      downloadProgress: 0.0,
+      networkUrl: url,
+      downloadStatus: DownloadStatus.ongoing.name,
+      fileSize: 0,
+    );
+
+    addToTotalPdfList(downloadPdf);
+
     bool fileExists = await checkIfFileExists(fileName);
     log("fileExists: $fileExists, fileName: $filePath fileName $fileName ");
 
     if (fileExists || _totalPdfList.containsKey(fileName)) {
       ToastUtils.showErrorToast("File already exists");
       resetValues();
-      setBtnLoading(false);
+      setDownloadBtnLoading(false);
       return;
     }
 
@@ -224,8 +245,9 @@ class PdfProvider with ChangeNotifier {
         );
 
         if (saveInfo != null && saveInfo.isSuccessful) {
-          debugPrint("here in the save info not null ${saveInfo.uri}");
-          final pdf = PdfModel(
+          debugPrint(
+              "here in the save info not null ${saveInfo.uri} $downloadProgress");
+          final completedPdf = downloadPdf.copyWith(
             id: fileName,
             fileSize: 0.0,
             filePath: _uriPath,
@@ -237,23 +259,31 @@ class PdfProvider with ChangeNotifier {
             lastOpened: DateTime.now(),
             createdAt: DateTime.now(),
           );
-          debugPrint("download pdf ${pdf.toJson()}");
-          addToTotalPdfList(pdf);
+
+          debugPrint("download pdf ${downloadPdf.toJson()}");
+          removeFromTotalPdfList(downloadPdf);
+          addToTotalPdfList(completedPdf);
 
           ToastUtils.showSuccessToast("File downloaded successfully");
           return;
         } else {
+          removeFromTotalPdfList(downloadPdf);
+
           ToastUtils.showErrorToast("File downloading error");
         }
       } else {
+        removeFromTotalPdfList(downloadPdf);
+
         ToastUtils.showErrorToast("Failed to download file");
       }
     } catch (e) {
+      removeFromTotalPdfList(downloadPdf);
+
       log("file download error $e");
       ToastUtils.showErrorToast("Unexpected file error: $e");
-      setBtnLoading(false);
+      setDownloadBtnLoading(false);
     } finally {
-      setBtnLoading(false);
+      setDownloadBtnLoading(false);
       resetValues();
     }
   }
@@ -308,8 +338,13 @@ class PdfProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void setBtnLoading(bool value) {
-    _btnLoading = value;
+  void setDownloadBtnLoading(bool value) {
+    _downloadBtnLoading = value;
+    notifyListeners();
+  }
+
+  void setMoreBtnLoading(bool value) {
+    _downloadBtnLoading = value;
     notifyListeners();
   }
 
@@ -322,7 +357,11 @@ class PdfProvider with ChangeNotifier {
       if (_totalPdfList[pdf.id]!.isFav) {
         _favoritesList[pdf.id] = _totalPdfList[pdf.id]!;
       } else {
-        _favoritesList.remove(pdf.id);
+        _favoritesList.removeWhere(
+          (key, value) {
+            return key == pdf.id;
+          },
+        );
       }
 
       notifyListeners();
@@ -347,10 +386,22 @@ class PdfProvider with ChangeNotifier {
     }
   }
 
+  void addToDownloadPdfList(PdfModel pdf) {
+    _downloadPdfList[pdf.id] = pdf;
+    notifyListeners();
+  }
+
+  void removeFromDownloadPdfList(PdfModel pdf) {
+    _downloadPdfList.removeWhere(
+      (key, value) => key == pdf.id,
+    );
+    notifyListeners();
+  }
+
   Future<void> deletePdfFormLocalStorage(PdfModel pdf) async {
     try {
       final bool status = await mediaStorePlugin.deleteFile(
-          fileName: pdf.fileName,
+          fileName: pdf.fileName!,
           dirType: DirType.download,
           dirName: DirType.download.defaults);
       debugPrint("Delete Status: $status");
@@ -364,20 +415,34 @@ class PdfProvider with ChangeNotifier {
     }
   }
 
-  void removeFromTotalPdfList(PdfModel pdf) async {
+  Future<void> removeFromTotalPdfList(PdfModel pdf) async {
+    setMoreBtnLoading(true);
+
     try {
       if (_totalPdfList.isNotEmpty) {
         await HiveHelper.removeFromCache(pdf.id);
-        _totalPdfList.remove(pdf.fileName);
-        _favoritesList.remove(pdf.fileName);
-        if (pdf.networkUrl != null) {
-          deletePdfFormLocalStorage(pdf);
-        }
+        debugPrint("hive file deleted");
+        _totalPdfList.removeWhere(
+          (key, value) {
+            return key == pdf.id;
+          },
+        );
+        _favoritesList.removeWhere(
+          (key, value) {
+            return key == pdf.id;
+          },
+        );
         notifyListeners();
+        if (pdf.networkUrl != null) {
+          await deletePdfFormLocalStorage(pdf);
+          debugPrint("downloads file deleted");
+        }
       }
     } catch (e) {
       debugPrint("deleting file error $e");
       ToastUtils.showErrorToast("Error while deleting file");
+    } finally {
+      setMoreBtnLoading(false);
     }
   }
 
@@ -386,15 +451,9 @@ class PdfProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> setCurrentPDF(PdfModel pdf) async {
-    try {
-      await HiveHelper.addOrUpdatePdf(pdf);
-      _currentPDF = pdf;
-      notifyListeners();
-    } catch (e) {
-      debugPrint("setting current pdf error $e");
-      ToastUtils.showErrorToast("Error while setting pdf");
-    }
+  void setCurrentPDF(PdfModel pdf) {
+    _currentPDF = pdf;
+    notifyListeners();
   }
 
   void setCurrentPage(int page) async {

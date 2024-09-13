@@ -11,8 +11,8 @@ final ThemeData lightTheme = ThemeData(
   ),
   tabBarTheme: const TabBarTheme(
     dividerColor: Color(0xFFFFFFFF),
-    labelStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-    unselectedLabelStyle: TextStyle(fontSize: 15),
+    labelStyle: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+    unselectedLabelStyle: TextStyle(fontSize: 13),
   ),
   iconTheme: const IconThemeData(color: Colors.black),
   textTheme: const TextTheme(

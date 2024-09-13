@@ -66,9 +66,15 @@ class DownloadTabBarState extends State<DownloadTabBar>
             physics: const NeverScrollableScrollPhysics(),
             controller: _tabController,
             children: const [
-              DownloadListView(),
-              DownloadListView(),
-              DownloadListView(),
+              DownloadListView(
+                status: DownloadStatus.ongoing,
+              ),
+              DownloadListView(
+                status: DownloadStatus.completed,
+              ),
+              DownloadListView(
+                status: DownloadStatus.cancelled,
+              ),
             ],
           ),
         ),

@@ -16,7 +16,7 @@ class FloatingDial extends StatelessWidget {
           : SpeedDial(
               icon: Icons.add,
               activeIcon: Icons.close,
-              animationDuration: const Duration(milliseconds: 300),
+              animationDuration: const Duration(milliseconds: 100),
               useRotationAnimation: true,
               elevation: 8.0,
               spaceBetweenChildren: 4,

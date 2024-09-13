@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:open_pdf/global_widgets/global_loading_widget.dart';
 import 'package:open_pdf/providers/pdf_provider.dart';
+import 'package:open_pdf/utils/toast_utils.dart';
 import 'package:provider/provider.dart';
 
 class DownloadButton extends StatefulWidget {
@@ -17,26 +18,34 @@ class _DownloadButtonState extends State<DownloadButton> {
   @override
   Widget build(BuildContext context) {
     return Consumer<PdfProvider>(builder: (context, provider, _) {
-      return provider.btnLoading
-          ? const GlobalLoadingWidget()
-          : IconButton(
-              icon: const Icon(
+      return IconButton(
+        icon: provider.downloadBtnLoading
+            ? const GlobalLoadingWidget()
+            : const Icon(
                 Icons.download,
                 size: 30,
               ),
-              onPressed: () async {
+        onPressed: provider.downloadBtnLoading
+            ? null
+            : () async {
+                if (widget.pdfUrl.isEmpty) {
+                  ToastUtils.showErrorToast("Enter valid URL");
+                  return;
+                }
                 // context.push(
                 //     navigateTo: DocumentSaveScreen(dirType: DirType.download));
-                final provider = context.read<PdfProvider>();
-                // final link =
-                //     "https://drive.google.com/uc?export=download&id=1Ih15A30PS1HhpnEN_UYSfiILgDXntsMd";
-                // // "https://drive.google.com/file/d/1-4WtAEydQN5zNZ2mTWugNm_ERS8yiA4u/view?usp=sharing";
+                const link1 =
+                    "http://englishonlineclub.com/pdf/iOS%20Programming%20-%20The%20Big%20Nerd%20Ranch%20Guide%20(6th%20Edition)%20[EnglishOnlineClub.com].pdf";
+                // const link2 =
+                //     "https://morth.nic.in/sites/default/files/dd12-13_0.pdf";
+
                 await provider.downloadAndSavePdf(
-                  "https://enos.itcollege.ee/~jpoial/allalaadimised/reading/Android-Programming-Cookbook.pdf",
-                  // link,
+                  widget.pdfUrl,
+                  // "https://enos.itcollege.ee/~jpoial/allalaadimised/reading/Android-Programming-Cookbook.pdf",
+                  // link1,
                 );
               },
-            );
+      );
     });
   }
 }
