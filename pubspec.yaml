@@ -19,7 +19,7 @@ description: "A new Flutter project."
 version: 1.0.0+1
 
 environment:
-  sdk: ^3.5.1
+  sdk: ">=3.4.3 <4.0.0"
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -30,7 +30,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -47,15 +46,14 @@ dependencies:
   permission_handler: ^11.3.1
   media_store_plus: ^0.1.2
   dio:
-  audioplayers: ^6.1.0
   path: ^1.9.0
   flutter_pdfview:
-    path: /home/saimurali/Desktop/projects/flutter_projects/open_pdf_flutter/open_pdf/packages/flutter_pdfview
   hive: ^2.2.3
   hive_flutter: ^1.1.0
   flutter_speed_dial: ^7.0.0
   flutter_local_notifications: ^17.2.2
-
+  pdfrx:
+    path: ./packages/pdfrx
 
 dev_dependencies:
   flutter_test:
@@ -68,14 +66,13 @@ dev_dependencies:
   # rules and activating additional ones.
   flutter_lints: ^4.0.0
   hive_generator: ^2.0.1
-  build_runner: ^2.4.12
+  # build_runner: ^2.4.12
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
 # The following section is specific to Flutter packages.
 flutter:
-
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.

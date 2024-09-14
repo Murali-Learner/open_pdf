@@ -6,6 +6,7 @@ import 'package:open_pdf/helpers/notication_helper.dart';
 import 'package:open_pdf/main/main_page.dart';
 import 'package:open_pdf/providers/dictionary_provider.dart';
 import 'package:open_pdf/providers/pdf_provider.dart';
+import 'package:open_pdf/providers/pdf_viewer_provider.dart';
 import 'package:open_pdf/utils/theme_data.dart';
 import 'package:provider/provider.dart';
 
@@ -35,7 +36,8 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => PdfProvider()),
-        ChangeNotifierProvider(create: (context) => DictionaryProvider())
+        ChangeNotifierProvider(create: (context) => DictionaryProvider()),
+        ChangeNotifierProvider(create: (context) => PdfViewerProvider())
       ],
       child: MaterialApp(
         title: 'Open PDF',
