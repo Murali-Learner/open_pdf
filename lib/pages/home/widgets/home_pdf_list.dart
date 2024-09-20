@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:open_pdf/models/pdf_model.dart';
 import 'package:open_pdf/pages/home/widgets/list_card.dart';
+import 'package:open_pdf/utils/extensions/spacer_extension.dart';
 
 class HomePdfListView extends StatelessWidget {
   final List<PdfModel> pdfLists;
@@ -13,9 +14,9 @@ class HomePdfListView extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListView.separated(
       shrinkWrap: true,
-      itemCount: pdfLists.length, //pdfLists.length,
+      itemCount: pdfLists.length,
       separatorBuilder: (BuildContext context, int index) {
-        return const SizedBox(height: 10);
+        return 10.vSpace;
       },
       itemBuilder: (BuildContext context, int index) {
         return ListPdfCard(

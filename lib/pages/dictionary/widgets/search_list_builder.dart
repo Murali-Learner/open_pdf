@@ -25,7 +25,6 @@ class SearchListBuilder extends StatelessWidget {
 
         return ListView.separated(
           separatorBuilder: (context, index) => 5.vSpace,
-          shrinkWrap: true,
           itemCount: provider.results.length,
           itemBuilder: (context, index) {
             final item = provider.results.values.toList()[index];

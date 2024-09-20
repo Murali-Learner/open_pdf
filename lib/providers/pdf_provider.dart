@@ -12,8 +12,9 @@ import 'package:media_store_plus/media_store_plus.dart';
 import 'package:open_pdf/helpers/hive_helper.dart';
 import 'package:open_pdf/helpers/notication_helper.dart';
 import 'package:open_pdf/models/pdf_model.dart';
+import 'package:open_pdf/providers/pdf_control_provider.dart';
 import 'package:open_pdf/utils/enumerates.dart';
-import 'package:open_pdf/utils/extensions/file_extension.dart';
+import 'package:open_pdf/utils/extensions/size_extension.dart';
 import 'package:open_pdf/utils/toast_utils.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
@@ -24,42 +25,36 @@ final mediaStorePlugin = MediaStore();
 
 class PdfProvider with ChangeNotifier {
   final NotificationHelper notificationHelper = NotificationHelper();
+  final PdfControlProvider controlProvider = PdfControlProvider();
+
   PdfProvider() {
     _loadPdfListFromHive();
-    _initializeNotifications();
   }
 
-  PdfModel? _currentPDF = PdfModel(
-    id: "1",
-    filePath: "assets/dart_flutter.pdf",
-    fileName: "dart_flutter.pdf",
-    pageNumber: 1,
-    fileSize: 5.0,
-    lastOpened: DateTime.now(),
-    createdAt: DateTime.now(),
-  );
+  PdfModel? _currentPDF;
   bool _isLoading = false;
   bool _downloadBtnLoading = false;
-  bool _moreBtnLoading = false;
+  final bool _moreBtnLoading = false;
   bool _isInternetConnected = false;
   PDFViewController? _pdfController;
   List<SharedMediaFile> sharedFiles = [];
   Map<String, PdfModel> _totalPdfList = {};
-  Map<String, PdfModel> _downloadPdfList = {};
   Map<String, PdfModel> _favoritesList = {};
+  Map<String, PdfModel> _selectedFiles = {};
   late StreamSubscription _intentSubscription;
   late StreamSubscription _internetSubscription;
   ViewMode _viewMode = ViewMode.grid;
-  int _pdfCurrentPage = 0;
+  final int _pdfCurrentPage = 0;
   int notificationIdCounter = 0;
-  int _totalPages = 0;
-  String _errorMessage = '';
-  final double _currentZoomLevel = 0;
   int _currentIndex = 0;
   double _downloadProgress = 0.0;
-
+  bool _isMultiSelected = false;
+  bool _showPdfTools = false;
+  bool _showAppbar = true;
+  bool _considerScroll = false;
   String _uriPath = "";
   DownloadStatus? _downloadStatus = DownloadStatus.ongoing;
+  CancelToken _cancelToken = CancelToken();
 
   PdfModel? get currentPDF => _currentPDF;
   bool get isLoading => _isLoading;
@@ -67,16 +62,17 @@ class PdfProvider with ChangeNotifier {
   bool get downloadBtnLoading => _downloadBtnLoading;
   bool get moreBtnLoading => _moreBtnLoading;
   int get pdfCurrentPage => _pdfCurrentPage;
-  int get totalPage => _totalPages;
-  double get curentZoomLevel => _currentZoomLevel;
-  String get errorMessage => _errorMessage;
+  bool get isMultiSelected => _isMultiSelected;
   bool get isInternetConnected => _isInternetConnected;
   PDFViewController get pdfController => _pdfController!;
   Map<String, PdfModel> get totalPdfList => _totalPdfList;
-  Map<String, PdfModel> get downloadPdfList => _downloadPdfList;
   Map<String, PdfModel> get favoritesList => _favoritesList;
+  Map<String, PdfModel> get selectedFiles => _selectedFiles;
   double get downloadProgress => _downloadProgress;
   ViewMode get selectedViewMode => _viewMode;
+  bool get showPdfTools => _showPdfTools;
+  bool get showAppbar => _showAppbar;
+  bool get considerScroll => _considerScroll;
   int get currentIndex => _currentIndex;
 
   Dio dio = Dio();
@@ -88,7 +84,7 @@ class PdfProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> _initializeNotifications() async {
+  Future<void> initializeNotifications() async {
     await notificationHelper.initializeNotifications();
   }
 
@@ -164,7 +160,7 @@ class PdfProvider with ChangeNotifier {
   Future<bool> isValidUrl(String url) async {
     try {
       final response = await dio.head(url);
-      debugPrint("url headers ${response.headers}");
+      // debugPrint("url headers ${response.headers}");
       if (response.statusCode == 200 &&
           response.headers.value("content-type") == "application/pdf") {
         return true;
@@ -174,6 +170,17 @@ class PdfProvider with ChangeNotifier {
       ToastUtils.showErrorToast("Error while checking URL ");
     }
     return false;
+  }
+
+  File getDownloadedFilePath({
+    String? relativePath,
+    required String fileName,
+    required DirType dirType,
+    required DirName dirName,
+  }) {
+    final downloadedFile = File(
+        "${dirType.fullPath(relativePath: relativePath.orAppFolder, dirName: dirName)}/$fileName");
+    return downloadedFile;
   }
 
   Future<bool> checkIfFileExists(String fileName) async {
@@ -206,7 +213,7 @@ class PdfProvider with ChangeNotifier {
     }
 
     String fileName = getFileNameFromPath(url);
-    final File filePath = await getPdfDownloadDirectory(fileName);
+    final File tempFilePath = await getPdfDownloadDirectory(fileName);
 
     int notificationId = notificationHelper.generateNotificationId();
     PdfModel downloadPdf = PdfModel(
@@ -219,12 +226,12 @@ class PdfProvider with ChangeNotifier {
       downloadProgress: 0.0,
       networkUrl: url,
       downloadStatus: DownloadStatus.ongoing.name,
-      fileSize: 0,
+      fileSize: "",
     );
     addToTotalPdfList(downloadPdf);
 
-    bool fileExists = await checkIfFileExists(fileName);
-    if (fileExists || _totalPdfList.containsKey(fileName)) {
+    // log("file exists $fileExists");
+    if (_totalPdfList.containsKey(fileName)) {
       ToastUtils.showErrorToast("File already exists");
       resetValues();
       setDownloadBtnLoading(false);
@@ -241,7 +248,8 @@ class PdfProvider with ChangeNotifier {
 
       final response = await dio.download(
         url,
-        filePath.path,
+        tempFilePath.path,
+        cancelToken: _cancelToken,
         onReceiveProgress: (count, total) async {
           double progress = count / total;
           setDownloadProgress(progress);
@@ -257,16 +265,25 @@ class PdfProvider with ChangeNotifier {
 
       if (response.statusCode == 200) {
         final SaveInfo? saveInfo = await mediaStorePlugin.saveFile(
-          tempFilePath: filePath.path,
+          tempFilePath: tempFilePath.path,
           dirType: DirType.download,
           dirName: DirType.download.defaults,
         );
 
         if (saveInfo != null && saveInfo.isSuccessful) {
+          File downloadedFilePath = getDownloadedFilePath(
+            fileName: saveInfo.name,
+            dirType: DirType.download,
+            dirName: DirType.download.defaults,
+          );
+
+          final thumbnailBytes =
+              await controlProvider.getPdfThumbNail(downloadedFilePath.path);
+
           final completedPdf = downloadPdf.copyWith(
-            id: fileName,
-            fileSize: 0.0,
-            filePath: saveInfo.uri.path,
+            id: saveInfo.name,
+            fileSize: downloadedFilePath.lengthSync().readableFileSize,
+            filePath: downloadedFilePath.path,
             fileName: saveInfo.name,
             networkUrl: url,
             pageNumber: 0,
@@ -274,6 +291,7 @@ class PdfProvider with ChangeNotifier {
             downloadProgress: 1.0,
             lastOpened: DateTime.now(),
             createdAt: DateTime.now(),
+            thumbnail: thumbnailBytes,
           );
 
           removeFromTotalPdfList(downloadPdf);
@@ -294,43 +312,62 @@ class PdfProvider with ChangeNotifier {
       }
     } catch (e) {
       removeFromTotalPdfList(downloadPdf);
+
+      downloadPdf =
+          downloadPdf.copyWith(downloadStatus: DownloadStatus.cancelled.name);
+
+      addToTotalPdfList(downloadPdf);
+
       await notificationHelper.cancelNotification(notificationId);
-      ToastUtils.showErrorToast("Error: $e");
+      debugPrint(" download Error $e");
+      ToastUtils.showErrorToast("Error while downloading file");
     } finally {
       setDownloadBtnLoading(false);
       resetValues();
     }
   }
 
-  void nextPage() {
-    if (_pdfController != null && _pdfCurrentPage < _totalPages - 1) {
-      _pdfCurrentPage++;
-      notifyListeners();
-      _pdfController!.setPage(_pdfCurrentPage);
+  Future<void> restartDownload(String url) async {
+    log("I'm here in restart pdf $url");
+    _cancelToken = CancelToken();
+    try {
+      setDownloadProgress(0.0);
+      setDownloadStatus(DownloadStatus.ongoing);
+
+      await downloadAndSavePdf(
+        url,
+      );
+    } catch (e) {
+      debugPrint("Error while restarting the download: $e");
+      ToastUtils.showErrorToast("Error restarting the download");
     }
   }
 
-  void gotoFirstPage() {
-    if (_pdfController != null && _pdfCurrentPage > 0) {
-      _pdfCurrentPage = 0;
+  Future<void> cancelDownload(PdfModel pdfModel) async {
+    try {
+      log("I'm here in cancel pdf");
+      _cancelToken.cancel();
+
+      await notificationHelper.cancelAllNotifications();
+      int notificationId = notificationHelper.generateNotificationId();
+
+      await removeFromTotalPdfList(pdfModel);
+
+      await notificationHelper.showDownloadCancelNotification(
+        notificationId: notificationId,
+        title: "Download cancelled",
+        body: pdfModel.fileName!,
+      );
+      final cancelledPdf =
+          pdfModel.copyWith(downloadStatus: DownloadStatus.cancelled.name);
+      await addToTotalPdfList(cancelledPdf);
       notifyListeners();
-      _pdfController!.setPage(_pdfCurrentPage);
+      ToastUtils.showSuccessToast("File download cancelled");
+    } catch (e) {
+      debugPrint("Error while canceling the download: $e");
+      ToastUtils.showErrorToast("Error canceling the download");
     }
   }
-
-  void gotoLastPage() {
-    if (_pdfController != null && _pdfCurrentPage < _totalPages - 1) {
-      _pdfCurrentPage = _totalPages;
-      notifyListeners();
-      _pdfController!.setPage(_pdfCurrentPage);
-    }
-  }
-
-  void zoomUp() async {
-    if (_pdfController != null) {}
-  }
-
-  void zoomDown() {}
 
   void setLoading(bool value) {
     _isLoading = value;
@@ -352,6 +389,12 @@ class PdfProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  void setPdfToolsVisibility(bool status) {
+    _showPdfTools = status;
+
+    notifyListeners();
+  }
+
   void setDownloadBtnLoading(bool value) {
     _downloadBtnLoading = value;
     notifyListeners();
@@ -359,6 +402,55 @@ class PdfProvider with ChangeNotifier {
 
   void setMoreBtnLoading(bool value) {
     _downloadBtnLoading = value;
+    notifyListeners();
+  }
+
+  void setAppBarVisibility(bool value) {
+    _showAppbar = value;
+    notifyListeners();
+  }
+
+  void setConsiderScroll(bool value) {
+    _considerScroll = value;
+    notifyListeners();
+  }
+
+  void setMultiSelect(bool value) {
+    _isMultiSelected = value;
+    notifyListeners();
+  }
+
+  Future<void> addToSelectedFiles(PdfModel pdf) async {
+    log("i'm here in the add pdf ");
+    if (!_selectedFiles.containsKey(pdf.fileName)) {
+      setMultiSelect(true);
+      pdf = pdf.copyWith(isSelected: true);
+
+      _selectedFiles[pdf.id] = pdf;
+      notifyListeners();
+    }
+    debugPrint("_selectedFiles ${_selectedFiles.length}");
+  }
+
+  Future<void> removeFromSelectedFiles(PdfModel pdf) async {
+    log("i'm here in the add pdf ");
+
+    if (_selectedFiles.isEmpty) {
+      setMultiSelect(false);
+    }
+    if (_selectedFiles.containsKey(pdf.fileName)) {
+      _selectedFiles.removeWhere((key, pdf) {
+        return key == pdf.id;
+      });
+      removeFromTotalPdfList(pdf);
+      notifyListeners();
+    }
+    debugPrint("_selectedFiles ${_selectedFiles.length}");
+  }
+
+  void clearSelectedFiles() {
+    _selectedFiles.clear();
+    setMultiSelect(false);
     notifyListeners();
   }
 
@@ -384,7 +476,7 @@ class PdfProvider with ChangeNotifier {
     }
   }
 
-  void addToTotalPdfList(PdfModel pdf) async {
+  Future<void> addToTotalPdfList(PdfModel pdf) async {
     log("i'm here in the add pdf ");
     try {
       if (!_totalPdfList.containsKey(pdf.fileName)) {
@@ -398,18 +490,6 @@ class PdfProvider with ChangeNotifier {
       debugPrint("adding file error $e");
       ToastUtils.showErrorToast("Error while adding file");
     }
-  }
-
-  void addToDownloadPdfList(PdfModel pdf) {
-    _downloadPdfList[pdf.id] = pdf;
-    notifyListeners();
-  }
-
-  void removeFromDownloadPdfList(PdfModel pdf) {
-    _downloadPdfList.removeWhere(
-      (key, value) => key == pdf.id,
-    );
-    notifyListeners();
   }
 
   Future<void> deletePdfFormLocalStorage(PdfModel pdf) async {
@@ -447,7 +527,7 @@ class PdfProvider with ChangeNotifier {
           },
         );
         notifyListeners();
-        if (pdf.networkUrl != null) {
+        if (pdf.networkUrl != null && !pdf.isSelected) {
           await deletePdfFormLocalStorage(pdf);
           debugPrint("downloads file deleted");
         }
@@ -469,47 +549,6 @@ class PdfProvider with ChangeNotifier {
     _currentPDF = pdf;
     notifyListeners();
   }
-
-  void setCurrentPage(int page) async {
-    try {
-      _pdfCurrentPage = page;
-      if (_currentPDF != null) {
-        _currentPDF = _currentPDF!.copyWith(pageNumber: page);
-        await HiveHelper.addOrUpdatePdf(_currentPDF!);
-      }
-      notifyListeners();
-    } catch (e) {
-      debugPrint("deleting file error $e");
-      ToastUtils.showErrorToast("Error while setting page");
-    }
-  }
-
-  Future<void> setTotalPages(int pages) async {
-    await Future.delayed(Duration.zero).whenComplete(() {
-      setLoading(true);
-      _totalPages = pages;
-
-      setLoading(false);
-    });
-  }
-
-  void setPdfController(PDFViewController controller) {
-    _pdfController = controller;
-    notifyListeners();
-  }
-
-  void setErrorMessage(String message) {
-    _errorMessage = message;
-    notifyListeners();
-  }
-
-  void setZoomControl() {
-    if (currentPDF != null) {
-      log("message");
-    }
-  }
-
-  void handlePDF() {}
 
   Future<void> handleIntent() async {
     try {
@@ -538,23 +577,23 @@ class PdfProvider with ChangeNotifier {
     }
   }
 
-  void _processSharedFiles(List<SharedMediaFile> files) {
+  void _processSharedFiles(List<SharedMediaFile> files) async {
     if (files.isNotEmpty) {
       sharedFiles = files;
       final file = File(sharedFiles[0].path);
-
+      final thumbnailBytes = await controlProvider.getPdfThumbNail(file.path);
       final pdf = PdfModel(
         id: getFileNameFromPath(file.path),
         filePath: file.path,
-        fileSize: file.sizeInKb,
+        fileSize: file.lengthSync().readableFileSize,
         fileName: getFileNameFromPath(file.path),
         pageNumber: 0,
         lastOpened: DateTime.now(),
         createdAt: DateTime.now(),
+        thumbnail: thumbnailBytes,
       );
 
       addToTotalPdfList(pdf);
-      handlePDF();
     }
   }
 
@@ -563,6 +602,7 @@ class PdfProvider with ChangeNotifier {
   }
 
   String getFileNameFromPath(String url) {
+    log("url $url");
     String fileName;
     if (url.contains("https") || url.contains("http")) {
       fileName = path.basename(Uri.parse(url).path);
@@ -585,19 +625,21 @@ class PdfProvider with ChangeNotifier {
       if (result != null) {
         final file = File(result.files.single.path!);
         final length = await file.length();
-        debugPrint("length ${file.lengthSync()} ${length}");
+        debugPrint("length ${file.lengthSync()} $length");
+        final thumbnailBytes = await controlProvider.getPdfThumbNail(file.path);
+
         final pdf = PdfModel(
-          id: getFileNameFromPath(file.path),
-          filePath: file.path,
-          fileSize: file.sizeInKb,
-          fileName: getFileNameFromPath(file.path),
-          pageNumber: 0,
-          lastOpened: DateTime.now(),
-          createdAt: DateTime.now(),
-        );
+            id: getFileNameFromPath(file.path),
+            filePath: file.path,
+            fileSize: file.lengthSync().readableFileSize,
+            fileName: getFileNameFromPath(file.path),
+            pageNumber: 0,
+            downloadStatus: DownloadStatus.completed.name,
+            lastOpened: DateTime.now(),
+            createdAt: DateTime.now(),
+            thumbnail: thumbnailBytes);
         addToTotalPdfList(pdf);
 
-        handlePDF();
         setLoading(false);
       } else {
         ToastUtils.showErrorToast("No file selected");

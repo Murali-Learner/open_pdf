@@ -5,6 +5,7 @@ import 'package:open_pdf/helpers/hive_helper.dart';
 import 'package:open_pdf/helpers/notication_helper.dart';
 import 'package:open_pdf/main/main_page.dart';
 import 'package:open_pdf/providers/dictionary_provider.dart';
+import 'package:open_pdf/providers/pdf_control_provider.dart';
 import 'package:open_pdf/providers/pdf_provider.dart';
 import 'package:open_pdf/utils/theme_data.dart';
 import 'package:provider/provider.dart';
@@ -13,7 +14,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await MediaStore.ensureInitialized();
-  MediaStore.appFolder = "PdfReader";
+  MediaStore.appFolder = "OpenPDF";
 
   HiveHelper hiveHelper = HiveHelper();
   await hiveHelper.initHive();
@@ -35,7 +36,8 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => PdfProvider()),
-        ChangeNotifierProvider(create: (context) => DictionaryProvider())
+        ChangeNotifierProvider(create: (context) => DictionaryProvider()),
+        ChangeNotifierProvider(create: (context) => PdfControlProvider()),
       ],
       child: MaterialApp(
         title: 'Open PDF',

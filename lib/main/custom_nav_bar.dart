@@ -22,7 +22,7 @@ class CustomBottomNavigationBar extends StatelessWidget {
         ),
         BottomNavigationBarItem(
           label: "Dictionary",
-          icon: Icon(Icons.book_rounded),
+          icon: Icon(Icons.menu_book),
         ),
       ],
     );

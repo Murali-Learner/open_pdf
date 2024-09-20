@@ -60,6 +60,10 @@ class NotificationHelper {
     await flutterLocalNotificationsPlugin.cancel(notificationId);
   }
 
+  Future<void> cancelAllNotifications() async {
+    await flutterLocalNotificationsPlugin.cancelAll();
+  }
+
   Future<void> showDownloadCompleteNotification({
     required int notificationId,
     required String title,
@@ -75,7 +79,34 @@ class NotificationHelper {
       autoCancel: true,
     );
 
-    final NotificationDetails notificationDetails = NotificationDetails(
+    const NotificationDetails notificationDetails = NotificationDetails(
+      android: androidNotificationDetails,
+    );
+
+    await flutterLocalNotificationsPlugin.show(
+      notificationId,
+      title,
+      body,
+      notificationDetails,
+    );
+  }
+
+  Future<void> showDownloadCancelNotification({
+    required int notificationId,
+    required String title,
+    required String body,
+  }) async {
+    const AndroidNotificationDetails androidNotificationDetails =
+        AndroidNotificationDetails(
+      'download_channel',
+      'File Downloads',
+      channelDescription: 'Notification for cancel file downloads',
+      importance: Importance.max,
+      priority: Priority.high,
+      autoCancel: true,
+    );
+
+    const NotificationDetails notificationDetails = NotificationDetails(
       android: androidNotificationDetails,
     );
 

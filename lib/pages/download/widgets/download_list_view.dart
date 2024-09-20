@@ -28,8 +28,8 @@ class DownloadListViewState extends State<DownloadListView> {
             .toList();
 
         if (filteredPdfList.isEmpty) {
-          return const Center(
-            child: Text("No downloads available for this status"),
+          return Center(
+            child: Text("No ${widget.status.name} downloads."),
           );
         }
 

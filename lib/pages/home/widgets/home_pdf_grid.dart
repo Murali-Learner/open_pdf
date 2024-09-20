@@ -15,7 +15,7 @@ class HomePdfGridView extends StatelessWidget {
       shrinkWrap: true,
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
-        childAspectRatio: 0.85,
+        childAspectRatio: 0.7,
         mainAxisSpacing: 10,
         crossAxisSpacing: 10,
       ),

@@ -11,16 +11,17 @@ class WordBottomSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.theme;
+
     return DraggableScrollableSheet(
       expand: false,
       builder: (context, scrollController) {
         return Container(
           width: double.infinity,
           padding: const EdgeInsets.all(5.0),
-          margin: const EdgeInsets.all(5.0),
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surface,
+            borderRadius: const BorderRadius.vertical(
               top: Radius.circular(16.0),
             ),
           ),
@@ -33,19 +34,19 @@ class WordBottomSheet extends StatelessWidget {
                 children: [
                   Text(
                     word.word,
-                    style: context.textTheme.bodyLarge,
+                    style: theme.textTheme.headlineSmall,
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 8),
                   Text(
                     word.definition,
-                    style: context.textTheme.bodyMedium,
+                    style: theme.textTheme.bodyMedium,
                   ),
                   const SizedBox(height: 16),
                   if (word.examples.isNotEmpty) ...[
                     Text(
                       'Examples:',
-                      style: context.textTheme.bodyLarge,
+                      style: theme.textTheme.titleMedium,
                     ),
                     const SizedBox(height: 8),
                     ...word.examples.map((example) => Text('• $example')),
@@ -54,7 +55,7 @@ class WordBottomSheet extends StatelessWidget {
                   if (word.synonyms.isNotEmpty) ...[
                     Text(
                       'Synonyms:',
-                      style: context.textTheme.bodyLarge,
+                      style: Theme.of(context).textTheme.titleMedium,
                     ),
                     const SizedBox(height: 8),
                     Text(word.synonyms.join(', ')),
@@ -63,7 +64,7 @@ class WordBottomSheet extends StatelessWidget {
                   if (word.antonyms.isNotEmpty) ...[
                     Text(
                       'Antonyms:',
-                      style: context.textTheme.bodyMedium,
+                      style: theme.textTheme.titleMedium,
                     ),
                     const SizedBox(height: 8),
                     Text(word.antonyms.join(', ')),

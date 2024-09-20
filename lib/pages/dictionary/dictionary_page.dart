@@ -7,7 +7,11 @@ import 'package:open_pdf/utils/extensions/spacer_extension.dart';
 import 'package:provider/provider.dart';
 
 class DictionaryPage extends StatefulWidget {
-  const DictionaryPage({super.key});
+  final bool showAppbar;
+  const DictionaryPage({
+    super.key,
+    this.showAppbar = true,
+  });
 
   @override
   DictionaryPageState createState() => DictionaryPageState();
@@ -35,12 +39,15 @@ class DictionaryPageState extends State<DictionaryPage> {
     final provider = context.read<DictionaryProvider>();
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Dictionary'),
-      ),
+      appBar: widget.showAppbar
+          ? AppBar(
+              title: const Text('Dictionary'),
+            )
+          : null,
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
         child: Column(
+          mainAxisSize: MainAxisSize.max,
           children: [
             10.vSpace,
             GlobalTextFormField(

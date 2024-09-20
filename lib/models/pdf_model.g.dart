@@ -23,19 +23,21 @@ class PdfModelAdapter extends TypeAdapter<PdfModel> {
       pageNumber: fields[4] as int?,
       lastOpened: fields[5] as DateTime?,
       createdAt: fields[6] as DateTime?,
-      fileSize: fields[8] as double?,
+      fileSize: fields[8] as String?,
       networkUrl: fields[7] as String?,
       downloadProgress: fields[9] as double?,
       isOpened: fields[10] as bool,
       isFav: fields[11] as bool,
       downloadStatus: fields[12] as String?,
+      thumbnail: fields[13] as Uint8List?,
+      isSelected: fields[14] as bool,
     );
   }
 
   @override
   void write(BinaryWriter writer, PdfModel obj) {
     writer
-      ..writeByte(12)
+      ..writeByte(14)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -59,7 +61,11 @@ class PdfModelAdapter extends TypeAdapter<PdfModel> {
       ..writeByte(11)
       ..write(obj.isFav)
       ..writeByte(12)
-      ..write(obj.downloadStatus);
+      ..write(obj.downloadStatus)
+      ..writeByte(13)
+      ..write(obj.thumbnail)
+      ..writeByte(14)
+      ..write(obj.isSelected);
   }
 
   @override

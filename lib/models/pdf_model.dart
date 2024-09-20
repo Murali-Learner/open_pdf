@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:hive/hive.dart';
 import 'package:open_pdf/utils/enumerates.dart';
 
@@ -20,7 +22,7 @@ class PdfModel {
   @HiveField(7)
   final String? networkUrl;
   @HiveField(8)
-  final double? fileSize;
+  final String? fileSize;
   @HiveField(9)
   final double? downloadProgress;
   @HiveField(10)
@@ -29,6 +31,10 @@ class PdfModel {
   final bool isFav;
   @HiveField(12)
   final String? downloadStatus;
+  @HiveField(13)
+  final Uint8List? thumbnail;
+  @HiveField(14)
+  final bool isSelected;
 
   PdfModel({
     required this.id,
@@ -43,6 +49,8 @@ class PdfModel {
     this.isOpened = false,
     this.isFav = false,
     this.downloadStatus,
+    this.thumbnail,
+    this.isSelected = false,
   });
 
   factory PdfModel.fromJson(Map<String, dynamic> json) {
@@ -51,7 +59,7 @@ class PdfModel {
       filePath: json['filePath'] ?? '',
       fileName: json['fileName'] ?? '',
       pageNumber: json['pageNumber'] ?? 0,
-      fileSize: json['fileSize'] ?? 0.0,
+      fileSize: json['fileSize'] ?? "",
       lastOpened: DateTime.parse(json['lastSeen']),
       createdAt: DateTime.parse(json['createdAt']),
       downloadProgress: json['downloadProgress'] ?? 0.0,
@@ -59,6 +67,8 @@ class PdfModel {
       isOpened: json['isOpened'] ?? false,
       isFav: json['isFav'] ?? false,
       downloadStatus: DownloadStatus.values[json['downloadStatus'] ?? 0].name,
+      thumbnail: json['thumbnail'],
+      isSelected: json['isSelected'],
     );
   }
 
@@ -76,6 +86,8 @@ class PdfModel {
       'isOpened': isOpened,
       'isFav': isFav,
       'downloadStatus': downloadStatus,
+      'thumbnail': thumbnail,
+      'isSelected': isSelected,
     };
   }
 
@@ -87,11 +99,13 @@ class PdfModel {
     DateTime? lastOpened,
     DateTime? createdAt,
     String? networkUrl,
-    double? fileSize,
+    String? fileSize,
     double? downloadProgress,
     bool? isOpened,
     bool? isFav,
     String? downloadStatus,
+    Uint8List? thumbnail,
+    bool? isSelected,
   }) {
     return PdfModel(
       id: id ?? this.id,
@@ -106,6 +120,8 @@ class PdfModel {
       isOpened: isOpened ?? this.isOpened,
       isFav: isFav ?? this.isFav,
       downloadStatus: downloadStatus ?? this.downloadStatus,
+      thumbnail: thumbnail ?? this.thumbnail,
+      isSelected: isSelected ?? this.isSelected,
     );
   }
 }

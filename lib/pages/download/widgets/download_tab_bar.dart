@@ -55,9 +55,15 @@ class DownloadTabBarState extends State<DownloadTabBar>
           child: TabBar(
             controller: _tabController,
             tabs: const [
-              Tab(text: 'Ongoing'),
-              Tab(text: 'Completed'),
-              Tab(text: 'Cancelled'),
+              Tab(
+                child: Text("Ongoing"),
+              ),
+              Tab(
+                child: Text("Completed"),
+              ),
+              Tab(
+                child: Text("Cancelled"),
+              ),
             ],
           ),
         ),

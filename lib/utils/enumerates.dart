@@ -3,6 +3,11 @@ enum ViewMode {
   list,
 }
 
+enum PdfScrollMode {
+  vertical,
+  horizontal,
+}
+
 enum DownloadStatus {
   ongoing,
   completed,

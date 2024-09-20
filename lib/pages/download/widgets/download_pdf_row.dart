@@ -2,12 +2,33 @@ import 'package:flutter/material.dart';
 import 'package:open_pdf/global_widgets/global_text_form_fields.dart';
 import 'package:open_pdf/pages/download/widgets/download_button.dart';
 
-class DownloadPdfRow extends StatelessWidget {
-  final TextEditingController _searchController = TextEditingController();
+class DownloadPdfRow extends StatefulWidget {
+  const DownloadPdfRow({Key? key}) : super(key: key);
 
-  DownloadPdfRow({
-    super.key,
-  });
+  @override
+  _DownloadPdfRowState createState() => _DownloadPdfRowState();
+}
+
+class _DownloadPdfRowState extends State<DownloadPdfRow> {
+  final TextEditingController _searchController = TextEditingController();
+  String _pdfUrl = '';
+
+  @override
+  void initState() {
+    super.initState();
+
+    _searchController.addListener(() {
+      setState(() {
+        _pdfUrl = _searchController.text.trim();
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,11 +50,12 @@ class DownloadPdfRow extends StatelessWidget {
                   return null;
                 }
               },
+              onChanged: (val) {},
               onFieldSubmitted: (value) {},
             ),
           ),
           DownloadButton(
-            pdfUrl: _searchController.text.trim(),
+            pdfUrl: _pdfUrl,
           ),
         ],
       ),

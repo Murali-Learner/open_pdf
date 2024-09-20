@@ -10,7 +10,7 @@
 
 
     <application
-        android:label="open_pdf"
+        android:label="Open Pdf"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
