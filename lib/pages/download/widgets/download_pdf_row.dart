@@ -1,58 +1,70 @@
 import 'package:flutter/material.dart';
 import 'package:open_pdf/global_widgets/global_text_form_fields.dart';
 import 'package:open_pdf/pages/download/widgets/download_button.dart';
+import 'package:open_pdf/providers/theme_provider.dart';
+import 'package:open_pdf/utils/extensions/context_extension.dart';
+import 'package:provider/provider.dart';
 
 class DownloadPdfRow extends StatefulWidget {
-  const DownloadPdfRow({Key? key}) : super(key: key);
+  const DownloadPdfRow({super.key});
 
   @override
-  _DownloadPdfRowState createState() => _DownloadPdfRowState();
+  DownloadPdfRowState createState() => DownloadPdfRowState();
 }
 
-class _DownloadPdfRowState extends State<DownloadPdfRow> {
-  final TextEditingController _searchController = TextEditingController();
+class DownloadPdfRowState extends State<DownloadPdfRow> {
+  final TextEditingController searchController = TextEditingController();
   String _pdfUrl = '';
 
   @override
   void initState() {
     super.initState();
 
-    _searchController.addListener(() {
+    searchController.addListener(() {
       setState(() {
-        _pdfUrl = _searchController.text.trim();
+        _pdfUrl = searchController.text.trim();
       });
     });
   }
 
   @override
   void dispose() {
-    _searchController.dispose();
+    searchController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.white,
+      // color: Colors.white,
       padding: const EdgeInsets.only(top: 10, left: 10, right: 10),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         mainAxisSize: MainAxisSize.max,
         children: [
-          Expanded(
-            child: GlobalTextFormField(
-              controller: _searchController,
-              labelText: 'Provide link to download',
-              validator: (value) {
-                if (value != null && value.isEmpty) {
-                  return 'Please provide a link';
-                } else {
-                  return null;
-                }
-              },
-              onChanged: (val) {},
-              onFieldSubmitted: (value) {},
-            ),
+          Consumer<ThemeProvider>(
+            builder: (context, provider, _) {
+              return Expanded(
+                child: GlobalTextFormField(
+                  controller: searchController,
+                  labelText: 'Provide link to download',
+                  validator: (value) {
+                    if (value != null && value.isEmpty) {
+                      return 'Please provide a link';
+                    } else {
+                      return null;
+                    }
+                  },
+                  onChanged: (val) {},
+                  onFieldSubmitted: (value) {},
+                  border: context.theme.brightness == Brightness.dark
+                      ? OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(color: Colors.white))
+                      : null,
+                ),
+              );
+            },
           ),
           DownloadButton(
             pdfUrl: _pdfUrl,

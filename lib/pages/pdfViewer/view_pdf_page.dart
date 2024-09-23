@@ -1,12 +1,11 @@
-import 'dart:async';
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:open_pdf/models/pdf_model.dart';
-import 'package:open_pdf/pages/pdfViewer/widgets/page_information_widget.dart';
 import 'package:open_pdf/pages/pdfViewer/widgets/pdf_control_buttons.dart';
+import 'package:open_pdf/pages/pdfViewer/widgets/pdf_view_app_bar.dart';
 import 'package:open_pdf/providers/pdf_control_provider.dart';
 import 'package:open_pdf/providers/pdf_provider.dart';
 import 'package:open_pdf/utils/enumerates.dart';
@@ -37,32 +36,23 @@ class _ViewPdfPageState extends State<ViewPdfPage> {
 
   void _scrollListener() {
     ScrollPosition position = scrollController.position;
-    log("_scrollListener ${position.pixels}");
     if (position.pixels == position.minScrollExtent) {
-      log("true");
+      // Show controls when at the top
       provider.setPdfControlButtons(true);
+      provider.setAppBarVisibility(true);
     } else if (position.userScrollDirection == ScrollDirection.reverse) {
-      log("false");
+      // Hide controls when scrolling down
       provider.setPdfControlButtons(false);
+      provider.setAppBarVisibility(false);
     }
   }
 
-  double _verticalDragOffset = 0.0;
   @override
   Widget build(BuildContext context) {
     return Consumer2<PdfControlProvider, PdfProvider>(
-        builder: (context, providerViewPdf, providerPdf, _) {
+        builder: (context, viewProvider, pdfProvider, _) {
       final path = widget.pdf.filePath;
       return Scaffold(
-        // appBar: providerPdf.showAppbar
-        //     ? AppBar(
-        //         elevation: 4.0,
-        //         title: const Text("Pdf Viewer"),
-        //         actions: const [
-        //           PageInformationWidget(),
-        //         ],
-        //       )
-        //     : null,
         body: SafeArea(
           child: Stack(
             children: [
@@ -72,10 +62,12 @@ class _ViewPdfPageState extends State<ViewPdfPage> {
                     )
                   : Padding(
                       padding: EdgeInsets.only(
-                        top: context.height(providerPdf.showAppbar &&
-                                providerPdf.pdfCurrentPage != 1
-                            ? 10
-                            : 0),
+                        top: context.height(
+                          viewProvider.showAppbar &&
+                                  viewProvider.pdfCurrentPage == 1
+                              ? 7.5
+                              : 0,
+                        ),
                       ),
                       child: SizedBox(
                         height: context.screenHeight,
@@ -91,7 +83,7 @@ class _ViewPdfPageState extends State<ViewPdfPage> {
                           pageFling: true,
                           pageSnap: true,
                           nightMode: false,
-                          defaultPage: provider.pdfCurrentPage,
+                          defaultPage: provider.pdfCurrentPage - 1,
                           fitPolicy: FitPolicy.BOTH,
                           preventLinkNavigation: false,
                           onRender: (pages) {
@@ -116,36 +108,61 @@ class _ViewPdfPageState extends State<ViewPdfPage> {
                           onLinkHandler: (String? uri) {
                             debugPrint('goto uri: $uri');
                           },
-                          onPageScrolled: (page, positionOffset) {
-                            log("page $page $positionOffset");
-                            if (providerPdf.considerScroll) {
-                              if (providerPdf.showPdfTools) {
-                                providerPdf.setPdfToolsVisibility(false);
-                              }
-                              providerPdf.setAppBarVisibility(page == 0);
-                            }
-                          },
+                          // onPageScrolled: (page, positionOffset) {
+                          //   // log("page $page $positionOffset");
+                          //   // if (pdfProvider.considerScroll) {
+                          //   //   if (pdfProvider.showPdfTools) {
+                          //   //     pdfProvider.setPdfToolsVisibility(false);
+                          //   //   }
+                          //   //   pdfProvider.setAppBarVisibility(page == 1);
+                          //   // }
+                          // },
                           onTap: (onTap) {
-                            debugPrint("onTap $onTap");
-                            providerPdf.setConsiderScroll(false);
-
-                            providerPdf.setPdfToolsVisibility(
-                                !providerPdf.showPdfTools);
-                            providerPdf
-                                .setAppBarVisibility(!providerPdf.showAppbar);
-                            Future.delayed(Duration(seconds: 1))
-                                .whenComplete(() {
-                              providerPdf.setConsiderScroll(true);
-                            });
+                            log("onTap ${viewProvider.showAppbar} ${viewProvider.showPdfTools}");
+                            // viewProvider.setConsiderScroll(false);
+                            if (viewProvider.showAppbar) {
+                              log("app bar visible, hiding it");
+                              viewProvider.setAppBarVisibility(false);
+                              viewProvider.setPdfToolsVisibility(false);
+                            } else {
+                              log("app bar not visible, showing it");
+                              viewProvider.setAppBarVisibility(true);
+                              viewProvider.setPdfToolsVisibility(true);
+                            }
+                            // // Delay and set `considerScroll` to true after a second
+                            // Future.delayed(const Duration(seconds: 1))
+                            //     .whenComplete(() {
+                            //   viewProvider.setConsiderScroll(true);
+                            // });
                           },
+                          // onTap: (onTap) {
+                          //   debugPrint("onTap $onTap");
+                          //   viewProvider.setConsiderScroll(false);
+
+                          //   viewProvider.setPdfToolsVisibility(
+                          //       !viewProvider.showPdfTools);
+                          //   viewProvider
+                          //       .setAppBarVisibility(!viewProvider.showAppbar);
+                          //   Future.delayed(const Duration(seconds: 1))
+                          //       .whenComplete(() {
+                          //     viewProvider.setConsiderScroll(true);
+
+                          //     // log()
+                          //   });
+                          // },
                           onPageChanged: (int? page, int? total) {
                             debugPrint('page change: $page/$total');
-                            provider.setCurrentPage(page!);
+                            if (page != null && total != null) {
+                              provider.setCurrentPage(
+                                  page >= 0 || (page) == total
+                                      ? (page + 1)
+                                      : page);
+                            }
                           },
                         ),
                       ),
                     ),
-              if (providerPdf.showPdfTools)
+              if (viewProvider.showPdfTools)
                 Positioned(
                   bottom: context.height(5),
                   left: 0,
@@ -153,36 +170,9 @@ class _ViewPdfPageState extends State<ViewPdfPage> {
                   // alignment: Alignment.bottomCenter,
                   child: const PdfControlButtons(),
                 ),
-              if (providerPdf.showAppbar && providerPdf.pdfCurrentPage != 1)
-                Container(
-                  height: context.height(8),
-                  decoration: BoxDecoration(color: Colors.white, boxShadow: [
-                    BoxShadow(
-                      blurRadius: 6,
-                      spreadRadius: 0.1,
-                      offset: const Offset(0, 8),
-                      color: Colors.grey.withOpacity(0.6),
-                    )
-                  ]),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      IconButton(
-                          onPressed: () {
-                            context.pop();
-                          },
-                          icon: const Icon(Icons.arrow_back)),
-                      Expanded(
-                        flex: 6,
-                        child: Text(
-                          "${widget.pdf.fileName}",
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      const Spacer(),
-                      const PageInformationWidget(),
-                    ],
-                  ),
+              if (viewProvider.showAppbar)
+                PdfViewAppBar(
+                  pdf: widget.pdf,
                 )
             ],
           ),
@@ -190,17 +180,6 @@ class _ViewPdfPageState extends State<ViewPdfPage> {
       );
     });
   }
-}
-
-Future<String?> _passwordDialog(BuildContext context) async {
-  final textController = TextEditingController();
-  return await showDialog<String?>(
-    context: context,
-    barrierDismissible: false,
-    builder: (context) {
-      return PasswordDialogWidget(textController: textController);
-    },
-  );
 }
 
 class PasswordDialogWidget extends StatelessWidget {

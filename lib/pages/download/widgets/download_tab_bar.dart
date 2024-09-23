@@ -14,77 +14,77 @@ class DownloadTabBar extends StatefulWidget {
 class DownloadTabBarState extends State<DownloadTabBar>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-
+  late PdfProvider provider;
   @override
   void initState() {
     super.initState();
+    provider = context.read<PdfProvider>();
     _tabController = TabController(length: 3, vsync: this);
-
+    _tabController.animateTo(1);
     _tabController.addListener(() {
       if (_tabController.indexIsChanging) {
-        context
-            .read<PdfProvider>()
-            .setDownloadStatus(DownloadStatus.values[_tabController.index]);
+        provider.setCurrentTabIndex(_tabController.index);
+        _tabController.animateTo(provider.currentTabIndex);
       }
     });
+  }
+
+  void switchToOngoingTab() {
+    _tabController.animateTo(0);
+    provider.setCurrentTabIndex(0);
   }
 
   @override
   void dispose() {
     _tabController.dispose();
+
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Container(
-          padding: const EdgeInsets.only(top: 10),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.3),
-                offset: Offset(0, 3),
-                blurRadius: 1,
-                spreadRadius: 1,
+    return Consumer<PdfProvider>(builder: (context, provider, _) {
+      return Column(
+        children: [
+          Material(
+            elevation: 4.0,
+            child: Padding(
+              padding: const EdgeInsets.only(top: 0),
+              child: TabBar(
+                controller: _tabController,
+                tabs: const [
+                  Tab(
+                    child: Text("Ongoing"),
+                  ),
+                  Tab(
+                    child: Text("Completed"),
+                  ),
+                  Tab(
+                    child: Text("Cancelled"),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
-          child: TabBar(
-            controller: _tabController,
-            tabs: const [
-              Tab(
-                child: Text("Ongoing"),
-              ),
-              Tab(
-                child: Text("Completed"),
-              ),
-              Tab(
-                child: Text("Cancelled"),
-              ),
-            ],
+          Expanded(
+            child: TabBarView(
+              physics: const NeverScrollableScrollPhysics(),
+              controller: _tabController,
+              children: const [
+                DownloadListView(
+                  status: DownloadStatus.ongoing,
+                ),
+                DownloadListView(
+                  status: DownloadStatus.completed,
+                ),
+                DownloadListView(
+                  status: DownloadStatus.cancelled,
+                ),
+              ],
+            ),
           ),
-        ),
-        Expanded(
-          child: TabBarView(
-            physics: const NeverScrollableScrollPhysics(),
-            controller: _tabController,
-            children: const [
-              DownloadListView(
-                status: DownloadStatus.ongoing,
-              ),
-              DownloadListView(
-                status: DownloadStatus.completed,
-              ),
-              DownloadListView(
-                status: DownloadStatus.cancelled,
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
+        ],
+      );
+    });
   }
 }

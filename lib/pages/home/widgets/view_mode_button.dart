@@ -25,7 +25,7 @@ class ViewModeButton extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(5),
         decoration: BoxDecoration(
-          color: _getColor(provider.selectedViewMode == viewMode),
+          color: _getColor(provider.viewMode == viewMode),
         ),
         child: Icon(icon),
       ),

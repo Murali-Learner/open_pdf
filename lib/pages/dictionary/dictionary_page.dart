@@ -64,6 +64,11 @@ class DictionaryPageState extends State<DictionaryPage> {
                   provider.searchWord(value.trim());
                 }
               },
+              border: context.theme.brightness == Brightness.dark
+                  ? OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: const BorderSide(color: Colors.white))
+                  : null,
               suffixIcon:
                   Consumer<DictionaryProvider>(builder: (context, provider, _) {
                 return provider.showClearButton

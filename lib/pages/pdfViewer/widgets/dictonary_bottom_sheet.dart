@@ -21,7 +21,7 @@ class DictionaryBottomSheet extends StatelessWidget {
                 top: Radius.circular(16.0),
               ),
             ),
-            child: DictionaryPage(
+            child: const DictionaryPage(
               showAppbar: false,
             ));
       },

@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:open_pdf/main/custom_nav_bar.dart';
-import 'package:open_pdf/main/notification_permission_dialog.dart';
 import 'package:open_pdf/pages/dictionary/dictionary_page.dart';
 import 'package:open_pdf/pages/home/home_page.dart'; // Your HomePage
 import 'package:open_pdf/providers/pdf_provider.dart';
-import 'package:open_pdf/utils/extensions/context_extension.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 
 class MainPage extends StatefulWidget {
@@ -16,7 +13,7 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
-  late final PdfProvider provider;
+  late final PdfProvider pdfProvider;
 
   @override
   void initState() {
@@ -25,39 +22,41 @@ class _MainPageState extends State<MainPage> {
   }
 
   void init() async {
-    provider = context.read<PdfProvider>();
+    pdfProvider = context.read<PdfProvider>();
+
     await Future.delayed(Duration.zero).whenComplete(() async {
-      await provider.handleIntent();
-      provider.internetSubscription();
-      await showNotificationDialog();
+      await pdfProvider.handleIntent(context);
+      pdfProvider.internetSubscription();
+      await pdfProvider.askPermissions();
+      // await showNotificationDialog();
     });
   }
 
-  Future<void> showNotificationDialog() async {
-    final notificationPermission = await Permission.notification.isGranted;
-    if (!notificationPermission) {
-      showDialog(
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              content: NotificationPermissionDialog(
-                onAllow: () async {
-                  context.pop();
-                  await provider.askPermissions();
-                },
-                onDeny: () {
-                  context.pop();
-                },
-              ),
-            );
-          });
-    }
-  }
+  // Future<void> showNotificationDialog() async {
+  //   final notificationPermission = await Permission.notification.isGranted;
+  //   if (!notificationPermission) {
+  //     showDialog(
+  //         context: context,
+  //         builder: (context) {
+  //           return AlertDialog(
+  //             content: NotificationPermissionDialog(
+  //               onAllow: () async {
+  //                 context.pop();
+  //                 await pdfProvider.askPermissions();
+  //               },
+  //               onDeny: () {
+  //                 context.pop();
+  //               },
+  //             ),
+  //           );
+  //         });
+  //   }
+  // }
 
   @override
   void dispose() {
     super.dispose();
-    provider.internetDispose();
+    pdfProvider.internetDispose();
   }
 
   @override
@@ -65,21 +64,22 @@ class _MainPageState extends State<MainPage> {
     return Scaffold(
       body: Consumer<PdfProvider>(
         builder: (context, navigationProvider, _) {
-          switch (navigationProvider.currentIndex) {
+          switch (navigationProvider.currentNavIndex) {
             case 1:
               return const DictionaryPage();
             case 0:
             default:
-              return const HomePage(); // Only HomePage content
+              return const HomePage();
           }
         },
       ),
       bottomNavigationBar: Consumer<PdfProvider>(
-        builder: (context, navigationProvider, _) {
+        builder: (context, provider, _) {
           return CustomBottomNavigationBar(
-            currentIndex: navigationProvider.currentIndex,
+            currentIndex: provider.currentNavIndex,
             onTap: (index) {
-              navigationProvider.setCurrentIndex(index);
+              provider.clearSelectedFiles();
+              provider.setCurrentNavIndex(index);
             },
           );
         },

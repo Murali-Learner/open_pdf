@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:open_pdf/pages/download/downloads_page.dart';
+import 'package:open_pdf/pages/pdfViewer/view_pdf_page.dart';
 import 'package:open_pdf/providers/pdf_provider.dart';
+import 'package:open_pdf/providers/theme_provider.dart';
+import 'package:open_pdf/utils/enumerates.dart';
 import 'package:open_pdf/utils/extensions/context_extension.dart';
 import 'package:provider/provider.dart';
 
@@ -10,9 +13,9 @@ class FloatingDial extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<PdfProvider>(
-      builder: (context, provider, _) {
-        return provider.totalPdfList.isEmpty
+    return Consumer2<PdfProvider, ThemeProvider>(
+      builder: (context, pdfProvider, themeProvider, _) {
+        return pdfProvider.totalPdfList.isEmpty
             ? const SizedBox.shrink()
             : SpeedDial(
                 icon: Icons.add,
@@ -20,27 +23,58 @@ class FloatingDial extends StatelessWidget {
                 animationDuration: const Duration(milliseconds: 150),
                 useRotationAnimation: true,
                 elevation: 8.0,
+                childrenButtonSize: Size.fromRadius(30),
                 spaceBetweenChildren: 4,
                 overlayColor: Colors.black,
                 overlayOpacity: 0,
                 children: [
                   SpeedDialChild(
-                      child: Icon(
-                        Icons.file_copy,
-                        color: context.theme.primaryColor,
-                      ),
-                      backgroundColor: Colors.white,
-                      onTap: () async {
-                        await provider.pickFile();
-                      }),
+                    shape: CircleBorder(),
+                    child: Icon(
+                      themeProvider.themeMode == ThemeMode.dark
+                          ? Icons.light_mode
+                          : Icons.dark_mode,
+                      color: context.theme.primaryColor,
+                    ),
+                    backgroundColor: Colors.white,
+                    onTap: () {
+                      if (themeProvider.themeMode == ThemeMode.dark) {
+                        themeProvider.setTheme(AppTheme.light);
+                      } else {
+                        themeProvider.setTheme(AppTheme.dark);
+                      }
+                    },
+                  ),
                   SpeedDialChild(
                     child: Icon(
                       Icons.download,
                       color: context.theme.primaryColor,
                     ),
                     backgroundColor: Colors.white,
+                    shape: CircleBorder(),
                     onTap: () {
+                      pdfProvider.clearSelectedFiles();
                       context.push(navigateTo: const DownloadPage());
+                    },
+                  ),
+                  SpeedDialChild(
+                    shape: CircleBorder(),
+                    child: Icon(
+                      Icons.file_copy,
+                      color: context.theme.primaryColor,
+                    ),
+                    backgroundColor: Colors.white,
+                    onTap: () async {
+                      pdfProvider.clearSelectedFiles();
+                      await context.read<PdfProvider>().pickFile().whenComplete(
+                        () {
+                          if (pdfProvider.currentPDF != null) {
+                            context.push(
+                                navigateTo:
+                                    ViewPdfPage(pdf: pdfProvider.currentPDF!));
+                          }
+                        },
+                      );
                     },
                   ),
                 ],

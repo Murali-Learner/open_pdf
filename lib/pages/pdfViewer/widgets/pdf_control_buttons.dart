@@ -13,12 +13,12 @@ class PdfControlButtons extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<PdfControlProvider>(builder: (context, provider, _) {
       return Padding(
-        padding: EdgeInsets.symmetric(horizontal: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 10),
         child: Material(
           elevation: 4.0,
           borderRadius: BorderRadius.circular(10),
           child: Container(
-            padding: EdgeInsets.all(5),
+            padding: const EdgeInsets.all(5),
             decoration: BoxDecoration(
               color: context.theme.colorScheme.surface,
               borderRadius: BorderRadius.circular(15),
@@ -63,7 +63,7 @@ class PdfControlButtons extends StatelessWidget {
                     Icons.arrow_downward,
                     color: Constants.pdfViewIconsColor,
                   ),
-                  onPressed: () => provider.nextPage(),
+                  onPressed: () async => await provider.nextPage(),
                 ),
                 IconButton(
                   tooltip: "Previous page",
@@ -71,11 +71,11 @@ class PdfControlButtons extends StatelessWidget {
                     Icons.arrow_upward,
                     color: Constants.pdfViewIconsColor,
                   ),
-                  onPressed: () => provider.previousPage(),
+                  onPressed: () async => await provider.previousPage(),
                 ),
                 IconButton(
                   tooltip: "Open dictionary",
-                  icon: Icon(
+                  icon: const Icon(
                     Icons.menu_book_outlined,
                     color: Constants.pdfViewIconsColor,
                   ),

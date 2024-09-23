@@ -12,15 +12,16 @@ class ViewModeButtonsRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
-      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        const Spacer(),
         Container(
           decoration: BoxDecoration(
             color: context.theme.primaryColor.withOpacity(0.5),
           ),
           child: Row(
+            mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const ViewModeButton(
                 icon: Icons.window,
@@ -37,4 +38,37 @@ class ViewModeButtonsRow extends StatelessWidget {
       ],
     );
   }
+}
+
+void showDeleteConfirmationDialog(
+    BuildContext context, VoidCallback onConfirmDelete,
+    {String content = 'Are you sure you want to delete selected items?'}) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text('Delete Confirmation'),
+        content: Text(content),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () {
+              context.pop();
+            },
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              onConfirmDelete();
+              context.pop();
+            },
+            child: const Text(
+              'Delete',
+              style:
+                  TextStyle(color: Colors.red), // Red color for delete action
+            ),
+          ),
+        ],
+      );
+    },
+  );
 }

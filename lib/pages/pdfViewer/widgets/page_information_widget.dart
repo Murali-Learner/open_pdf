@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:open_pdf/providers/pdf_control_provider.dart';
 import 'package:open_pdf/utils/extensions/context_extension.dart';
@@ -27,7 +29,9 @@ class _PageInformationWidgetState extends State<PageInformationWidget> {
       (_) {
         pdfProvider = context.read<PdfControlProvider>();
 
-        pageController.text = (pdfProvider!.pdfCurrentPage).toString();
+        pageController.text = pdfProvider!.totalPages == 1
+            ? "1"
+            : (pdfProvider!.pdfCurrentPage).toString();
 
         pdfProvider!.addListener(_updatePageController);
       },
@@ -47,10 +51,9 @@ class _PageInformationWidgetState extends State<PageInformationWidget> {
   void _updatePageController() {
     if (pdfProvider != null) {
       setState(() {
-        pageController.text = pdfProvider!.pdfCurrentPage == 0 ||
-                pdfProvider!.pdfCurrentPage == (pdfProvider!.totalPages - 1)
-            ? (pdfProvider!.pdfCurrentPage + 1).toString()
-            : pdfProvider!.pdfCurrentPage.toString();
+        pageController.text = pdfProvider!.totalPages == 1
+            ? "1"
+            : (pdfProvider!.pdfCurrentPage).toString();
       });
     }
   }
@@ -62,7 +65,7 @@ class _PageInformationWidgetState extends State<PageInformationWidget> {
         mainAxisSize: MainAxisSize.min,
         children: [
           ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: 25),
+            constraints: const BoxConstraints(maxWidth: 25),
             child: TextField(
               controller: pageController,
               keyboardType: TextInputType.number,
@@ -74,17 +77,21 @@ class _PageInformationWidgetState extends State<PageInformationWidget> {
                 fontWeight: FontWeight.w500,
                 fontSize: 18,
               ),
+              onTap: () {
+                context.read<PdfControlProvider>().setConsiderScroll(false);
+              },
               onSubmitted: (value) {
                 final newPage = int.tryParse(value);
+                log("newPage $newPage");
                 if (newPage != null &&
                     newPage > 0 &&
                     newPage <= provider.totalPages) {
-                  provider.setCurrentPage(newPage);
-
-                  provider.gotoPage(newPage);
+                  provider.gotoPage(
+                      newPage == provider.totalPages ? newPage : (newPage - 1));
                 } else {
                   ToastUtils.showErrorToast("Invalid page number");
                 }
+                context.read<PdfControlProvider>().setConsiderScroll(true);
               },
             ),
           ),

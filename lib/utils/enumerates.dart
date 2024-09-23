@@ -13,3 +13,9 @@ enum DownloadStatus {
   completed,
   cancelled,
 }
+
+enum AppTheme {
+  light,
+  dark,
+  system,
+}

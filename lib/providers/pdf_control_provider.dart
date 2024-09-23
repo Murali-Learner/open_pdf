@@ -1,18 +1,20 @@
-import 'dart:ui';
+import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:open_pdf/utils/enumerates.dart';
-import 'package:pdf_render/pdf_render.dart';
 
 class PdfControlProvider with ChangeNotifier {
   PDFViewController? _pdfController;
-  int _pdfCurrentPage = 0;
+  int _pdfCurrentPage = 1;
   int _totalPages = 0;
   String _errorMessage = '';
   bool _showPdfControlButtons = false;
   double _currentZoomLevel = 1.0;
   PdfScrollMode _pdfScrollMode = PdfScrollMode.vertical;
+  bool _showPdfTools = false;
+  bool _showAppbar = true;
+  bool _considerScroll = false;
 
   PDFViewController? get pdfController => _pdfController;
   int get pdfCurrentPage => _pdfCurrentPage;
@@ -20,7 +22,24 @@ class PdfControlProvider with ChangeNotifier {
   double get currentZoomLevel => _currentZoomLevel;
   PdfScrollMode get pdfScrollMode => _pdfScrollMode;
   String get errorMessage => _errorMessage;
-  bool get showPdfControlButtons => _showPdfControlButtons;
+
+  bool get showPdfTools => _showPdfTools;
+  void setPdfToolsVisibility(bool value) {
+    _showPdfTools = value;
+    notifyListeners();
+  }
+
+  bool get showAppbar => _showAppbar;
+  void setAppBarVisibility(bool value) {
+    _showAppbar = value;
+    notifyListeners();
+  }
+
+  bool get considerScroll => _considerScroll;
+  void setConsiderScroll(bool value) {
+    _considerScroll = value;
+    notifyListeners();
+  }
 
   void setTotalPages(int pages) {
     _totalPages = pages;
@@ -28,11 +47,13 @@ class PdfControlProvider with ChangeNotifier {
   }
 
   void resetValues() {
-    _pdfCurrentPage = 0;
+    _pdfCurrentPage = 1;
     _totalPages = 0;
     _errorMessage = "";
     _showPdfControlButtons = false;
     _currentZoomLevel = 0.0;
+    _showAppbar = true;
+    _showPdfTools = false;
     notifyListeners();
   }
 
@@ -43,25 +64,6 @@ class PdfControlProvider with ChangeNotifier {
     debugPrint("_showPdfControlButtons $_showPdfControlButtons");
     notifyListeners();
   }
-
-  Future<Uint8List> getPdfThumbNail(String path) async {
-    PdfDocument doc = await PdfDocument.openFile(path);
-
-    PdfPage page = await doc.getPage(1);
-    final pageImage = await page.render();
-    final image = await pageImage.createImageDetached();
-    final pngData = await image.toByteData(format: ImageByteFormat.png);
-
-    return pngData!.buffer.asUint8List();
-  }
-  //  FutureBuilder(
-  //             future: provider.getPdfThumbNail(pdf),
-  //             builder: (context, snapshot) {
-  //               return snapshot.hasData
-  //                   ? Image.memory((snapshot.data!))
-  //                   : const SizedBox();
-  //             },
-  //           ),
 
   void setScrollMode(PdfScrollMode mode) {
     _pdfScrollMode = mode;
@@ -86,16 +88,21 @@ class PdfControlProvider with ChangeNotifier {
   }
 
   Future<void> gotoPage(int page) async {
-    if (_pdfController != null && _pdfCurrentPage < _totalPages - 1) {
+    log("goto page number $page  $_pdfCurrentPage");
+    if (_pdfController != null && _pdfCurrentPage <= _totalPages) {
       _pdfCurrentPage = page;
-      await _pdfController!.setPage(_pdfCurrentPage);
+      if (page == 1) {
+        await _pdfController!.setPage(0);
+      } else {
+        await _pdfController!.setPage(_pdfCurrentPage);
+      }
       notifyListeners();
     }
   }
 
   Future<void> nextPage() async {
-    if (_pdfController != null && _pdfCurrentPage < _totalPages - 1) {
-      _pdfCurrentPage++;
+    log("im here next page ${_pdfCurrentPage + 1}");
+    if (_pdfCurrentPage < _totalPages - 1) {
       await _pdfController!.setPage(_pdfCurrentPage);
       notifyListeners();
     }
@@ -103,8 +110,7 @@ class PdfControlProvider with ChangeNotifier {
 
   Future<void> previousPage() async {
     if (_pdfController != null && _pdfCurrentPage > 0) {
-      _pdfCurrentPage--;
-      await _pdfController!.setPage(_pdfCurrentPage);
+      await _pdfController!.setPage(_pdfCurrentPage - 1 - 1);
       notifyListeners();
     }
   }
@@ -119,7 +125,7 @@ class PdfControlProvider with ChangeNotifier {
 
   Future<void> gotoLastPage() async {
     if (_pdfController != null && _pdfCurrentPage < _totalPages - 1) {
-      _pdfCurrentPage = _totalPages - 1;
+      _pdfCurrentPage = _totalPages;
       await _pdfController!.setPage(_pdfCurrentPage);
       notifyListeners();
     }

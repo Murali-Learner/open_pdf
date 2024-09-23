@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:dio/dio.dart';
 import 'package:hive/hive.dart';
 import 'package:open_pdf/utils/enumerates.dart';
 
@@ -28,13 +29,15 @@ class PdfModel {
   @HiveField(10)
   final bool isOpened;
   @HiveField(11)
-  final bool isFav;
+  bool isFav;
   @HiveField(12)
   final String? downloadStatus;
   @HiveField(13)
   final Uint8List? thumbnail;
   @HiveField(14)
   final bool isSelected;
+
+  final CancelToken? cancelToken;
 
   PdfModel({
     required this.id,
@@ -51,6 +54,7 @@ class PdfModel {
     this.downloadStatus,
     this.thumbnail,
     this.isSelected = false,
+    this.cancelToken,
   });
 
   factory PdfModel.fromJson(Map<String, dynamic> json) {
@@ -69,6 +73,7 @@ class PdfModel {
       downloadStatus: DownloadStatus.values[json['downloadStatus'] ?? 0].name,
       thumbnail: json['thumbnail'],
       isSelected: json['isSelected'],
+      cancelToken: json['cancelToken'],
     );
   }
 
@@ -78,8 +83,8 @@ class PdfModel {
       'filePath': filePath,
       'fileName': fileName,
       'pageNumber': pageNumber,
-      'lastSeen': lastOpened!.toIso8601String(),
-      'createdAt': createdAt!.toIso8601String(),
+      'lastSeen': lastOpened,
+      'createdAt': createdAt,
       'networkUrl': networkUrl,
       'fileSize': fileSize,
       'downloadProgress': downloadProgress,
@@ -88,6 +93,7 @@ class PdfModel {
       'downloadStatus': downloadStatus,
       'thumbnail': thumbnail,
       'isSelected': isSelected,
+      'cancelToken': cancelToken,
     };
   }
 
@@ -106,6 +112,7 @@ class PdfModel {
     String? downloadStatus,
     Uint8List? thumbnail,
     bool? isSelected,
+    CancelToken? cancelToken,
   }) {
     return PdfModel(
       id: id ?? this.id,
@@ -122,6 +129,7 @@ class PdfModel {
       downloadStatus: downloadStatus ?? this.downloadStatus,
       thumbnail: thumbnail ?? this.thumbnail,
       isSelected: isSelected ?? this.isSelected,
+      cancelToken: cancelToken ?? this.cancelToken,
     );
   }
 }

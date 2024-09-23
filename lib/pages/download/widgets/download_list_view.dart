@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:open_pdf/pages/home/widgets/list_card.dart';
+import 'package:open_pdf/providers/download_provider.dart';
 import 'package:open_pdf/providers/pdf_provider.dart';
 import 'package:open_pdf/utils/enumerates.dart';
 import 'package:provider/provider.dart';
@@ -18,14 +19,10 @@ class DownloadListView extends StatefulWidget {
 class DownloadListViewState extends State<DownloadListView> {
   @override
   Widget build(BuildContext context) {
-    return Consumer<PdfProvider>(
-      builder: (context, provider, _) {
-        final filteredPdfList = provider.totalPdfList.values
-            .where((pdf) =>
-                pdf.downloadStatus == widget.status.name &&
-                pdf.networkUrl != null &&
-                pdf.networkUrl!.isNotEmpty)
-            .toList();
+    return Consumer2<DownloadProvider, PdfProvider>(
+      builder: (context, downloadProvider, pdfProvider, _) {
+        final filteredPdfList =
+            downloadProvider.getFilteredListByStatus(widget.status);
 
         if (filteredPdfList.isEmpty) {
           return Center(
@@ -44,32 +41,10 @@ class DownloadListViewState extends State<DownloadListView> {
             return ListPdfCard(
               pdf: filteredPdfList[index],
               index: index,
+              isDownloadCard: true,
             );
           },
         );
-      },
-    );
-  }
-}
-
-class DownloadStatusWidget extends StatelessWidget {
-  const DownloadStatusWidget({
-    super.key,
-    required this.groupValue,
-    required this.value,
-    required this.title,
-  });
-  final DownloadStatus groupValue;
-  final DownloadStatus value;
-  final String title;
-  @override
-  Widget build(BuildContext context) {
-    return RadioListTile<DownloadStatus>(
-      title: Text(title),
-      value: value,
-      groupValue: groupValue,
-      onChanged: (DownloadStatus? value) {
-        context.read<PdfProvider>().setDownloadStatus(value!);
       },
     );
   }

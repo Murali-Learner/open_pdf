@@ -1,0 +1,14 @@
+
+pause download
+
+when download started  for pause popup button
+ 2 buttons
+cancel download and resume download
+
+
+ pdf controll button
+  center lo page change cheyadaniki text feild aa card loki vastundi
+  left previous page and right next Page
+  dictionary
+
+// download progress background grey and foregound  green

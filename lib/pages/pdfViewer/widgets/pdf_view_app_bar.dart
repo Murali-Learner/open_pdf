@@ -1,0 +1,67 @@
+import 'package:flutter/material.dart';
+import 'package:open_pdf/models/pdf_model.dart';
+import 'package:open_pdf/pages/pdfViewer/view_pdf_page.dart';
+import 'package:open_pdf/pages/pdfViewer/widgets/page_information_widget.dart';
+import 'package:open_pdf/utils/extensions/context_extension.dart';
+
+class PdfViewAppBar extends StatelessWidget {
+  const PdfViewAppBar({
+    super.key,
+    required this.pdf,
+  });
+  final PdfModel pdf;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: context.height(7),
+      decoration: BoxDecoration(
+          color: context.theme.appBarTheme.foregroundColor,
+          boxShadow: context.theme.brightness == Brightness.dark
+              ? null
+              : [
+                  BoxShadow(
+                    blurRadius: 6,
+                    spreadRadius: 0.1,
+                    offset: const Offset(0, 8),
+                    color: Colors.grey.withOpacity(0.6),
+                  )
+                ]),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          IconButton(
+              onPressed: () {
+                context.pop();
+              },
+              icon: const Icon(Icons.arrow_back)),
+          Expanded(
+            flex: 6,
+            child: Tooltip(
+              message: pdf.fileName,
+              child: Text(
+                "${pdf.fileName}",
+                overflow: TextOverflow.ellipsis,
+                style: context.textTheme.bodyLarge!
+                    .copyWith(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ),
+          const Spacer(),
+          const PageInformationWidget(),
+        ],
+      ),
+    );
+  }
+}
+
+Future<String?> _passwordDialog(BuildContext context) async {
+  final textController = TextEditingController();
+  return await showDialog<String?>(
+    context: context,
+    barrierDismissible: false,
+    builder: (context) {
+      return PasswordDialogWidget(textController: textController);
+    },
+  );
+}

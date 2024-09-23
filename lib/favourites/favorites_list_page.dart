@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:open_pdf/global_widgets/shimmer_loading.dart';
 import 'package:open_pdf/pages/home/widgets/list_card.dart';
 import 'package:open_pdf/providers/pdf_provider.dart';
 import 'package:provider/provider.dart';
@@ -20,12 +19,8 @@ class FavoritesListPage extends StatelessWidget {
       ),
       body: Consumer<PdfProvider>(
         builder: (context, provider, _) {
-          if (provider.isLoading) {
-            return const ShimmerLoading();
-          }
-
           if (provider.favoritesList.isEmpty) {
-            return const Center(child: Text('No bookmarks yet'));
+            return const Center(child: Text('No favorites added'));
           }
 
           return ListView.builder(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:open_pdf/utils/extensions/context_extension.dart';
 import 'package:shimmer/shimmer.dart';
 
 class ShimmerLoading extends StatelessWidget {
@@ -11,8 +12,12 @@ class ShimmerLoading extends StatelessWidget {
       shrinkWrap: true,
       itemBuilder: (context, index) {
         return Shimmer.fromColors(
-          baseColor: Colors.grey[100]!,
-          highlightColor: Colors.grey[300]!,
+          baseColor: context.theme.brightness == Brightness.dark
+              ? Colors.grey[600]!
+              : Colors.grey[100]!,
+          highlightColor: context.theme.brightness == Brightness.dark
+              ? Colors.grey[700]!
+              : Colors.grey[300]!,
           child: Card(
             child: ListTile(
               title: Container(

@@ -5,10 +5,8 @@ import 'package:open_pdf/pages/pdfViewer/view_pdf_page.dart';
 import 'package:open_pdf/providers/pdf_control_provider.dart';
 import 'package:open_pdf/providers/pdf_provider.dart';
 import 'package:open_pdf/utils/constants.dart';
-import 'package:open_pdf/utils/enumerates.dart';
 import 'package:open_pdf/utils/extensions/context_extension.dart';
 import 'package:open_pdf/utils/extensions/spacer_extension.dart';
-import 'package:open_pdf/utils/toast_utils.dart';
 import 'package:provider/provider.dart';
 
 class GridPdfCard extends StatelessWidget {
@@ -25,30 +23,30 @@ class GridPdfCard extends StatelessWidget {
     final provider = context.watch<PdfProvider>();
     return GestureDetector(
       onLongPress: () {
-        debugPrint("long press");
-        // provider.addToSelectedFiles(pdf);
+        provider.toggleSelectedFiles(pdf);
+        debugPrint("long press ${provider.selectedFiles.length}");
       },
       onTap: () {
-        if (pdf.downloadStatus == DownloadStatus.completed.name) {
+        if (pdf.isSelected || provider.isMultiSelected) {
+          provider.toggleSelectedFiles(pdf);
+        } else {
           context.read<PdfControlProvider>().resetValues();
-
+          provider.clearSelectedFiles();
           context.push(
             navigateTo: ViewPdfPage(
               pdf: pdf,
             ),
           );
-        } else {
-          ToastUtils.showErrorToast("File is not available");
         }
       },
       child: Container(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(5),
+          borderRadius: BorderRadius.circular(10),
           color:
               // context.theme.primaryColor.withOpacity(0.8)
               pdf.isSelected
                   ? context.theme.primaryColor.withOpacity(0.8)
-                  : context.theme.primaryColor.withOpacity(0.5),
+                  : context.theme.primaryColor.withOpacity(0.3),
         ),
         padding: const EdgeInsets.all(5),
         child: Stack(
@@ -57,14 +55,19 @@ class GridPdfCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                AspectRatio(
-                  aspectRatio: 0.9,
-                  child: pdf.thumbnail == null
-                      ? Image.asset(Constants.appLogo)
-                      : Image.memory(
-                          pdf.thumbnail!,
-                          fit: BoxFit.cover,
-                        ),
+                ClipRRect(
+                  borderRadius: const BorderRadius.only(
+                      topRight: Radius.circular(10),
+                      topLeft: Radius.circular(10)),
+                  child: AspectRatio(
+                    aspectRatio: 0.9,
+                    child: pdf.thumbnail == null
+                        ? Image.asset(Constants.appLogo)
+                        : Image.memory(
+                            pdf.thumbnail!,
+                            fit: BoxFit.cover,
+                          ),
+                  ),
                 ),
                 Container(
                   padding: const EdgeInsets.symmetric(
@@ -74,27 +77,25 @@ class GridPdfCard extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(
-                        flex: 5,
-                        child: Wrap(
-                          // alignment: A,
-                          children: [
-                            SizedBox(
-                              child: Text(
-                                pdf.fileName!,
-                                style: context.textTheme.bodyMedium,
-                                overflow: TextOverflow.ellipsis,
-                              ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SizedBox(
+                            width: context.width(30),
+                            child: Text(
+                              pdf.fileName!,
+                              style: context.textTheme.bodyMedium,
+                              overflow: TextOverflow.ellipsis,
                             ),
-                            4.vSpace,
-                            SizedBox(
-                              child: Text(
-                                pdf.fileSize!,
-                                style: context.textTheme.bodyMedium,
-                              ),
+                          ),
+                          4.vSpace,
+                          SizedBox(
+                            child: Text(
+                              pdf.fileSize!,
+                              style: context.textTheme.bodyMedium,
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                       PdfCardOptions(
                         pdf: pdf,
@@ -105,23 +106,23 @@ class GridPdfCard extends StatelessWidget {
                 ),
               ],
             ),
-            if ((pdf.downloadStatus == DownloadStatus.cancelled.name))
-              Align(
-                alignment: Alignment.center,
-                child: GestureDetector(
-                  onTap: () {
-                    if (pdf.networkUrl != null && pdf.networkUrl!.isNotEmpty) {
-                      provider.downloadAndSavePdf(pdf.networkUrl!);
-                    }
-                  },
-                  child: Stack(
-                    children: [
-                      CircularProgressIndicator(),
-                      const Icon(Icons.download),
-                    ],
-                  ),
-                ),
-              ),
+            // if ((pdf.downloadStatus == DownloadStatus.cancelled.name))
+            //   Align(
+            //     alignment: Alignment.center,
+            //     child: GestureDetector(
+            //       onTap: () {
+            //         if (pdf.networkUrl != null && pdf.networkUrl!.isNotEmpty) {
+            //           provider.downloadAndSavePdf(pdf.networkUrl!);
+            //         }
+            //       },
+            //       child: Stack(
+            //         children: [
+            //           CircularProgressIndicator(),
+            //           const Icon(Icons.download),
+            //         ],
+            //       ),
+            //     ),
+            //   ),
           ],
         ),
       ),

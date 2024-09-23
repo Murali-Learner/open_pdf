@@ -1,6 +1,11 @@
+// ignore_for_file: use_build_context_synchronously
+
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:open_pdf/models/pdf_model.dart';
 import 'package:open_pdf/pages/home/widgets/pdf_option_item.dart';
+import 'package:open_pdf/providers/download_provider.dart';
 import 'package:open_pdf/providers/pdf_provider.dart';
 import 'package:open_pdf/utils/extensions/context_extension.dart';
 import 'package:open_pdf/utils/toast_utils.dart';
@@ -18,6 +23,7 @@ class PdfOptionsBottomSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final provider = context.read<PdfProvider>();
+    final downloadProvider = context.read<DownloadProvider>();
     return Wrap(
       children: [
         PdfOptionItem(
@@ -30,11 +36,20 @@ class PdfOptionsBottomSheet extends StatelessWidget {
           text: "Share",
           onTap: () => _handleSharePdf(context, pdf),
         ),
+        if (pdf.networkUrl != null && pdf.networkUrl!.isNotEmpty)
+          PdfOptionItem(
+            icon: Icons.delete,
+            text: "Delete permanently",
+            onTap: () {
+              showDeleteConfirmationDialog(context, pdf);
+            },
+          ),
         PdfOptionItem(
           icon: Icons.delete,
-          text: "Delete",
+          text: "Delete from history",
           onTap: () async {
-            await provider.removeFromTotalPdfList(pdf);
+            await provider.deleteFormHistory(pdf);
+            await downloadProvider.removeFromCompletedList(pdf);
             context.pop();
           },
         ),
@@ -44,6 +59,8 @@ class PdfOptionsBottomSheet extends StatelessWidget {
 
   Future<void> _handleAddToFavorites(BuildContext context) async {
     await context.read<PdfProvider>().toggleFavorite(pdf);
+    await context.read<DownloadProvider>().toggleFavorite(pdf);
+
     context.pop();
   }
 
@@ -63,4 +80,43 @@ class PdfOptionsBottomSheet extends StatelessWidget {
       ToastUtils.showErrorToast("Error while sharing");
     }
   }
+}
+
+void showDeleteConfirmationDialog(
+  BuildContext context,
+  PdfModel pdf,
+) {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text('Delete Confirmation'),
+        content: Text("Are you sure you want to delete this ${pdf.fileName}"),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () {
+              context.pop();
+            },
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              log("delete perme");
+              final pdfProvider = context.read<PdfProvider>();
+              final downloadProvider = context.read<DownloadProvider>();
+
+              pdfProvider.removeFromTotalPdfList(pdf);
+              await downloadProvider.deleteCompletely(pdf);
+              context.pop();
+              context.pop();
+            },
+            child: const Text(
+              'Delete',
+              style: TextStyle(color: Colors.red),
+            ),
+          ),
+        ],
+      );
+    },
+  );
 }

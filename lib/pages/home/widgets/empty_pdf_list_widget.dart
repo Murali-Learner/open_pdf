@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:open_pdf/pages/download/downloads_page.dart';
+import 'package:open_pdf/pages/pdfViewer/view_pdf_page.dart';
 import 'package:open_pdf/providers/pdf_provider.dart';
 import 'package:open_pdf/utils/extensions/context_extension.dart';
 import 'package:provider/provider.dart';
 
-class NoPdfListWidget extends StatelessWidget {
-  const NoPdfListWidget({
+class EmptyPdfListWidget extends StatelessWidget {
+  const EmptyPdfListWidget({
     super.key,
   });
 
@@ -22,7 +23,7 @@ class NoPdfListWidget extends StatelessWidget {
               "No PDFs Available",
               style: context.textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.bold,
-                color: Colors.grey.shade700,
+                // color: Colors.grey.shade700,
               ),
               textAlign: TextAlign.center,
             ),
@@ -32,8 +33,8 @@ class NoPdfListWidget extends StatelessWidget {
             Text(
               "Upload or download your first PDF to get started!",
               style: context.textTheme.bodyMedium?.copyWith(
-                color: Colors.grey.shade600,
-              ),
+                  // color: Colors.grey.shade600,
+                  ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 30),
@@ -44,7 +45,17 @@ class NoPdfListWidget extends StatelessWidget {
               children: [
                 ElevatedButton.icon(
                   onPressed: () async {
-                    await context.read<PdfProvider>().pickFile();
+                    final provider = context.read<PdfProvider>();
+                    provider.clearSelectedFiles();
+                    await context
+                        .read<PdfProvider>()
+                        .pickFile()
+                        .whenComplete(() {
+                      if (provider.currentPDF != null) {
+                        context.push(
+                            navigateTo: ViewPdfPage(pdf: provider.currentPDF!));
+                      }
+                    });
                   },
                   icon: const Icon(Icons.upload_file),
                   label: const Text("Upload File"),
@@ -61,6 +72,7 @@ class NoPdfListWidget extends StatelessWidget {
                 const SizedBox(width: 15),
                 ElevatedButton.icon(
                   onPressed: () {
+                    context.read<PdfProvider>().clearSelectedFiles();
                     context.push(navigateTo: const DownloadPage());
                   },
                   icon: const Icon(Icons.download),
