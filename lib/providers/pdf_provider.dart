@@ -19,6 +19,7 @@ import 'package:open_pdf/utils/toast_utils.dart';
 import 'package:path/path.dart' as path;
 import 'package:pdf_render/pdf_render.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:printing/printing.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
 final mediaStorePlugin = MediaStore();
@@ -320,7 +321,7 @@ class PdfProvider with ChangeNotifier {
           await ReceiveSharingIntent.instance.getInitialMedia();
 
       final pdf = await _processSharedFiles(initialMedia);
-      log("shared pdf: $pdf");
+
       if (pdf != null) {
         context.push(navigateTo: ViewPdfPage(pdf: pdf));
       }
@@ -361,7 +362,6 @@ class PdfProvider with ChangeNotifier {
         networkUrl: null,
       );
 
-      log("shared pdf:111 $pdf");
       addToTotalPdfList(pdf);
       return pdf;
     } else {
@@ -375,6 +375,13 @@ class PdfProvider with ChangeNotifier {
 
   void disposeIntentListener() {
     _intentSubscription.cancel();
+  }
+
+  void updateLastOpenedValue(PdfModel pdf) {
+    final updatedPdf = pdf.copyWith(lastOpened: DateTime.now());
+    debugPrint("updatedPdf ${updatedPdf.lastOpened}");
+    _totalPdfList[pdf.id] = updatedPdf;
+    notifyListeners();
   }
 
   String getFileNameFromPath(String url) {
@@ -428,5 +435,14 @@ class PdfProvider with ChangeNotifier {
     } finally {
       isLoading = false;
     }
+  }
+
+  Future<void> printPdf(String filePath) async {
+    File pdfFile = File(filePath);
+    Uint8List pdfBytes = await pdfFile.readAsBytes();
+
+    await Printing.layoutPdf(
+      onLayout: (format) async => pdfBytes,
+    );
   }
 }

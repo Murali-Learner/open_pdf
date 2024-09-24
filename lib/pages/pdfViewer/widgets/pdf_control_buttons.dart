@@ -41,9 +41,9 @@ class PdfControlButtons extends StatelessWidget {
                 // ),
                 IconButton(
                   tooltip: "First page",
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.first_page,
-                    color: Constants.pdfViewIconsColor,
+                    color: ColorConstants.primaryColor,
                   ),
                   onPressed: () {
                     provider.gotoFirstPage();
@@ -51,33 +51,33 @@ class PdfControlButtons extends StatelessWidget {
                 ),
                 IconButton(
                   tooltip: "Last page",
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.last_page,
-                    color: Constants.pdfViewIconsColor,
+                    color: ColorConstants.primaryColor,
                   ),
                   onPressed: () => provider.gotoLastPage(),
                 ),
                 IconButton(
                   tooltip: "Next page",
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.arrow_downward,
-                    color: Constants.pdfViewIconsColor,
+                    color: ColorConstants.primaryColor,
                   ),
                   onPressed: () async => await provider.nextPage(),
                 ),
                 IconButton(
                   tooltip: "Previous page",
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.arrow_upward,
-                    color: Constants.pdfViewIconsColor,
+                    color: ColorConstants.primaryColor,
                   ),
                   onPressed: () async => await provider.previousPage(),
                 ),
                 IconButton(
                   tooltip: "Open dictionary",
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.menu_book_outlined,
-                    color: Constants.pdfViewIconsColor,
+                    color: ColorConstants.primaryColor,
                   ),
                   onPressed: () {
                     context.hideKeyBoard();

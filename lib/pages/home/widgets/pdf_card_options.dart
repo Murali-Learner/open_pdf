@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:open_pdf/global_widgets/global_bottom_sheet.dart';
 import 'package:open_pdf/models/pdf_model.dart';
 import 'package:open_pdf/pages/home/widgets/pdf_option_bottom_sheet.dart';
 import 'package:open_pdf/providers/pdf_provider.dart';
@@ -20,13 +21,8 @@ class PdfCardOptions extends StatelessWidget {
       return GestureDetector(
         onTap: () {
           if (!pdf.isSelected) {
-            showModalBottomSheet(
-              context: context,
-              showDragHandle: true,
-              builder: (BuildContext context) {
-                return PdfOptionsBottomSheet(pdf: pdf);
-              },
-            );
+            showGlobalBottomSheet(
+                context: context, child: PdfOptionsBottomSheet(pdf: pdf));
           }
         },
         child: const Icon(Icons.more_vert),

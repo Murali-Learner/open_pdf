@@ -3,10 +3,12 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:open_pdf/global_widgets/global_horizontal_divider.dart';
 import 'package:open_pdf/models/pdf_model.dart';
 import 'package:open_pdf/pages/home/widgets/pdf_option_item.dart';
 import 'package:open_pdf/providers/download_provider.dart';
 import 'package:open_pdf/providers/pdf_provider.dart';
+import 'package:open_pdf/utils/constants.dart';
 import 'package:open_pdf/utils/extensions/context_extension.dart';
 import 'package:open_pdf/utils/toast_utils.dart';
 import 'package:provider/provider.dart';
@@ -25,7 +27,20 @@ class PdfOptionsBottomSheet extends StatelessWidget {
     final provider = context.read<PdfProvider>();
     final downloadProvider = context.read<DownloadProvider>();
     return Wrap(
+      alignment: WrapAlignment.center,
       children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 10.0),
+          child: Text(
+            pdf.fileName!,
+            style: context.textTheme.bodyLarge!.copyWith(
+              color: ColorConstants.primaryColor,
+              fontWeight: FontWeight.bold,
+              fontSize: 20,
+            ),
+          ),
+        ),
+        const GlobalHorizontalDivider(),
         PdfOptionItem(
           icon: Icons.favorite,
           text: "${pdf.isFav ? "Remove from" : "Add to"} Favorites",
@@ -50,6 +65,14 @@ class PdfOptionsBottomSheet extends StatelessWidget {
           onTap: () async {
             await provider.deleteFormHistory(pdf);
             await downloadProvider.removeFromCompletedList(pdf);
+            context.pop();
+          },
+        ),
+        PdfOptionItem(
+          icon: Icons.print,
+          text: "Print PDF",
+          onTap: () async {
+            await provider.printPdf(pdf.filePath!);
             context.pop();
           },
         ),

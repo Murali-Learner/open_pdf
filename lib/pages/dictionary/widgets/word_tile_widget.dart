@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:open_pdf/global_widgets/global_bottom_sheet.dart';
 import 'package:open_pdf/models/word_model.dart';
 import 'package:open_pdf/pages/dictionary/widgets/word_bottom_sheet.dart';
 import 'package:open_pdf/utils/extensions/context_extension.dart';
@@ -20,12 +21,10 @@ class WordTile extends StatelessWidget {
       child: InkWell(
         onTap: () {
           context.hideKeyBoard();
-          showModalBottomSheet(
-            showDragHandle: true,
+
+          showGlobalBottomSheet(
             context: context,
-            isScrollControlled: true,
-            useSafeArea: true,
-            builder: (context) => WordBottomSheet(word: word),
+            child: WordBottomSheet(word: word),
           );
         },
         borderRadius: BorderRadius.circular(12),

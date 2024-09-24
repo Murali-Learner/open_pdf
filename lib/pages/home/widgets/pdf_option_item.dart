@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:open_pdf/utils/constants.dart';
 
 class PdfOptionItem extends StatelessWidget {
   final IconData icon;
@@ -15,8 +16,16 @@ class PdfOptionItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      leading: Icon(icon),
-      title: Text(text),
+      leading: Icon(
+        icon,
+        color: ColorConstants.whiteColor,
+      ),
+      title: Text(
+        text,
+        // style: TextStyle(
+        //   color: ColorConstants.primaryColor,
+        // ),
+      ),
       onTap: onTap,
     );
   }

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:open_pdf/pages/home/widgets/list_card.dart';
+import 'package:open_pdf/pages/home/widgets/list_pdf_card.dart';
 import 'package:open_pdf/providers/pdf_provider.dart';
 import 'package:provider/provider.dart';
 

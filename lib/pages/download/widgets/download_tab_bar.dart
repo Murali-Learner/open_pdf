@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:open_pdf/pages/download/widgets/download_list_view.dart';
 import 'package:open_pdf/providers/pdf_provider.dart';
+import 'package:open_pdf/utils/constants.dart';
 import 'package:open_pdf/utils/enumerates.dart';
 import 'package:provider/provider.dart';
 
@@ -47,7 +48,8 @@ class DownloadTabBarState extends State<DownloadTabBar>
       return Column(
         children: [
           Material(
-            elevation: 4.0,
+            elevation: Constants.globalElevation,
+            color: ColorConstants.color,
             child: Padding(
               padding: const EdgeInsets.only(top: 0),
               child: TabBar(

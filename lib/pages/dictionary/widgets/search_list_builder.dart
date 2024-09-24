@@ -26,6 +26,7 @@ class SearchListBuilder extends StatelessWidget {
         return ListView.separated(
           separatorBuilder: (context, index) => 5.vSpace,
           itemCount: provider.results.length,
+          shrinkWrap: true,
           itemBuilder: (context, index) {
             final item = provider.results.values.toList()[index];
             return WordTile(word: item);

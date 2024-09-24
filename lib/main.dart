@@ -48,8 +48,8 @@ class MyApp extends StatelessWidget {
         return MaterialApp(
           title: 'Open PDF',
           debugShowCheckedModeBanner: false,
-          theme: lightTheme,
-          darkTheme: darkTheme,
+          theme: appTheme,
+          // darkTheme: darkTheme,
           themeMode: provider.themeMode,
           home: const MainPage(),
         );

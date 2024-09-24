@@ -5,6 +5,8 @@ when download started  for pause popup button
  2 buttons
 cancel download and resume download
 
+imp:
+https://cdn.dribbble.com/users/1253590/screenshots/6777609/airbasket-app.png
 
  pdf controll button
   center lo page change cheyadaniki text feild aa card loki vastundi
@@ -12,3 +14,14 @@ cancel download and resume download
   dictionary
 
 // download progress background grey and foregound  green
+
+
+
+remove light mode compeletely
+
+last opened  replace pdf size
+
+list adope read
+grid vid sent image
+primary color amber
+senc balck

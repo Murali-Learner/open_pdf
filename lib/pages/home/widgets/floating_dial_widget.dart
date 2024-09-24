@@ -23,13 +23,13 @@ class FloatingDial extends StatelessWidget {
                 animationDuration: const Duration(milliseconds: 150),
                 useRotationAnimation: true,
                 elevation: 8.0,
-                childrenButtonSize: Size.fromRadius(30),
+                childrenButtonSize: const Size.fromRadius(30),
                 spaceBetweenChildren: 4,
                 overlayColor: Colors.black,
                 overlayOpacity: 0,
                 children: [
                   SpeedDialChild(
-                    shape: CircleBorder(),
+                    shape: const CircleBorder(),
                     child: Icon(
                       themeProvider.themeMode == ThemeMode.dark
                           ? Icons.light_mode
@@ -51,14 +51,14 @@ class FloatingDial extends StatelessWidget {
                       color: context.theme.primaryColor,
                     ),
                     backgroundColor: Colors.white,
-                    shape: CircleBorder(),
+                    shape: const CircleBorder(),
                     onTap: () {
                       pdfProvider.clearSelectedFiles();
                       context.push(navigateTo: const DownloadPage());
                     },
                   ),
                   SpeedDialChild(
-                    shape: CircleBorder(),
+                    shape: const CircleBorder(),
                     child: Icon(
                       Icons.file_copy,
                       color: context.theme.primaryColor,

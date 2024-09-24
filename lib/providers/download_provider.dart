@@ -82,6 +82,17 @@ class DownloadProvider extends ChangeNotifier {
     return pdfList;
   }
 
+  Future<void> updateLastOpenedValue(PdfModel pdf) async {
+    try {
+      final updatedPdf = pdf.copyWith(lastOpened: DateTime.now());
+      await HiveHelper.addOrUpdatePdf(updatedPdf);
+      _completedList[pdf.id] = updatedPdf;
+      notifyListeners();
+    } catch (e) {
+      debugPrint(e.toString());
+    }
+  }
+
   Future<void> addToOngoingList(PdfModel pdf) async {
     await HiveHelper.addOrUpdatePdf(pdf);
     _onGoingList[pdf.id] = pdf;

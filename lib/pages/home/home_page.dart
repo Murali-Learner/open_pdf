@@ -48,27 +48,9 @@ class _HomePageState extends State<HomePage> {
           actions: [
             if (provider.selectedFiles.isEmpty) const PopupMenuButtonWidget(),
             if (provider.selectedFiles.isNotEmpty)
-              Tooltip(
-                message: "Delete Selection",
-                child: GestureDetector(
-                  onTap: () {
-                    showDeleteConfirmationDialog(context, () async {
-                      final downloadProvider = context.read<DownloadProvider>();
-                      await downloadProvider
-                          .deleteSelectedFiles(provider.selectedFiles);
-
-                      provider.deleteSelectedFiles();
-                    });
-                  },
-                  child: const Icon(
-                    Icons.delete,
-                    size: 30,
-                  ),
-                ),
-              ),
+              const MultiSelectionDeleteButton(),
             10.hSpace,
           ],
-          elevation: 5.0,
         ),
         body: Consumer<PdfProvider>(
           builder: (context, provider, _) {
@@ -99,5 +81,33 @@ class _HomePageState extends State<HomePage> {
         floatingActionButton: const FloatingDial(),
       );
     });
+  }
+}
+
+class MultiSelectionDeleteButton extends StatelessWidget {
+  const MultiSelectionDeleteButton({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final provider = context.watch<PdfProvider>();
+    return Tooltip(
+      message: "Delete Selection",
+      child: GestureDetector(
+        onTap: () {
+          showDeleteConfirmationDialog(context, () async {
+            final downloadProvider = context.read<DownloadProvider>();
+            await downloadProvider.deleteSelectedFiles(provider.selectedFiles);
+
+            provider.deleteSelectedFiles();
+          });
+        },
+        child: const Icon(
+          Icons.delete,
+          size: 30,
+        ),
+      ),
+    );
   }
 }

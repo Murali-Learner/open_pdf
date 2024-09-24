@@ -3,10 +3,6 @@ import 'package:open_pdf/providers/pdf_provider.dart';
 import 'package:open_pdf/utils/enumerates.dart';
 import 'package:provider/provider.dart';
 
-Color? _getColor(bool isSelected) {
-  return isSelected ? Colors.green : null;
-}
-
 class ViewModeButton extends StatelessWidget {
   const ViewModeButton({
     super.key,
@@ -25,9 +21,12 @@ class ViewModeButton extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(5),
         decoration: BoxDecoration(
-          color: _getColor(provider.viewMode == viewMode),
+          color: provider.viewMode == viewMode ? Colors.amber : null,
         ),
-        child: Icon(icon),
+        child: Icon(
+          icon,
+          color: provider.viewMode == viewMode ? null : Colors.amber,
+        ),
       ),
     );
   }

@@ -9,5 +9,13 @@ class Constants {
   static GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
   GlobalKey previewContainer = GlobalKey();
 
+  static const double globalElevation = 4.0;
+}
+
+class ColorConstants {
   static const Color pdfViewIconsColor = Colors.green;
+  static Color get backgroundColor => Colors.black;
+  static Color get primaryColor => Colors.amber;
+  static Color get color => const Color(0xFF20232a);
+  static Color get whiteColor => const Color.fromARGB(255, 255, 255, 255);
 }
