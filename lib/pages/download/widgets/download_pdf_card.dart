@@ -11,47 +11,29 @@ import 'package:open_pdf/utils/extensions/context_extension.dart';
 import 'package:open_pdf/utils/extensions/spacer_extension.dart';
 import 'package:provider/provider.dart';
 
-class ListPdfCard extends StatelessWidget {
+class DownloadPdfCard extends StatelessWidget {
   final PdfModel pdf;
-  final bool isDownloadCard;
+
   final int index;
 
-  const ListPdfCard(
-      {super.key,
-      required this.pdf,
-      this.isDownloadCard = false,
-      required this.index});
+  const DownloadPdfCard({super.key, required this.pdf, required this.index});
 
   @override
   Widget build(BuildContext context) {
     return Consumer<PdfProvider>(builder: (context, provider, _) {
       return GestureDetector(
-        onLongPress: isDownloadCard
-            ? null
-            : () {
-                provider.toggleSelectedFiles(pdf);
-                debugPrint("long press ${provider.selectedFiles.length}");
-              },
+        onLongPress: () {
+          provider.toggleSelectedFiles(pdf);
+          debugPrint("long press ${provider.selectedFiles.length}");
+        },
         onTap: () {
           debugPrint("pdf  ${pdf.fileName} ${provider.isMultiSelected}");
-          if (pdf.downloadStatus == DownloadStatus.completed.name) {
-            if (pdf.isSelected || provider.isMultiSelected) {
-              provider.toggleSelectedFiles(pdf);
-            } else {
-              context.read<PdfControlProvider>().resetValues();
-
-              context.push(
-                navigateTo: ViewPdfPage(
-                  pdf: pdf,
-                ),
-              );
-            }
-          }
+          onSingleTap(provider, context);
         },
         child: Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: pdf.isSelected && !isDownloadCard
+            color: pdf.isSelected
                 ? context.theme.primaryColor.withOpacity(0.8)
                 : context.theme.primaryColor.withOpacity(0.1),
             borderRadius: BorderRadius.circular(8),
@@ -62,9 +44,19 @@ class ListPdfCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Expanded(
-                child: PdfInfoWidget(
-                  pdf: pdf,
-                  isDownloadCard: isDownloadCard,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    PdfInfoWidget(
+                      pdf: pdf,
+                      isDownloadCard: true,
+                    ),
+                    5.vSpace,
+                    if (pdf.downloadStatus == DownloadStatus.ongoing.name)
+                      LinearProgressIndicator(
+                        value: pdf.downloadProgress,
+                      ),
+                  ],
                 ),
               ),
               10.hSpace,
@@ -76,5 +68,21 @@ class ListPdfCard extends StatelessWidget {
         ),
       );
     });
+  }
+
+  void onSingleTap(PdfProvider provider, BuildContext context) {
+    if (pdf.downloadStatus == DownloadStatus.completed.name) {
+      if (pdf.isSelected || provider.isMultiSelected) {
+        provider.toggleSelectedFiles(pdf);
+      } else {
+        context.read<PdfControlProvider>().resetValues();
+
+        context.push(
+          navigateTo: ViewPdfPage(
+            pdf: pdf,
+          ),
+        );
+      }
+    }
   }
 }

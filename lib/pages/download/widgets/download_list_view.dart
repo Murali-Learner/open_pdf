@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:open_pdf/pages/home/widgets/list_pdf_card.dart';
+import 'package:open_pdf/pages/download/widgets/download_pdf_card.dart';
 import 'package:open_pdf/providers/download_provider.dart';
 import 'package:open_pdf/providers/pdf_provider.dart';
 import 'package:open_pdf/utils/enumerates.dart';
@@ -38,10 +38,9 @@ class DownloadListViewState extends State<DownloadListView> {
             return const SizedBox(height: 10);
           },
           itemBuilder: (BuildContext context, int index) {
-            return ListPdfCard(
+            return DownloadPdfCard(
               pdf: filteredPdfList[index],
               index: index,
-              isDownloadCard: true,
             );
           },
         );

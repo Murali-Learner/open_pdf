@@ -17,27 +17,27 @@ final ThemeData appTheme = ThemeData(
   disabledColor: ColorConstants.color,
   bottomNavigationBarTheme: BottomNavigationBarThemeData(
     elevation: 4.0,
-    backgroundColor: Color(0xFF20232a),
+    backgroundColor: const Color(0xFF20232a),
     selectedIconTheme: IconThemeData(color: ColorConstants.primaryColor),
-    selectedLabelStyle: TextStyle(
+    selectedLabelStyle: const TextStyle(
       fontSize: 12,
     ),
     selectedItemColor: ColorConstants.primaryColor,
     unselectedItemColor: Colors.white,
-    unselectedLabelStyle: TextStyle(
+    unselectedLabelStyle: const TextStyle(
       fontSize: 12,
     ),
-    unselectedIconTheme: IconThemeData(color: Colors.white),
+    unselectedIconTheme: const IconThemeData(color: Colors.white),
   ),
   tabBarTheme: TabBarTheme(
     indicatorColor: ColorConstants.primaryColor,
-    dividerColor: Color.fromARGB(255, 45, 44, 44),
+    dividerColor: const Color.fromARGB(255, 45, 44, 44),
     labelStyle: TextStyle(
       fontSize: 16,
       fontWeight: FontWeight.bold,
       color: ColorConstants.primaryColor,
     ),
-    unselectedLabelStyle: TextStyle(fontSize: 15, color: Colors.grey),
+    unselectedLabelStyle: const TextStyle(fontSize: 15, color: Colors.grey),
   ),
   // iconButtonTheme: IconButtonThemeData(
   //   style: ButtonStyle(
@@ -58,8 +58,8 @@ final ThemeData appTheme = ThemeData(
   ),
 
   progressIndicatorTheme: ProgressIndicatorThemeData(
-    color: ColorConstants.color,
-    linearTrackColor: ColorConstants.primaryColor,
+    color: ColorConstants.primaryColor,
+    linearTrackColor: ColorConstants.color,
   ),
   cardTheme: const CardTheme(
     color: Color.fromARGB(255, 27, 28, 27),

@@ -7,6 +7,7 @@ import 'package:open_pdf/providers/pdf_control_provider.dart';
 import 'package:open_pdf/providers/pdf_provider.dart';
 import 'package:open_pdf/utils/enumerates.dart';
 import 'package:open_pdf/utils/extensions/context_extension.dart';
+import 'package:open_pdf/utils/extensions/date_time_extension.dart';
 import 'package:open_pdf/utils/extensions/spacer_extension.dart';
 import 'package:provider/provider.dart';
 
@@ -61,16 +62,10 @@ class PdfInfoWidget extends StatelessWidget {
             ],
           ),
           8.vSpace,
-          if (pdf.downloadStatus == DownloadStatus.ongoing.name)
-            Consumer<PdfProvider>(builder: (context, provider, _) {
-              return LinearProgressIndicator(
-                value: pdf.downloadProgress,
-              );
-            }),
-          Text(
-            pdf.fileSize ?? '',
-            style: context.textTheme.bodyMedium!.copyWith(
-              color: pdf.isSelected ? Colors.white : Colors.grey,
+          SizedBox(
+            child: Text(
+              pdf.lastOpened!.timeAgo(),
+              style: context.textTheme.bodyMedium,
             ),
           ),
         ],
