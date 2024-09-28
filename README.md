@@ -1,6 +1,6 @@
 # OpenPDF 📄
 
-OpenPDF is a Flutter-based app for efficient PDF management, allowing users to download, view, and search PDFs with ease. It integrates local storage and file sharing, making it a complete solution for your PDF needs.
+OpenPDF is a Flutter-based app for efficient PDF management, allowing users to download and view. It integrates local storage and file sharing, making it a complete solution for your PDF needs.
 
 ## Features
 
