@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:open_pdf/pages/download/widgets/download_pdf_card.dart';
 import 'package:open_pdf/providers/download_provider.dart';
@@ -23,7 +25,7 @@ class DownloadListViewState extends State<DownloadListView> {
       builder: (context, downloadProvider, pdfProvider, _) {
         final filteredPdfList =
             downloadProvider.getFilteredListByStatus(widget.status);
-
+        log("_total Pdf list ${pdfProvider.totalPdfList.length}");
         if (filteredPdfList.isEmpty) {
           return Center(
             child: Text("No ${widget.status.name} downloads."),

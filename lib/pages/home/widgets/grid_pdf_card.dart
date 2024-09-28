@@ -46,11 +46,11 @@ class GridPdfCard extends StatelessWidget {
         },
         child: Container(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(6),
             color:
                 // context.theme.primaryColor.withOpacity(0.8)
                 pdf.isSelected
-                    ? context.theme.primaryColor.withOpacity(0.8)
+                    ? ColorConstants.amberColor
                     : context.theme.primaryColor.withOpacity(0.3),
           ),
           padding: const EdgeInsets.all(5),
@@ -62,8 +62,8 @@ class GridPdfCard extends StatelessWidget {
                 children: [
                   ClipRRect(
                     borderRadius: const BorderRadius.only(
-                        topRight: Radius.circular(10),
-                        topLeft: Radius.circular(10)),
+                        topRight: Radius.circular(6),
+                        topLeft: Radius.circular(6)),
                     child: AspectRatio(
                       aspectRatio: 0.9,
                       child: pdf.thumbnail == null
@@ -89,7 +89,7 @@ class GridPdfCard extends StatelessWidget {
                               width: context.width(30),
                               child: Text(
                                 pdf.fileName!,
-                                style: context.textTheme.bodyMedium,
+                                style: context.textTheme.bodyLarge,
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
@@ -97,15 +97,16 @@ class GridPdfCard extends StatelessWidget {
                             SizedBox(
                               child: Text(
                                 pdf.lastOpened!.timeAgo(),
-                                style: context.textTheme.bodyMedium,
+                                style: context.textTheme.bodySmall!.copyWith(),
                               ),
                             ),
                           ],
                         ),
-                        PdfCardOptions(
-                          pdf: pdf,
-                          index: index,
-                        )
+                        if (!pdf.isSelected)
+                          PdfCardOptions(
+                            pdf: pdf,
+                            index: index,
+                          )
                       ],
                     ),
                   ),

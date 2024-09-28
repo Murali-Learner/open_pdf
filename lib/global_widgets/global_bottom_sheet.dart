@@ -13,6 +13,7 @@ Future<void> showGlobalBottomSheet({
   return showModalBottomSheet(
     showDragHandle: showDragHandle,
     context: context,
+    backgroundColor: context.theme.scaffoldBackgroundColor,
     barrierColor: ColorConstants.color.withOpacity(0.5),
     isScrollControlled: isScrollControlled,
     useSafeArea: useSafeArea,
@@ -20,7 +21,7 @@ Future<void> showGlobalBottomSheet({
       return Padding(
         padding: EdgeInsets.symmetric(
           horizontal: context.width(2),
-          vertical: context.height(4),
+          vertical: context.height(2),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -34,7 +35,7 @@ Future<void> showGlobalBottomSheet({
               child: Text(
                 "Done",
                 style: TextStyle(
-                  color: ColorConstants.primaryColor,
+                  color: ColorConstants.amberColor,
                   fontSize: 15,
                   fontWeight: FontWeight.bold,
                 ),

@@ -15,7 +15,8 @@ class Constants {
 class ColorConstants {
   static const Color pdfViewIconsColor = Colors.green;
   static Color get backgroundColor => Colors.black;
-  static Color get primaryColor => Colors.amber;
+  static Color get amberColor => Colors.amber;
   static Color get color => const Color(0xFF20232a);
   static Color get whiteColor => const Color.fromARGB(255, 255, 255, 255);
+  static Color get cardColor => const Color(0xFF282b33);
 }

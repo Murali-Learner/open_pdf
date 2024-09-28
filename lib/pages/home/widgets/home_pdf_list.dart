@@ -14,14 +14,16 @@ class HomePdfListView extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListView.separated(
       shrinkWrap: true,
-      itemCount: 16, //pdfLists.length,
+      itemCount: pdfLists.length,
+      padding: const EdgeInsets.symmetric(horizontal: 5),
       separatorBuilder: (BuildContext context, int index) {
-        return 10.vSpace;
+        return 6.vSpace;
       },
       itemBuilder: (BuildContext context, int index) {
+        debugPrint("pdfLists[index] ${pdfLists[index].toJson()}");
         return ListPdfCard(
-          pdf: pdfLists[0],
-          index: 0,
+          pdf: pdfLists[index],
+          index: index,
         );
       },
     );

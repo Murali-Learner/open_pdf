@@ -24,6 +24,7 @@ class SearchListBuilder extends StatelessWidget {
         }
 
         return ListView.separated(
+          padding: const EdgeInsets.symmetric(horizontal: 5),
           separatorBuilder: (context, index) => 5.vSpace,
           itemCount: provider.results.length,
           shrinkWrap: true,

@@ -56,6 +56,7 @@ extension ContextExtensions on BuildContext {
   }
 
   double get screenHeight => MediaQuery.of(this).size.height;
+  MediaQueryData get mediaQuery => MediaQuery.of(this);
   double get screenWidth => MediaQuery.of(this).size.width;
 
   Size get size => Size(screenWidth, screenHeight);

@@ -16,6 +16,7 @@ class ViewModeButtonsRow extends StatelessWidget {
       children: [
         Container(
           decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(3),
             color: context.theme.primaryColor.withOpacity(0.5),
           ),
           child: Row(

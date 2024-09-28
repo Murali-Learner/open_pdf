@@ -29,9 +29,7 @@ class _PageInformationWidgetState extends State<PageInformationWidget> {
       (_) {
         pdfProvider = context.read<PdfControlProvider>();
 
-        pageController.text = pdfProvider!.totalPages == 1
-            ? "1"
-            : (pdfProvider!.pdfCurrentPage).toString();
+        pageController.text = (pdfProvider!.pdfCurrentPage).toString();
 
         pdfProvider!.addListener(_updatePageController);
       },
@@ -51,9 +49,7 @@ class _PageInformationWidgetState extends State<PageInformationWidget> {
   void _updatePageController() {
     if (pdfProvider != null) {
       setState(() {
-        pageController.text = pdfProvider!.totalPages == 1
-            ? "1"
-            : (pdfProvider!.pdfCurrentPage).toString();
+        pageController.text = (pdfProvider!.pdfCurrentPage).toString();
       });
     }
   }
@@ -86,8 +82,7 @@ class _PageInformationWidgetState extends State<PageInformationWidget> {
                 if (newPage != null &&
                     newPage > 0 &&
                     newPage <= provider.totalPages) {
-                  provider.gotoPage(
-                      newPage == provider.totalPages ? newPage : (newPage - 1));
+                  provider.gotoPage(newPage);
                 } else {
                   ToastUtils.showErrorToast("Invalid page number");
                 }

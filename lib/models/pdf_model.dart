@@ -91,7 +91,7 @@ class PdfModel {
       'isOpened': isOpened,
       'isFav': isFav,
       'downloadStatus': downloadStatus,
-      'thumbnail': thumbnail,
+      // 'thumbnail': thumbnail,
       'isSelected': isSelected,
       'cancelToken': cancelToken,
     };

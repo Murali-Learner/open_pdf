@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:open_pdf/models/pdf_model.dart';
 import 'package:open_pdf/pages/pdfViewer/view_pdf_page.dart';
-import 'package:open_pdf/pages/pdfViewer/widgets/page_information_widget.dart';
+import 'package:open_pdf/utils/constants.dart';
 import 'package:open_pdf/utils/extensions/context_extension.dart';
 
 class PdfViewAppBar extends StatelessWidget {
@@ -13,10 +13,11 @@ class PdfViewAppBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return AnimatedContainer(
+      duration: Constants.globalDuration,
       height: context.height(7),
       decoration: BoxDecoration(
-          color: context.theme.appBarTheme.foregroundColor,
+          color: context.theme.appBarTheme.backgroundColor,
           boxShadow: context.theme.brightness == Brightness.dark
               ? null
               : [
@@ -47,8 +48,7 @@ class PdfViewAppBar extends StatelessWidget {
               ),
             ),
           ),
-          const Spacer(),
-          const PageInformationWidget(),
+          // const Spacer(),
         ],
       ),
     );

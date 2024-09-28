@@ -251,28 +251,21 @@ class PdfProvider with ChangeNotifier {
 
   Future<void> addToTotalPdfList(PdfModel pdf) async {
     log("i'm here in the add pdf  ${pdf.id}");
-
-    if (!_totalPdfList.containsKey(pdf.fileName)) {
+    final contain =
+        _totalPdfList.values.where((e) => e.fileName == pdf.fileName);
+    if (contain.isEmpty) {
       await HiveHelper.addOrUpdatePdf(pdf);
       _totalPdfList[pdf.id] = pdf;
       notifyListeners();
+    } else {
+      ToastUtils.showErrorToast("Pdf already exists");
     }
   }
 
-  Future<void> deleteFormHistory(PdfModel pdf) async {
+  void deleteFormHistory(PdfModel pdf) {
     if (_totalPdfList.isNotEmpty) {
-      await HiveHelper.removeFromCache(pdf.id);
-
-      _totalPdfList.removeWhere(
-        (key, value) {
-          return key == pdf.id;
-        },
-      );
-      _favoritesList.removeWhere(
-        (key, value) {
-          return key == pdf.id;
-        },
-      );
+      _totalPdfList.remove(pdf.id);
+      _favoritesList.remove(pdf.id);
       notifyListeners();
     }
   }
@@ -351,7 +344,7 @@ class PdfProvider with ChangeNotifier {
       final file = File(sharedFiles[0].path);
       final thumbnailBytes = await getPdfThumbNail(file.path);
       final pdf = PdfModel(
-        id: getFileNameFromPath(file.path),
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
         filePath: file.path,
         fileSize: file.lengthSync().readableFileSize,
         fileName: getFileNameFromPath(file.path),
@@ -361,8 +354,7 @@ class PdfProvider with ChangeNotifier {
         thumbnail: thumbnailBytes,
         networkUrl: null,
       );
-
-      addToTotalPdfList(pdf);
+      await addToTotalPdfList(pdf);
       return pdf;
     } else {
       return null;
@@ -413,7 +405,7 @@ class PdfProvider with ChangeNotifier {
         final thumbnailBytes = await getPdfThumbNail(file.path);
 
         final pdf = PdfModel(
-            id: getFileNameFromPath(file.path),
+            id: DateTime.now().millisecondsSinceEpoch.toString(),
             filePath: file.path,
             fileSize: file.lengthSync().readableFileSize,
             fileName: getFileNameFromPath(file.path),
@@ -422,8 +414,9 @@ class PdfProvider with ChangeNotifier {
             lastOpened: DateTime.now(),
             createdAt: DateTime.now(),
             thumbnail: thumbnailBytes);
-        setCurrentPDF(pdf);
+
         await addToTotalPdfList(pdf);
+        setCurrentPDF(pdf);
 
         isLoading = false;
       } else {

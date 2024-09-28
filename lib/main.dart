@@ -1,5 +1,3 @@
-import 'package:device_preview/device_preview.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:media_store_plus/media_store_plus.dart';
 import 'package:open_pdf/helpers/hive_helper.dart';
@@ -24,11 +22,7 @@ void main() async {
   // NotificationHelper notificationHelper = NotificationHelper();
   // notificationHelper.initializeNotifications();
 
-  runApp(DevicePreview(
-      enabled: !kReleaseMode,
-      builder: (context) {
-        return const MyApp();
-      }));
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {

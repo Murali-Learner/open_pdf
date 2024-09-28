@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:open_pdf/models/pdf_model.dart';
-import 'package:open_pdf/pages/home/widgets/download_action_button.dart';
 import 'package:open_pdf/pages/home/widgets/pdf_card_options.dart';
 import 'package:open_pdf/pages/home/widgets/pdf_info_widget.dart';
 import 'package:open_pdf/pages/pdfViewer/view_pdf_page.dart';
+import 'package:open_pdf/providers/download_provider.dart';
 import 'package:open_pdf/providers/pdf_control_provider.dart';
 import 'package:open_pdf/providers/pdf_provider.dart';
+import 'package:open_pdf/utils/constants.dart';
 import 'package:open_pdf/utils/enumerates.dart';
 import 'package:open_pdf/utils/extensions/context_extension.dart';
 import 'package:open_pdf/utils/extensions/spacer_extension.dart';
@@ -32,13 +33,15 @@ class ListPdfCard extends StatelessWidget {
                 provider.toggleSelectedFiles(pdf);
                 debugPrint("long press ${provider.selectedFiles.length}");
               },
-        onTap: () {
+        onTap: () async {
           debugPrint("pdf  ${pdf.fileName} ${provider.isMultiSelected}");
           if (pdf.downloadStatus == DownloadStatus.completed.name) {
             if (pdf.isSelected || provider.isMultiSelected) {
               provider.toggleSelectedFiles(pdf);
             } else {
               context.read<PdfControlProvider>().resetValues();
+              provider.updateLastOpenedValue(pdf);
+              await context.read<DownloadProvider>().updateLastOpenedValue(pdf);
 
               context.push(
                 navigateTo: ViewPdfPage(
@@ -49,11 +52,11 @@ class ListPdfCard extends StatelessWidget {
           }
         },
         child: Container(
-          padding: const EdgeInsets.all(8),
+          padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: pdf.isSelected && !isDownloadCard
-                ? context.theme.primaryColor.withOpacity(0.8)
-                : context.theme.primaryColor.withOpacity(0.1),
+            color: pdf.isSelected
+                ? ColorConstants.amberColor
+                : context.theme.primaryColor.withOpacity(0.3),
             borderRadius: BorderRadius.circular(8),
             border:
                 Border.all(color: context.theme.primaryColor.withOpacity(0.5)),
@@ -68,9 +71,7 @@ class ListPdfCard extends StatelessWidget {
                 ),
               ),
               10.hSpace,
-              pdf.downloadStatus == DownloadStatus.completed.name
-                  ? PdfCardOptions(pdf: pdf, index: index)
-                  : DownloadActionButton(pdf: pdf),
+              if (!pdf.isSelected) PdfCardOptions(pdf: pdf, index: index)
             ],
           ),
         ),

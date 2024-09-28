@@ -140,6 +140,7 @@ class DownloadProvider extends ChangeNotifier {
 
   Future<void> removeFromOngoingList(PdfModel pdf) async {
     try {
+      log("cancel pdf ${pdf.toJson()}");
       await HiveHelper.removeFromCache(pdf.id);
       _onGoingList.remove(pdf.id);
       notifyListeners();
@@ -171,6 +172,8 @@ class DownloadProvider extends ChangeNotifier {
       log("selectedFiles ${pdf.id}");
       await HiveHelper.removeFromCache(pdf.id);
       _completedList.remove(pdf.id);
+      _onGoingList.remove(pdf.id);
+      _cancelledList.remove(pdf.id);
       notifyListeners();
     } catch (e) {
       ToastUtils.showErrorToast(
@@ -298,7 +301,7 @@ class DownloadProvider extends ChangeNotifier {
     final token = CancelToken();
 
     PdfModel downloadPdf = PdfModel(
-      id: fileName,
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
       filePath: '',
       fileName: fileName,
       pageNumber: 0,
@@ -354,7 +357,6 @@ class DownloadProvider extends ChangeNotifier {
       final thumbnailBytes = await getPdfThumbNail(downloadedFilePath.path);
 
       downloadPdf = downloadPdf.copyWith(
-        id: savedFileInfo.name,
         fileSize: downloadedFilePath.lengthSync().readableFileSize,
         filePath: downloadedFilePath.path,
         fileName: savedFileInfo.name,
@@ -382,17 +384,23 @@ class DownloadProvider extends ChangeNotifier {
   }
 
   Future<void> updateDownloadCompletion(PdfModel downloadPdf) async {
-    removeFromOngoingList(downloadPdf);
-    addToCompletedList(downloadPdf);
+    try {
+      await removeFromOngoingList(downloadPdf);
+      log("ongoing remove ${downloadPdf.id}");
+      await addToCompletedList(downloadPdf);
+      log("complete add");
 
-    // await notificationHelper.cancelNotification(notificationId);
-    // await notificationHelper.showDownloadCompleteNotification(
-    //   notificationId: notificationId,
-    //   title: "Download Complete",
-    //   body: downloadPdf.fileName!,
-    // );
+      // await notificationHelper.cancelNotification(notificationId);
+      // await notificationHelper.showDownloadCompleteNotification(
+      //   notificationId: notificationId,
+      //   title: "Download Complete",
+      //   body: downloadPdf.fileName!,
+      // );
 
-    ToastUtils.showSuccessToast("File downloaded successfully");
+      ToastUtils.showSuccessToast("File downloaded successfully");
+    } catch (e) {
+      debugPrint("error while completing download $e");
+    }
   }
 
   Future<void> handleDownloadError(PdfModel downloadPdf, Object e) async {
@@ -499,11 +507,9 @@ class DownloadProvider extends ChangeNotifier {
   }
 
   Future<void> restartDownload(PdfModel pdfModel) async {
-    // Check if the download can be restarted
     if (pdfModel.downloadStatus == DownloadStatus.cancelled.name) {
       log("Restarting download for: ${pdfModel.networkUrl}");
 
-      // Call startDownload with the same URL and file name
       await startDownload(pdfModel.networkUrl!, pdfModel.id);
     } else {
       ToastUtils.showErrorToast("Cannot restart this download.");
@@ -513,9 +519,9 @@ class DownloadProvider extends ChangeNotifier {
   Future<void> cancelDownload(PdfModel pdfModel) async {
     try {
       log("Canceling download... ${pdfModel.toJson()}");
-      pdfModel.cancelToken!.cancel();
 
       await removeFromOngoingList(pdfModel);
+      pdfModel.cancelToken!.cancel();
 
       pdfModel = pdfModel.copyWith(
         downloadStatus: DownloadStatus.cancelled.name,
@@ -523,7 +529,7 @@ class DownloadProvider extends ChangeNotifier {
       );
       await addToCancelledList(pdfModel);
 
-      notifyListeners(); // Ensure UI updates
+      notifyListeners();
       ToastUtils.showSuccessToast("File download cancelled");
     } catch (e) {
       debugPrint("Error while canceling the download: $e");

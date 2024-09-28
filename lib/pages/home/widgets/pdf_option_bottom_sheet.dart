@@ -34,7 +34,7 @@ class PdfOptionsBottomSheet extends StatelessWidget {
           child: Text(
             pdf.fileName!,
             style: context.textTheme.bodyLarge!.copyWith(
-              color: ColorConstants.primaryColor,
+              color: ColorConstants.amberColor,
               fontWeight: FontWeight.bold,
               fontSize: 20,
             ),
@@ -63,7 +63,7 @@ class PdfOptionsBottomSheet extends StatelessWidget {
           icon: Icons.delete,
           text: "Delete from history",
           onTap: () async {
-            await provider.deleteFormHistory(pdf);
+            provider.deleteFormHistory(pdf);
             await downloadProvider.removeFromCompletedList(pdf);
             context.pop();
           },

@@ -3,6 +3,10 @@ import 'package:open_pdf/helpers/db_helper.dart';
 import 'package:open_pdf/models/word_model.dart';
 
 class DictionaryProvider with ChangeNotifier {
+  DictionaryProvider() {
+    fetchAllWords();
+  }
+
   final Map<int, Word> _results = {};
   bool _isLoading = false;
   bool _showClearButton = false;

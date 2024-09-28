@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:open_pdf/models/pdf_model.dart';
 import 'package:open_pdf/pages/home/widgets/download_action_button.dart';
@@ -21,11 +23,8 @@ class DownloadPdfCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Consumer<PdfProvider>(builder: (context, provider, _) {
+      log("pdf ${pdf.toJson()}");
       return GestureDetector(
-        onLongPress: () {
-          provider.toggleSelectedFiles(pdf);
-          debugPrint("long press ${provider.selectedFiles.length}");
-        },
         onTap: () {
           debugPrint("pdf  ${pdf.fileName} ${provider.isMultiSelected}");
           onSingleTap(provider, context);
@@ -51,11 +50,22 @@ class DownloadPdfCard extends StatelessWidget {
                       pdf: pdf,
                       isDownloadCard: true,
                     ),
-                    5.vSpace,
+                    // 5.vSpace,
                     if (pdf.downloadStatus == DownloadStatus.ongoing.name)
-                      LinearProgressIndicator(
-                        value: pdf.downloadProgress,
-                      ),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: LinearProgressIndicator(
+                              value: pdf.downloadProgress,
+                            ),
+                          ),
+                          5.hSpace,
+                          Text(
+                            "${(pdf.downloadProgress! * 100).toStringAsFixed(0)}%",
+                            style: context.textTheme.bodyLarge,
+                          )
+                        ],
+                      )
                   ],
                 ),
               ),

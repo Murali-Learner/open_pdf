@@ -22,9 +22,9 @@ class PdfOptionItem extends StatelessWidget {
       ),
       title: Text(
         text,
-        // style: TextStyle(
-        //   color: ColorConstants.primaryColor,
-        // ),
+        style: TextStyle(
+          fontSize: 14,
+        ),
       ),
       onTap: onTap,
     );

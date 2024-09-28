@@ -31,7 +31,7 @@ class EmptyPdfListWidget extends StatelessWidget {
 
             // Secondary description text
             Text(
-              "Upload or download your first PDF to get started!",
+              "Pick or download your first PDF to get started!",
               style: context.textTheme.bodyMedium?.copyWith(
                   // color: Colors.grey.shade600,
                   ),
@@ -58,7 +58,7 @@ class EmptyPdfListWidget extends StatelessWidget {
                     });
                   },
                   icon: const Icon(Icons.upload_file),
-                  label: const Text("Upload File"),
+                  label: const Text("Pick File"),
                   style: ElevatedButton.styleFrom(
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30),

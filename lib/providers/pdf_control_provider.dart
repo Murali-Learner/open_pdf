@@ -1,27 +1,40 @@
 import 'dart:developer';
 
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_pdfview/flutter_pdfview.dart';
-import 'package:open_pdf/utils/enumerates.dart';
+import 'package:open_pdf/utils/constants.dart';
+import 'package:pdf_render/pdf_render_widgets.dart';
+import 'package:pdfx/pdfx.dart';
 
 class PdfControlProvider with ChangeNotifier {
-  PDFViewController? _pdfController;
+  // PDFViewController? _pdfController;
+  // PdfViewerController viewerController = PdfViewerController();
+  PdfControllerPinch? pinchController;
+
+  bool _isLoading = false;
   int _pdfCurrentPage = 1;
   int _totalPages = 0;
+
   String _errorMessage = '';
   bool _showPdfControlButtons = false;
   double _currentZoomLevel = 1.0;
-  PdfScrollMode _pdfScrollMode = PdfScrollMode.vertical;
+  Axis _pdfScrollMode = Axis.vertical;
   bool _showPdfTools = false;
   bool _showAppbar = true;
   bool _considerScroll = false;
 
-  PDFViewController? get pdfController => _pdfController;
+  // PDFViewController? get pdfController => _pdfController;
   int get pdfCurrentPage => _pdfCurrentPage;
   int get totalPages => _totalPages;
   double get currentZoomLevel => _currentZoomLevel;
-  PdfScrollMode get pdfScrollMode => _pdfScrollMode;
+  Axis get pdfScrollMode => _pdfScrollMode;
   String get errorMessage => _errorMessage;
+
+  bool get isLoading => _isLoading;
+  void setIsLoading(bool value) {
+    _isLoading = value;
+    notifyListeners();
+  }
 
   bool get showPdfTools => _showPdfTools;
   void setPdfToolsVisibility(bool value) {
@@ -57,6 +70,11 @@ class PdfControlProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  void init(PdfControllerPinch controller) {
+    pinchController = controller;
+    notifyListeners();
+  }
+
   void setPdfControlButtons(
     bool showButtons,
   ) {
@@ -65,7 +83,7 @@ class PdfControlProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void setScrollMode(PdfScrollMode mode) {
+  void setScrollMode(Axis mode) {
     _pdfScrollMode = mode;
     notifyListeners();
   }
@@ -76,8 +94,14 @@ class PdfControlProvider with ChangeNotifier {
   }
 
   void setPdfController(PDFViewController controller) {
-    _pdfController = controller;
+    // _pdfController = controller;
     notifyListeners();
+  }
+
+  void setPdfViewController(PdfViewerController controller) {
+    log("setPdfViewController ${controller.pageCount}");
+    // setCurrentPage(controller.currentPageNumber);
+    // notifyListeners();
   }
 
   void setCurrentPage(int page) {
@@ -89,69 +113,75 @@ class PdfControlProvider with ChangeNotifier {
 
   Future<void> gotoPage(int page) async {
     log("goto page number $page  $_pdfCurrentPage");
-    if (_pdfController != null && _pdfCurrentPage <= _totalPages) {
+    if (pinchController != null && _pdfCurrentPage <= _totalPages) {
       _pdfCurrentPage = page;
-      if (page == 1) {
-        await _pdfController!.setPage(0);
-      } else {
-        await _pdfController!.setPage(_pdfCurrentPage);
-      }
+
+      pinchController!.animateToPage(pageNumber: page);
+
       notifyListeners();
     }
   }
 
   Future<void> nextPage() async {
-    log("im here next page ${_pdfCurrentPage + 1}");
-    if (_pdfCurrentPage < _totalPages - 1) {
-      await _pdfController!.setPage(_pdfCurrentPage);
+    if (pinchController != null && _pdfCurrentPage <= _totalPages) {
+      log("im here next page ${pinchController!.page}");
+      pinchController!
+          .nextPage(duration: Constants.globalDuration, curve: Curves.easeIn);
+      setCurrentPage(pinchController!.page);
+      // _pdfCurrentPage = _pdfCurrentPage + 1;
+
       notifyListeners();
     }
   }
 
   Future<void> previousPage() async {
-    if (_pdfController != null && _pdfCurrentPage > 0) {
-      await _pdfController!.setPage(_pdfCurrentPage - 1 - 1);
+    if (pinchController != null && _pdfCurrentPage > 0) {
+      log("im here previous page ${_pdfCurrentPage}");
+      pinchController!.previousPage(
+          duration: Constants.globalDuration, curve: Curves.easeIn);
+      setCurrentPage(pinchController!.page);
+      // _pdfCurrentPage = _pdfCurrentPage - 1;
       notifyListeners();
     }
   }
 
-  Future<void> gotoFirstPage() async {
-    if (_pdfController != null && _pdfCurrentPage > 0) {
-      _pdfCurrentPage = 0;
-      await _pdfController!.setPage(_pdfCurrentPage);
-      notifyListeners();
-    }
-  }
+  // Future<void> gotoFirstPage() async {
+  //   if (pinchController != null && _pdfCurrentPage > 0) {
+  //     _pdfCurrentPage = 0;
+  //     pinchController!.jumpToPage(_pdfCurrentPage);
+  //     notifyListeners();
+  //   }
+  // }
 
-  Future<void> gotoLastPage() async {
-    if (_pdfController != null && _pdfCurrentPage < _totalPages - 1) {
-      _pdfCurrentPage = _totalPages;
-      await _pdfController!.setPage(_pdfCurrentPage);
-      notifyListeners();
-    }
-  }
+  // Future<void> gotoLastPage() async {
+  //   if (pinchController != null && _pdfCurrentPage < _totalPages - 1) {
+  //     _pdfCurrentPage = _totalPages;
+  //     pinchController!.jumpToPage(_pdfCurrentPage);
+  //     notifyListeners();
+  //   }
+  // }
 
   Future<void> zoomIn() async {
-    if (_pdfController != null) {
-      _currentZoomLevel += 0.5;
-      // await _pdfController!.setZoom(_currentZoomLevel);
-      notifyListeners();
-    }
+    // if (_pdfController != null) {
+    //   _currentZoomLevel += 0.5;
+    //   // await _pdfController!.setZoom(_currentZoomLevel);
+    //   notifyListeners();
+    // }
   }
 
   Future<void> zoomOut() async {
-    if (_pdfController != null && _currentZoomLevel > 0.5) {
-      _currentZoomLevel -= 0.5;
-      // await _pdfController!.setZoom(_currentZoomLevel);
-      notifyListeners();
-    }
+    // if (_pdfController != null && _currentZoomLevel > 0.5) {
+    //   _currentZoomLevel -= 0.5;
+    //   // await _pdfController!.setZoom(_currentZoomLevel);
+    //   notifyListeners();
+    // }
   }
 
   Future<void> resetZoom() async {
-    if (_pdfController != null) {
-      _currentZoomLevel = 1.0;
-      // await _pdfController!.setZoom(_currentZoomLevel);
-      notifyListeners();
-    }
+    // if (_pdfController != null) {
+    //   _currentZoomLevel = 1.0;
+    //   // await _pdfController!.setZoom(_currentZoomLevel);
+    //   notifyListeners();
+    // }
   }
 }

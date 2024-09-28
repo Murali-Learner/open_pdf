@@ -3,6 +3,7 @@ import 'package:open_pdf/global_widgets/global_bottom_sheet.dart';
 import 'package:open_pdf/models/pdf_model.dart';
 import 'package:open_pdf/pages/home/widgets/pdf_option_bottom_sheet.dart';
 import 'package:open_pdf/providers/pdf_provider.dart';
+import 'package:open_pdf/utils/extensions/context_extension.dart';
 import 'package:provider/provider.dart';
 
 class PdfCardOptions extends StatelessWidget {
@@ -25,7 +26,10 @@ class PdfCardOptions extends StatelessWidget {
                 context: context, child: PdfOptionsBottomSheet(pdf: pdf));
           }
         },
-        child: const Icon(Icons.more_vert),
+        child: Icon(
+          Icons.more_vert,
+          color: pdf.isSelected ? context.theme.primaryColor : null,
+        ),
       );
     });
   }

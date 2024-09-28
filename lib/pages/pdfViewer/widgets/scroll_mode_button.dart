@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:open_pdf/providers/pdf_control_provider.dart';
-import 'package:open_pdf/utils/enumerates.dart';
+import 'package:open_pdf/utils/extensions/context_extension.dart';
 import 'package:provider/provider.dart';
 
 Color? _getColor(bool isSelected) {
@@ -14,20 +14,26 @@ class ScrollModeButton extends StatelessWidget {
     required this.scrollMode,
   });
   final IconData icon;
-  final PdfScrollMode scrollMode;
+  final Axis scrollMode;
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<PdfControlProvider>();
     return GestureDetector(
       onTap: () {
-        provider.setScrollMode(scrollMode);
+        provider.setScrollMode(
+            scrollMode == Axis.horizontal ? Axis.vertical : Axis.horizontal);
       },
       child: Container(
         padding: const EdgeInsets.all(5),
         decoration: BoxDecoration(
-          color: _getColor(provider.pdfScrollMode == scrollMode),
+          color: provider.pdfScrollMode == scrollMode ? Colors.amber : null,
         ),
-        child: Icon(icon),
+        child: Icon(
+          icon,
+          color: provider.pdfScrollMode == scrollMode
+              ? context.theme.primaryColor
+              : null,
+        ),
       ),
     );
   }

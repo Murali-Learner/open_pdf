@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:open_pdf/pages/pdfViewer/widgets/scroll_mode_button.dart';
-import 'package:open_pdf/utils/enumerates.dart';
 import 'package:open_pdf/utils/extensions/context_extension.dart';
 import 'package:open_pdf/utils/extensions/spacer_extension.dart';
 
@@ -24,12 +23,12 @@ class ScrollModeButtonsRow extends StatelessWidget {
             children: [
               const ScrollModeButton(
                 icon: Icons.swap_horiz,
-                scrollMode: PdfScrollMode.horizontal,
+                scrollMode: Axis.vertical,
               ),
               10.hSpace,
               const ScrollModeButton(
                 icon: Icons.swap_vert,
-                scrollMode: PdfScrollMode.vertical,
+                scrollMode: Axis.horizontal,
               ),
             ],
           ),

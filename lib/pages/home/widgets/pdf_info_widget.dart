@@ -54,7 +54,7 @@ class PdfInfoWidget extends StatelessWidget {
                 child: Text(
                   pdf.fileName ?? 'Unknown Files',
                   style: context.textTheme.bodyLarge!.copyWith(
-                    fontSize: 15,
+                    fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -62,12 +62,13 @@ class PdfInfoWidget extends StatelessWidget {
             ],
           ),
           8.vSpace,
-          SizedBox(
-            child: Text(
-              pdf.lastOpened!.timeAgo(),
-              style: context.textTheme.bodyMedium,
+          if (pdf.downloadStatus == DownloadStatus.completed.name)
+            SizedBox(
+              child: Text(
+                pdf.lastOpened!.timeAgo(),
+                style: context.textTheme.bodyMedium,
+              ),
             ),
-          ),
         ],
       ),
     );

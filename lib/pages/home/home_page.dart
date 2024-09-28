@@ -4,10 +4,11 @@ import 'package:open_pdf/pages/home/widgets/empty_pdf_list_widget.dart';
 import 'package:open_pdf/pages/home/widgets/floating_dial_widget.dart';
 import 'package:open_pdf/pages/home/widgets/home_pdf_grid.dart';
 import 'package:open_pdf/pages/home/widgets/home_pdf_list.dart';
+import 'package:open_pdf/pages/home/widgets/multi_select_button.dart';
 import 'package:open_pdf/pages/home/widgets/pop_up_menu_button.dart';
 import 'package:open_pdf/pages/home/widgets/view_mode_buttons_row.dart';
-import 'package:open_pdf/providers/download_provider.dart';
 import 'package:open_pdf/providers/pdf_provider.dart';
+import 'package:open_pdf/utils/constants.dart';
 import 'package:open_pdf/utils/enumerates.dart';
 import 'package:open_pdf/utils/extensions/spacer_extension.dart';
 import 'package:provider/provider.dart';
@@ -44,7 +45,11 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
           title: Text(
-              " ${provider.selectedFiles.isEmpty ? 'Open PDF' : provider.selectedFiles.length} "),
+            " ${provider.selectedFiles.isEmpty ? 'Open PDF' : provider.selectedFiles.length} ",
+            style: TextStyle(
+              color: ColorConstants.amberColor,
+            ),
+          ),
           actions: [
             if (provider.selectedFiles.isEmpty) const PopupMenuButtonWidget(),
             if (provider.selectedFiles.isNotEmpty)
@@ -81,33 +86,5 @@ class _HomePageState extends State<HomePage> {
         floatingActionButton: const FloatingDial(),
       );
     });
-  }
-}
-
-class MultiSelectionDeleteButton extends StatelessWidget {
-  const MultiSelectionDeleteButton({
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final provider = context.watch<PdfProvider>();
-    return Tooltip(
-      message: "Delete Selection",
-      child: GestureDetector(
-        onTap: () {
-          showDeleteConfirmationDialog(context, () async {
-            final downloadProvider = context.read<DownloadProvider>();
-            await downloadProvider.deleteSelectedFiles(provider.selectedFiles);
-
-            provider.deleteSelectedFiles();
-          });
-        },
-        child: const Icon(
-          Icons.delete,
-          size: 30,
-        ),
-      ),
-    );
   }
 }

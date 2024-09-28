@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:open_pdf/pages/download/widgets/download_list_view.dart';
+import 'package:open_pdf/providers/download_provider.dart';
 import 'package:open_pdf/providers/pdf_provider.dart';
 import 'package:open_pdf/utils/constants.dart';
 import 'package:open_pdf/utils/enumerates.dart';
@@ -15,24 +16,25 @@ class DownloadTabBar extends StatefulWidget {
 class DownloadTabBarState extends State<DownloadTabBar>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  late PdfProvider provider;
+  late PdfProvider pdfProvider;
+  late DownloadProvider downloadProvider;
   @override
   void initState() {
     super.initState();
-    provider = context.read<PdfProvider>();
+    pdfProvider = context.read<PdfProvider>();
+    downloadProvider = context.read<DownloadProvider>();
     _tabController = TabController(length: 3, vsync: this);
-    _tabController.animateTo(1);
-    _tabController.addListener(() {
-      if (_tabController.indexIsChanging) {
-        provider.setCurrentTabIndex(_tabController.index);
-        _tabController.animateTo(provider.currentTabIndex);
-      }
-    });
+
+    if (downloadProvider.onGoingList.isEmpty) {
+      _tabController.animateTo(1);
+    } else {
+      _tabController.animateTo(0);
+    }
   }
 
   void switchToOngoingTab() {
     _tabController.animateTo(0);
-    provider.setCurrentTabIndex(0);
+    pdfProvider.setCurrentTabIndex(0);
   }
 
   @override

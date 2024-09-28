@@ -19,11 +19,11 @@ class HomePdfGridView extends StatelessWidget {
         mainAxisSpacing: 10,
         crossAxisSpacing: 10,
       ),
-      itemCount: 16, //pdfLists.length,
+      itemCount: pdfLists.length,
       itemBuilder: (BuildContext context, int index) {
         return GridPdfCard(
-          pdf: pdfLists[0],
-          index: 0,
+          pdf: pdfLists[index],
+          index: index,
         );
       },
     );
