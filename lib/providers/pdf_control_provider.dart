@@ -1,7 +1,6 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_pdfview/flutter_pdfview.dart';
 import 'package:open_pdf/utils/constants.dart';
 import 'package:pdf_render/pdf_render_widgets.dart';
 import 'package:pdfx/pdfx.dart';
@@ -93,10 +92,10 @@ class PdfControlProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void setPdfController(PDFViewController controller) {
-    // _pdfController = controller;
-    notifyListeners();
-  }
+  // void setPdfController(PDFViewController controller) {
+  //   // _pdfController = controller;
+  //   notifyListeners();
+  // }
 
   void setPdfViewController(PdfViewerController controller) {
     log("setPdfViewController ${controller.pageCount}");
