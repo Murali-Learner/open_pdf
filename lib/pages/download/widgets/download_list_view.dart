@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:open_pdf/pages/download/widgets/download_pdf_card.dart';
@@ -9,10 +7,10 @@ import 'package:provider/provider.dart';
 
 class DownloadListView extends StatefulWidget {
   const DownloadListView({
-    required this.status,
+    required this.statuses,
     super.key,
   });
-  final DownloadTaskStatus status;
+  final List<DownloadTaskStatus> statuses;
 
   @override
   DownloadListViewState createState() => DownloadListViewState();
@@ -24,11 +22,11 @@ class DownloadListViewState extends State<DownloadListView> {
     return Consumer2<DownloadProvider, PdfProvider>(
       builder: (context, downloadProvider, pdfProvider, _) {
         final filteredPdfList =
-            downloadProvider.getFilteredListByStatus(widget.status);
+            downloadProvider.getFilteredListByStatus(widget.statuses);
 
         if (filteredPdfList.isEmpty) {
           return Center(
-            child: Text("No ${widget.status.name} downloads."),
+            child: Text("No ${widget.statuses.first.name} downloads."),
           );
         }
 
@@ -40,7 +38,8 @@ class DownloadListViewState extends State<DownloadListView> {
             return const SizedBox(height: 10);
           },
           itemBuilder: (BuildContext context, int index) {
-            log("filteredPdfList ${filteredPdfList[index].downloadStatus}");
+            debugPrint(
+                "filteredPdfList ${filteredPdfList[index].downloadStatus}");
 
             return DownloadPdfCard(
               pdf: filteredPdfList[index],

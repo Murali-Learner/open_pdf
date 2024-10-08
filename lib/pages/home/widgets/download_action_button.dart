@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:open_pdf/models/pdf_model.dart';
 import 'package:open_pdf/providers/download_provider.dart';
 import 'package:open_pdf/providers/pdf_provider.dart';
@@ -13,32 +12,20 @@ class DownloadActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint("pdf.downloadStatus ${pdf.downloadStatus}");
     switch (pdf.downloadStatus) {
-      case "running":
+      case "running" || "enqueued" || "undefined" || "paused":
         return Row(
           children: [
-            _buildPauseButton(context),
+            (pdf.downloadStatus == "paused")
+                ? _buildResumeButton(context)
+                : _buildPauseButton(context),
             10.hSpace,
             _buildCancelButton(context),
           ],
         );
 
-      case "paused":
-        return Row(
-          children: [
-            _buildResumeButton(context),
-            10.hSpace,
-            _buildCancelButton(context),
-          ],
-        );
-
-      case "complete":
-        return IconButton(
-          icon: const Icon(Icons.delete, color: Colors.red, size: 30),
-          onPressed: () {},
-        );
-
-      case "cancelled":
+      case "canceled" || "failed":
         return Row(
           children: [
             _buildRestartButton(context),
@@ -57,7 +44,6 @@ class DownloadActionButton extends StatelessWidget {
       icon: const Icon(Icons.pause, color: Colors.orange, size: 30),
       onPressed: () async {
         final downloadProvider = context.read<DownloadProvider>();
-        await FlutterDownloader.pause(taskId: pdf.taskId!);
         await downloadProvider.pauseDownload(pdf);
       },
     );
@@ -78,7 +64,6 @@ class DownloadActionButton extends StatelessWidget {
       icon: const Icon(Icons.cancel, color: Colors.red, size: 30),
       onPressed: () async {
         final downloadProvider = context.read<DownloadProvider>();
-        await FlutterDownloader.cancel(taskId: pdf.taskId!);
         await downloadProvider.cancelDownload(pdf);
       },
     );
@@ -89,10 +74,7 @@ class DownloadActionButton extends StatelessWidget {
       child: const Icon(Icons.restart_alt, size: 30, color: Colors.orange),
       onTap: () async {
         final downloadProvider = context.read<DownloadProvider>();
-        final pdfProvider = context.read<PdfProvider>();
-        await downloadProvider.addToDownloadedMap(pdf);
         await downloadProvider.restartDownload(pdf);
-        pdfProvider.setCurrentTabIndex(0);
       },
     );
   }

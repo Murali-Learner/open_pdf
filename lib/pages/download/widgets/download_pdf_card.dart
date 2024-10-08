@@ -20,19 +20,17 @@ class DownloadPdfCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<PdfProvider>(builder: (context, provider, _) {
+    return Consumer2<PdfProvider, DownloadProvider>(
+        builder: (context, pdfProvider, downloadProvider, _) {
       return GestureDetector(
         onTap: () {
-          debugPrint(
-              "pdf  ${pdf.fileName} ${provider.isMultiSelected} ${pdf.filePath}");
-          onSingleTap(provider, context);
+          debugPrint("pdf  ${pdf.toJson()}");
+          onSingleTap(pdfProvider, context);
         },
         child: Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: pdf.isSelected
-                ? context.theme.primaryColor.withOpacity(0.8)
-                : context.theme.primaryColor.withOpacity(0.1),
+            color: context.theme.primaryColor.withOpacity(0.1),
             borderRadius: BorderRadius.circular(8),
             border:
                 Border.all(color: context.theme.primaryColor.withOpacity(0.5)),
@@ -78,40 +76,14 @@ class DownloadPdfCard extends StatelessWidget {
     });
   }
 
-  Widget _buildPauseButton(BuildContext context) {
-    return IconButton(
-      icon: const Icon(Icons.pause, color: Colors.orange),
-      onPressed: () async {
-        final provider = context.read<DownloadProvider>();
-        await FlutterDownloader.pause(taskId: pdf.taskId!);
-        await provider.pauseDownload(pdf);
-      },
-    );
-  }
-
-  Widget _buildResumeButton(BuildContext context) {
-    return IconButton(
-      icon: const Icon(Icons.play_arrow, color: Colors.green),
-      onPressed: () async {
-        final provider = context.read<DownloadProvider>();
-
-        await provider.resumeDownload(pdf);
-      },
-    );
-  }
-
   void onSingleTap(PdfProvider provider, BuildContext context) async {
     if (pdf.downloadStatus == DownloadTaskStatus.complete.name) {
-      if (pdf.isSelected || provider.isMultiSelected) {
-        provider.toggleSelectedFiles(pdf);
-      } else {
-        context.read<PdfControlProvider>().resetValues();
-        context.push(
-          navigateTo: ViewPdfPage(
-            pdf: pdf,
-          ),
-        );
-      }
+      context.read<PdfControlProvider>().resetValues();
+      context.push(
+        navigateTo: ViewPdfPage(
+          pdf: pdf,
+        ),
+      );
     }
   }
 }

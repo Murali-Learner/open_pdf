@@ -31,7 +31,6 @@ class DownloadPageState extends State<DownloadPage> {
   @override
   void dispose() {
     provider.internetDispose();
-    downloadProvider.dispose();
     super.dispose();
   }
 

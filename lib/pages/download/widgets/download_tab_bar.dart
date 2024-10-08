@@ -64,7 +64,7 @@ class DownloadTabBarState extends State<DownloadTabBar>
                     child: Text("Completed"),
                   ),
                   Tab(
-                    child: Text("Cancelled"),
+                    child: Text("Canceled"),
                   ),
                 ],
               ),
@@ -76,13 +76,21 @@ class DownloadTabBarState extends State<DownloadTabBar>
               controller: _tabController,
               children: const [
                 DownloadListView(
-                  status: DownloadTaskStatus.running,
+                  statuses: [
+                    DownloadTaskStatus.running,
+                    DownloadTaskStatus.paused,
+                    DownloadTaskStatus.undefined,
+                    DownloadTaskStatus.enqueued,
+                  ],
                 ),
                 DownloadListView(
-                  status: DownloadTaskStatus.complete,
+                  statuses: [DownloadTaskStatus.complete],
                 ),
                 DownloadListView(
-                  status: DownloadTaskStatus.canceled,
+                  statuses: [
+                    DownloadTaskStatus.canceled,
+                    DownloadTaskStatus.failed,
+                  ],
                 ),
               ],
             ),
