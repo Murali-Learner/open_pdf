@@ -33,15 +33,16 @@ class _DownloadButtonState extends State<DownloadButton> {
           ToastUtils.showErrorToast("Please enter URL");
           return;
         }
+        debugPrint("widget.pdfUrl ${widget.pdfUrl}");
 
         final downloadPdfTextFieldState =
             context.findAncestorStateOfType<DownloadPdfRowState>();
         context.hideKeyBoard();
 
         downloadPdfTextFieldState!.searchController.clear();
-
         await downloadProvider.downloadAndSavePdf(
           widget.pdfUrl,
+          pdfProvider.addToTotalPdfList,
         );
       },
     );

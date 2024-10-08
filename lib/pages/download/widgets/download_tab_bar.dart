@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:open_pdf/pages/download/widgets/download_list_view.dart';
 import 'package:open_pdf/providers/download_provider.dart';
 import 'package:open_pdf/providers/pdf_provider.dart';
 import 'package:open_pdf/utils/constants.dart';
-import 'package:open_pdf/utils/enumerates.dart';
 import 'package:provider/provider.dart';
 
 class DownloadTabBar extends StatefulWidget {
@@ -25,7 +25,7 @@ class DownloadTabBarState extends State<DownloadTabBar>
     downloadProvider = context.read<DownloadProvider>();
     _tabController = TabController(length: 3, vsync: this);
 
-    if (downloadProvider.onGoingList.isEmpty) {
+    if (downloadProvider.downloadedPdfMap.isEmpty) {
       _tabController.animateTo(1);
     } else {
       _tabController.animateTo(0);
@@ -76,13 +76,13 @@ class DownloadTabBarState extends State<DownloadTabBar>
               controller: _tabController,
               children: const [
                 DownloadListView(
-                  status: DownloadStatus.ongoing,
+                  status: DownloadTaskStatus.running,
                 ),
                 DownloadListView(
-                  status: DownloadStatus.completed,
+                  status: DownloadTaskStatus.complete,
                 ),
                 DownloadListView(
-                  status: DownloadStatus.cancelled,
+                  status: DownloadTaskStatus.canceled,
                 ),
               ],
             ),

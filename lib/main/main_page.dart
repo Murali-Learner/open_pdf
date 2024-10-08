@@ -57,6 +57,7 @@ class _MainPageState extends State<MainPage> {
   void dispose() {
     super.dispose();
     pdfProvider.internetDispose();
+    pdfProvider.dispose();
   }
 
   @override

@@ -1,11 +1,11 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:open_pdf/models/pdf_model.dart';
 import 'package:open_pdf/pages/pdfViewer/view_pdf_page.dart';
 import 'package:open_pdf/providers/pdf_control_provider.dart';
 import 'package:open_pdf/providers/pdf_provider.dart';
-import 'package:open_pdf/utils/enumerates.dart';
 import 'package:open_pdf/utils/extensions/context_extension.dart';
 import 'package:open_pdf/utils/extensions/date_time_extension.dart';
 import 'package:open_pdf/utils/extensions/spacer_extension.dart';
@@ -31,7 +31,7 @@ class PdfInfoWidget extends StatelessWidget {
             },
       onTap: () {
         log("pdf.fileName  ${pdf.fileName}");
-        if (pdf.downloadStatus == DownloadStatus.completed.name) {
+        if (pdf.downloadStatus == DownloadTaskStatus.complete.name) {
           if (pdf.isSelected || provider.isMultiSelected) {
             provider.toggleSelectedFiles(pdf);
           } else {
@@ -62,7 +62,7 @@ class PdfInfoWidget extends StatelessWidget {
             ],
           ),
           8.vSpace,
-          if (pdf.downloadStatus == DownloadStatus.completed.name)
+          if (pdf.downloadStatus == DownloadTaskStatus.complete.name)
             SizedBox(
               child: Text(
                 pdf.lastOpened!.timeAgo(),

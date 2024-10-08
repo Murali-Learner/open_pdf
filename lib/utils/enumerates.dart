@@ -8,11 +8,11 @@ enum PdfScrollMode {
   horizontal,
 }
 
-enum DownloadStatus {
-  ongoing,
-  completed,
-  cancelled,
-}
+// enum DownloadStatus {
+//   ongoing,
+//   completed,
+//   cancelled,
+// }
 
 enum AppTheme {
   light,

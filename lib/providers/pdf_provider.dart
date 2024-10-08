@@ -7,6 +7,7 @@ import 'dart:ui';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:media_store_plus/media_store_plus.dart';
 import 'package:open_pdf/helpers/hive_helper.dart';
@@ -118,8 +119,8 @@ class PdfProvider with ChangeNotifier {
   List<PdfModel> getFilteredAndSortedPdfList() {
     List<PdfModel> pdfList = _totalPdfList.values
         .where((pdf) =>
-            pdf.downloadStatus != DownloadStatus.cancelled.name &&
-            pdf.downloadStatus != DownloadStatus.ongoing.name &&
+            pdf.downloadStatus != DownloadTaskStatus.canceled.name &&
+            pdf.downloadStatus != DownloadTaskStatus.running.name &&
             pdf.lastOpened != null)
         .toList();
 
@@ -137,7 +138,7 @@ class PdfProvider with ChangeNotifier {
   Future<void> askPermissions() async {
     List<Permission> permissions = [
       Permission.storage,
-      // Permission.notification,
+      Permission.notification,
     ];
 
     Map<Permission, PermissionStatus> permissionStatus =
@@ -257,9 +258,7 @@ class PdfProvider with ChangeNotifier {
       await HiveHelper.addOrUpdatePdf(pdf);
       _totalPdfList[pdf.id] = pdf;
       notifyListeners();
-    } else {
-      ToastUtils.showErrorToast("Pdf already exists");
-    }
+    } else {}
   }
 
   void deleteFormHistory(PdfModel pdf) {
@@ -410,7 +409,7 @@ class PdfProvider with ChangeNotifier {
             fileSize: file.lengthSync().readableFileSize,
             fileName: getFileNameFromPath(file.path),
             pageNumber: 0,
-            downloadStatus: DownloadStatus.completed.name,
+            downloadStatus: DownloadTaskStatus.complete.name,
             lastOpened: DateTime.now(),
             createdAt: DateTime.now(),
             thumbnail: thumbnailBytes);

@@ -64,7 +64,7 @@ class PdfOptionsBottomSheet extends StatelessWidget {
           text: "Delete from history",
           onTap: () async {
             provider.deleteFormHistory(pdf);
-            await downloadProvider.removeFromCompletedList(pdf);
+            await downloadProvider.removeFromDownloadedMap(pdf);
             context.pop();
           },
         ),

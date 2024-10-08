@@ -47,6 +47,7 @@ dependencies:
   permission_handler: ^11.3.1
   media_store_plus: ^0.1.2
   dio:
+  path:
   hive: ^2.2.3
   hive_flutter: ^1.1.0
   flutter_speed_dial: ^7.0.0
@@ -60,6 +61,7 @@ dependencies:
   modal_progress_hud_nsn: ^0.5.1
   pdfx: ^2.8.0
   pdf_render: ^1.4.7
+  flutter_downloader: ^1.11.8
 
 
 dev_dependencies:

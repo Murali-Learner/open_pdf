@@ -135,7 +135,7 @@ class PdfControlProvider with ChangeNotifier {
 
   Future<void> previousPage() async {
     if (pinchController != null && _pdfCurrentPage > 0) {
-      log("im here previous page ${_pdfCurrentPage}");
+      log("im here previous page $_pdfCurrentPage");
       pinchController!.previousPage(
           duration: Constants.globalDuration, curve: Curves.easeIn);
       setCurrentPage(pinchController!.page);

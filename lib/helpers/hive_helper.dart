@@ -1,9 +1,7 @@
-import 'dart:developer';
-
 import 'package:flutter/foundation.dart';
+import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:open_pdf/models/pdf_model.dart';
-import 'package:open_pdf/utils/enumerates.dart';
 
 class HiveHelper {
   static const String pdfBoxName = 'pdfBox';
@@ -56,7 +54,7 @@ class HiveHelper {
   }
 
   static Future<void> removeFromCache(String pdfId) async {
-    log("remove pdfId $pdfId");
+    // log("remove pdfId $pdfId");
     await _pdfBox?.delete(pdfId);
   }
 
@@ -74,7 +72,7 @@ class HiveHelper {
   }
 
   static Future<void> updateDownloadStatus(
-      String id, DownloadStatus status) async {
+      String id, DownloadTaskStatus status) async {
     final pdf = _pdfBox?.get(id);
     if (pdf != null) {
       final updatedPdf = pdf.copyWith(downloadStatus: status.name);
