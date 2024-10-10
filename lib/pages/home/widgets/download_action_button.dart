@@ -65,6 +65,7 @@ class DownloadActionButton extends StatelessWidget {
       onPressed: () async {
         final downloadProvider = context.read<DownloadProvider>();
         await downloadProvider.cancelDownload(pdf);
+        await downloadProvider.removeTaskFormDownloader(pdf.taskId!);
       },
     );
   }
@@ -86,6 +87,7 @@ class DownloadActionButton extends StatelessWidget {
         final downloadProvider = context.read<DownloadProvider>();
         final pdfProvider = context.read<PdfProvider>();
         await downloadProvider.removeFromDownloadedMap(pdf);
+        await downloadProvider.removeTaskFormDownloader(pdf.taskId!);
         pdfProvider.removeFromTotalPdfList(pdf);
       },
     );

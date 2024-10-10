@@ -22,11 +22,13 @@ class PdfInfoWidget extends StatelessWidget {
       onLongPress: isDownloadCard
           ? null
           : () {
-              provider.toggleSelectedFiles(pdf);
-              debugPrint("long press ${provider.selectedFiles.length}");
+              {
+                provider.toggleSelectedFiles(pdf);
+                debugPrint("long press ${provider.selectedFiles.length}");
+              }
             },
       onTap: () {
-        // log("pdf.fileName  ${pdf.fileName}");
+        debugPrint("pdf.fileName  ${pdf.toJson()}");
         // if (pdf.downloadStatus == DownloadTaskStatus.complete.name) {
         //   if (pdf.isSelected || provider.isMultiSelected) {
         //     provider.toggleSelectedFiles(pdf);

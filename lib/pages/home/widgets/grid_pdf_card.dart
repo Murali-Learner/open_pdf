@@ -29,6 +29,7 @@ class GridPdfCard extends StatelessWidget {
           debugPrint("long press ${pdfProvider.selectedFiles.length}");
         },
         onTap: () async {
+          debugPrint("statement ${pdf.toJson()}");
           if (pdf.isSelected || pdfProvider.isMultiSelected) {
             pdfProvider.toggleSelectedFiles(pdf);
           } else {

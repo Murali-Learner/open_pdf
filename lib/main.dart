@@ -20,7 +20,9 @@ void main() async {
   HiveHelper hiveHelper = HiveHelper();
   await hiveHelper.initHive();
 
-  await FlutterDownloader.initialize();
+  await FlutterDownloader.initialize(
+    ignoreSsl: false,
+  );
 
   runApp(const MyApp());
 }

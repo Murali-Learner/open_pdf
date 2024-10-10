@@ -25,7 +25,7 @@ class DownloadPdfCard extends StatelessWidget {
       return GestureDetector(
         onTap: () {
           debugPrint("pdf  ${pdf.toJson()}");
-          onSingleTap(pdfProvider, context);
+          // onSingleTap(pdfProvider, context);
         },
         child: Container(
           padding: const EdgeInsets.all(8),

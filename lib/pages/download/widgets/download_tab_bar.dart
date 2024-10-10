@@ -25,16 +25,20 @@ class DownloadTabBarState extends State<DownloadTabBar>
     downloadProvider = context.read<DownloadProvider>();
     _tabController = TabController(length: 3, vsync: this);
 
-    if (downloadProvider.downloadedPdfMap.isEmpty) {
+    switchToOngoingTab();
+  }
+
+  void switchToOngoingTab() {
+    final onGoingDownloads =
+        downloadProvider.getSpecificStatusDownloads(DownloadTaskStatus.running);
+    // _tabController.addListener(
+    //   () {},
+    // );
+    if (onGoingDownloads.isEmpty) {
       _tabController.animateTo(1);
     } else {
       _tabController.animateTo(0);
     }
-  }
-
-  void switchToOngoingTab() {
-    _tabController.animateTo(0);
-    pdfProvider.setCurrentTabIndex(0);
   }
 
   @override

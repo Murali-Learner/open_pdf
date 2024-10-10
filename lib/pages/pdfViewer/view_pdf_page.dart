@@ -58,7 +58,7 @@ class _ViewPdfPageState extends State<ViewPdfPage> {
           if (path == null || !File(path).existsSync()) {
             return const Center(child: Text("PDF file not found"));
           }
-          log("path checking finished ${viewProvider.pdfCurrentPage}");
+          debugPrint("path checking finished ${viewProvider.pdfCurrentPage}");
 
           return Scaffold(
             body: SafeArea(

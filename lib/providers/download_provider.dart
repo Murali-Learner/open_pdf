@@ -77,17 +77,20 @@ class DownloadProvider extends ChangeNotifier {
       PdfModel model = _downloadedPdfMap.values
           .firstWhere((element) => element.taskId == taskId);
       // listedFormPort(model);
+      Uint8List? thumbnailBytes;
+      if (progress == 100) {
+        thumbnailBytes = await getPdfThumbNail(_tempFilePath + model.fileName!);
+      }
       model = model.copyWith(
         taskId: taskId,
         downloadProgress: progress.toDouble(),
+        thumbnail: thumbnailBytes,
         downloadStatus:
             progress == 100 ? DownloadTaskStatus.complete.name : status.name,
         filePath: _tempFilePath + model.fileName!,
       );
       debugPrint("model ${model.toJson()}");
       await addToDownloadedMap(model);
-
-      notifyListeners();
     });
   }
 
@@ -102,7 +105,7 @@ class DownloadProvider extends ChangeNotifier {
     int status,
     int progress,
   ) {
-    print(
+    debugPrint(
       'Callback on background isolate: '
       'task ($id) is in status ($status) and process ($progress)',
     );
@@ -136,6 +139,14 @@ class DownloadProvider extends ChangeNotifier {
     return pdfList;
   }
 
+  Map<String, PdfModel> getSpecificStatusDownloads(DownloadTaskStatus status) {
+    final pdfMap = Map<String, PdfModel>.fromEntries(
+        _downloadedPdfMap.entries.where((element) {
+      return element.value.downloadStatus == status.name;
+    }));
+    return pdfMap;
+  }
+
   Future<void> updateLastOpenedValue(PdfModel pdf) async {
     try {
       final updatedPdf = pdf.copyWith(lastOpened: DateTime.now());
@@ -149,7 +160,6 @@ class DownloadProvider extends ChangeNotifier {
 
   Future<void> addToDownloadedMap(PdfModel pdf) async {
     try {
-      log("pdf model ${pdf.toJson()}");
       await HiveHelper.addOrUpdatePdf(pdf);
       _downloadedPdfMap[pdf.id] = pdf;
       notifyListeners();
@@ -181,15 +191,15 @@ class DownloadProvider extends ChangeNotifier {
     try {
       for (var entry in selectedFiles.entries) {
         final key = entry.key;
-        final value = entry.value;
+        final pdf = entry.value;
 
-        await HiveHelper.removeFromCache(value.id);
+        await removeTaskFormDownloader(pdf.taskId!);
+        await HiveHelper.removeFromCache(pdf.id);
         _downloadedPdfMap.remove(key);
       }
       notifyListeners();
     } catch (e) {
-      ToastUtils.showErrorToast(
-          "Failed to remove the file from completed list.");
+      ToastUtils.showErrorToast("Failed to delete selected files.");
     }
   }
 
@@ -197,12 +207,14 @@ class DownloadProvider extends ChangeNotifier {
     try {
       await HiveHelper.removeFromCache(pdf.id);
       _downloadedPdfMap.remove(pdf.id);
-
       notifyListeners();
     } catch (e) {
-      ToastUtils.showErrorToast(
-          "Failed to remove the file from completed list.");
+      ToastUtils.showErrorToast("Failed to remove the file from list.");
     }
+  }
+
+  Future<void> removeTaskFormDownloader(String taskId) async {
+    await FlutterDownloader.remove(taskId: taskId);
   }
 
   Future<void> deleteCompletely(PdfModel pdf) async {
@@ -220,7 +232,7 @@ class DownloadProvider extends ChangeNotifier {
         dirName: DirType.download.defaults,
       );
       // debugPrint("Delete Status: $status");
-// FlutterDownloader.
+
       if (status) {
         ToastUtils.showSuccessToast("File Deleted!");
       }
@@ -240,18 +252,25 @@ class DownloadProvider extends ChangeNotifier {
         "${dirType.fullPath(relativePath: relativePath.orAppFolder, dirName: dirName)}/$fileName");
   }
 
-  Future<bool> checkIfFileExists(String fileName) async {
-    try {
-      final Uri? uri = await mediaStorePlugin.getFileUri(
-          fileName: fileName,
-          dirType: DirType.download,
-          dirName: DirType.download.defaults);
-      return uri != null;
-    } catch (e) {
-      ToastUtils.showErrorToast("Error while checking file");
-    }
-    return false;
+  bool checkIfFileExists(String fileName) {
+    final exists = _downloadedPdfMap.values.any((element) {
+      return element.fileName == fileName;
+    });
+
+    debugPrint("exists $exists $fileName");
+    return exists;
   }
+
+  // Future<bool> checkIfFileExists(String fileName) async {
+  //   try {
+  //     String downloadsPath = _tempFilePath;
+  //     File file = File('$downloadsPath/$fileName');
+  //     return file.existsSync();
+  //   } catch (e) {
+  //     ToastUtils.showErrorToast("Error while checking file");
+  //   }
+  //   return false;
+  // }
 
   Future<void> clearData() async {
     await HiveHelper.clearAllData();
@@ -261,10 +280,10 @@ class DownloadProvider extends ChangeNotifier {
     debugPrint("_downloadedPdfMap ${_downloadedPdfMap.length}");
   }
 
-  Future<void> _initializeTempFilePath() async {
-    Directory directory = await getApplicationSupportDirectory();
-    _tempFilePath = directory.absolute.path;
-  }
+  // Future<void> _initializeTempFilePath() async {
+  //   Directory directory = await getApplicationSupportDirectory();
+  //   _tempFilePath = directory.absolute.path;
+  // }
 
   Future<bool> validateUrl(String url) async {
     try {
@@ -294,18 +313,12 @@ class DownloadProvider extends ChangeNotifier {
 
   Future<String> getDownloadFileName(String url, String fileName) async {
     int randomNum = random.nextInt(100);
-    final bool localFileExists = await checkIfFileExists(fileName);
-    // log("localFileExists $localFileExists $fileName");
+    final bool localFileExists = checkIfFileExists(fileName);
+    log("localFileExists $localFileExists $fileName");
     if (localFileExists || _downloadedPdfMap.containsKey(fileName)) {
       fileName = "${fileName.split(".").first}$randomNum.pdf";
     }
     return fileName;
-  }
-
-  Future<String> prepareDownloadFileName(String url) async {
-    String fileNameFromUrl = getFileNameFromPath(url);
-    String downloadFileName = await getDownloadFileName(url, fileNameFromUrl);
-    return downloadFileName;
   }
 
   Future<PdfModel> setupOngoingDownload(String url, String fileName) async {
@@ -386,7 +399,6 @@ class DownloadProvider extends ChangeNotifier {
 
   Future<void> updateDownloadCompletion(PdfModel downloadPdf) async {
     try {
-      await removeFromDownloadedMap(downloadPdf);
       log("im here in the update download complete");
       await addToDownloadedMap(downloadPdf.copyWith(
           downloadStatus: DownloadTaskStatus.complete.name));
@@ -397,16 +409,6 @@ class DownloadProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> handleDownloadError(PdfModel downloadPdf, Object e) async {
-    // downloadPdf =
-    //     downloadPdf.copyWith(downloadStatus: DownloadStatus.canceled.name);
-    // addToCancelledList(downloadPdf);
-
-    // await notificationHelper.cancelNotification(notificationId);
-    debugPrint("Download Error $e");
-    // ToastUtils.showErrorToast("Error while downloading file");
-  }
-
   Future<void> downloadAndSavePdf(
       String url, Function(PdfModel) addToTotalPdfListCallback) async {
     bool validUrl = await validateUrl(url);
@@ -414,15 +416,22 @@ class DownloadProvider extends ChangeNotifier {
       ToastUtils.showErrorToast("Enter a valid URL");
       return;
     }
-
     String fileNameFromUrl = getFileNameFromPath(url);
-    String downloadFileName = await getDownloadFileName(url, fileNameFromUrl);
+    for (var e in _downloadedPdfMap.values) {
+      debugPrint("element ${e.toJson()} $fileNameFromUrl");
+    }
+    final bool localFileExists = checkIfFileExists(fileNameFromUrl);
+    debugPrint("statement");
+    if (localFileExists) {
+      ToastUtils.showErrorToast("File Already Exists");
+      return;
+    }
 
     try {
-      PdfModel downloadPdf = await setupOngoingDownload(url, downloadFileName);
+      PdfModel downloadPdf = await setupOngoingDownload(url, fileNameFromUrl);
       String downloadTaskId =
-          await downloadPdfFile(url, downloadFileName, downloadPdf);
-      log("download task ID ${downloadTaskId}");
+          await downloadPdfFile(url, fileNameFromUrl, downloadPdf);
+      log("download task ID $downloadTaskId");
       // downloadPdf = (await saveDownloadedFile(downloadPdf));
       // downloadPdf = downloadPdf.copyWith(
       //     downloadStatus: DownloadTaskStatus.complete.name,
@@ -432,7 +441,8 @@ class DownloadProvider extends ChangeNotifier {
 
       // await updateDownloadCompletion(downloadPdf);
     } catch (e) {
-      await handleDownloadError(PdfModel(id: downloadFileName), e);
+      debugPrint("File Download Error $e");
+      ToastUtils.showErrorToast("Error while downloading file");
     }
   }
 
@@ -468,6 +478,7 @@ class DownloadProvider extends ChangeNotifier {
     try {
       String? taskId = await FlutterDownloader.enqueue(
         url: url,
+        // "https://upload.wikimedia.org/wikipedia/commons/b/b2/Sand_Dunes_in_Death_Valley_National_Park.jpg",
         savedDir: _tempFilePath,
         saveInPublicStorage: true,
         fileName: fileName,

@@ -119,8 +119,7 @@ class PdfProvider with ChangeNotifier {
   List<PdfModel> getFilteredAndSortedPdfList() {
     List<PdfModel> pdfList = _totalPdfList.values
         .where((pdf) =>
-            pdf.downloadStatus != DownloadTaskStatus.canceled.name &&
-            pdf.downloadStatus != DownloadTaskStatus.running.name &&
+            pdf.downloadStatus == DownloadTaskStatus.complete.name &&
             pdf.lastOpened != null)
         .toList();
 
