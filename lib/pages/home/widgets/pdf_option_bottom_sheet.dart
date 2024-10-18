@@ -1,7 +1,5 @@
 // ignore_for_file: use_build_context_synchronously
 
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:open_pdf/global_widgets/global_horizontal_divider.dart';
 import 'package:open_pdf/models/pdf_model.dart';
@@ -97,7 +95,6 @@ class PdfOptionsBottomSheet extends StatelessWidget {
       await Share.shareXFiles([XFile(pdf.filePath!)],
           text: 'Check out this PDF file!',
           subject: "Check out this pdf file!");
-      debugPrint("Sharing ${pdf.fileName}");
     } catch (e) {
       debugPrint("Error while sharing file $e");
       ToastUtils.showErrorToast("Error while sharing");
@@ -124,7 +121,6 @@ void showDeleteConfirmationDialog(
           ),
           TextButton(
             onPressed: () async {
-              log("delete perme");
               final pdfProvider = context.read<PdfProvider>();
               final downloadProvider = context.read<DownloadProvider>();
 

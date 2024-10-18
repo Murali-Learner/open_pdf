@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:developer';
 import 'dart:io';
-import 'dart:math' hide log;
 import 'dart:ui';
 
 import 'package:file_picker/file_picker.dart';
@@ -9,7 +8,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
-import 'package:media_store_plus/media_store_plus.dart';
 import 'package:open_pdf/helpers/hive_helper.dart';
 import 'package:open_pdf/models/pdf_model.dart';
 import 'package:open_pdf/pages/pdfViewer/view_pdf_page.dart';
@@ -23,15 +21,10 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:printing/printing.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
-final mediaStorePlugin = MediaStore();
-
 class PdfProvider with ChangeNotifier {
-  // final NotificationHelper notificationHelper = NotificationHelper();
-
   PdfProvider() {
-    _loadPdfListFromHive();
+    loadPdfListFromHive();
   }
-  var random = Random();
 
   PdfModel? _currentPDF;
   bool _isLoading = false;
@@ -128,10 +121,13 @@ class PdfProvider with ChangeNotifier {
     return pdfList;
   }
 
-  Future<void> _loadPdfListFromHive() async {
+  Future<void> loadPdfListFromHive() async {
     _totalPdfList = HiveHelper.getHivePdfList();
     debugPrint("_totalPdfList ${_totalPdfList.length}");
     notifyListeners();
+    _totalPdfList.forEach((key, pdf) {
+      debugPrint("_totalPdfList pdfs ${pdf.toJson()}");
+    });
   }
 
   Future<void> askPermissions() async {
@@ -187,7 +183,7 @@ class PdfProvider with ChangeNotifier {
 
     if (!pdf.isSelected) {
       isMultiSelected = true;
-      //  (true);
+
       _selectedFiles[pdf.id] = pdf;
 
       notifyListeners();

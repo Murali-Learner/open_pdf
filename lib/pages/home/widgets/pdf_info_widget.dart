@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:open_pdf/models/pdf_model.dart';
+import 'package:open_pdf/pages/pdfViewer/view_pdf_page.dart';
+import 'package:open_pdf/providers/pdf_control_provider.dart';
 import 'package:open_pdf/providers/pdf_provider.dart';
 import 'package:open_pdf/utils/extensions/context_extension.dart';
 import 'package:open_pdf/utils/extensions/date_time_extension.dart';
@@ -24,24 +26,22 @@ class PdfInfoWidget extends StatelessWidget {
           : () {
               {
                 provider.toggleSelectedFiles(pdf);
-                debugPrint("long press ${provider.selectedFiles.length}");
               }
             },
       onTap: () {
-        debugPrint("pdf.fileName  ${pdf.toJson()}");
-        // if (pdf.downloadStatus == DownloadTaskStatus.complete.name) {
-        //   if (pdf.isSelected || provider.isMultiSelected) {
-        //     provider.toggleSelectedFiles(pdf);
-        //   } else {
-        //     context.read<PdfControlProvider>().resetValues();
+        if (pdf.downloadStatus == DownloadTaskStatus.complete.name) {
+          if (pdf.isSelected || provider.isMultiSelected) {
+            provider.toggleSelectedFiles(pdf);
+          } else {
+            context.read<PdfControlProvider>().resetValues();
 
-        //     context.push(
-        //       navigateTo: ViewPdfPage(
-        //         pdf: pdf,
-        //       ),
-        //     );
-        //   }
-        // }
+            context.push(
+              navigateTo: ViewPdfPage(
+                pdf: pdf,
+              ),
+            );
+          }
+        }
       },
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

@@ -28,30 +28,8 @@ class _MainPageState extends State<MainPage> {
       await pdfProvider.handleIntent(context);
       pdfProvider.internetSubscription();
       await pdfProvider.askPermissions();
-      // await showNotificationDialog();
     });
   }
-
-  // Future<void> showNotificationDialog() async {
-  //   final notificationPermission = await Permission.notification.isGranted;
-  //   if (!notificationPermission) {
-  //     showDialog(
-  //         context: context,
-  //         builder: (context) {
-  //           return AlertDialog(
-  //             content: NotificationPermissionDialog(
-  //               onAllow: () async {
-  //                 context.pop();
-  //                 await pdfProvider.askPermissions();
-  //               },
-  //               onDeny: () {
-  //                 context.pop();
-  //               },
-  //             ),
-  //           );
-  //         });
-  //   }
-  // }
 
   @override
   void dispose() {

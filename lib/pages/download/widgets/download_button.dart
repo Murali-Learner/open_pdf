@@ -35,15 +35,21 @@ class _DownloadButtonState extends State<DownloadButton> {
         }
         debugPrint("widget.pdfUrl ${widget.pdfUrl}");
 
+        context.hideKeyBoard();
+
         final downloadPdfTextFieldState =
             context.findAncestorStateOfType<DownloadPdfRowState>();
         context.hideKeyBoard();
 
         downloadPdfTextFieldState!.searchController.clear();
-        await downloadProvider.downloadAndSavePdf(
-          widget.pdfUrl,
-          pdfProvider.addToTotalPdfList,
-        );
+        downloadProvider.setTabIndex(0);
+
+        await downloadProvider
+            .downloadAndSavePdf(widget.pdfUrl)
+            // ;
+            .whenComplete(() {
+          pdfProvider.loadPdfListFromHive();
+        });
       },
     );
   }

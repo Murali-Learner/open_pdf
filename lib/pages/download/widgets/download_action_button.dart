@@ -75,6 +75,7 @@ class DownloadActionButton extends StatelessWidget {
       child: const Icon(Icons.restart_alt, size: 30, color: Colors.orange),
       onTap: () async {
         final downloadProvider = context.read<DownloadProvider>();
+        downloadProvider.setTabIndex(0);
         await downloadProvider.restartDownload(pdf);
       },
     );

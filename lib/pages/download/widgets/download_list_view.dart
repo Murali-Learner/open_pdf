@@ -3,6 +3,8 @@ import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:open_pdf/pages/download/widgets/download_pdf_card.dart';
 import 'package:open_pdf/providers/download_provider.dart';
 import 'package:open_pdf/providers/pdf_provider.dart';
+import 'package:open_pdf/utils/constants.dart';
+import 'package:open_pdf/utils/extensions/context_extension.dart';
 import 'package:provider/provider.dart';
 
 class DownloadListView extends StatefulWidget {
@@ -26,7 +28,15 @@ class DownloadListViewState extends State<DownloadListView> {
 
         if (filteredPdfList.isEmpty) {
           return Center(
-            child: Text("No ${widget.statuses.first.name} downloads."),
+            child: Text(
+              "No ${widget.statuses.first.name} downloads.",
+              style: context.textTheme.labelLarge!.copyWith(
+                color: ColorConstants.amberColor,
+                fontSize: 20,
+                // letterSpacing: 0.5,
+                // fontWeight: FontWeight.bold,
+              ),
+            ),
           );
         }
 

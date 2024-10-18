@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:open_pdf/models/pdf_model.dart';
-import 'package:open_pdf/pages/home/widgets/download_action_button.dart';
+import 'package:open_pdf/pages/download/widgets/download_action_button.dart';
 import 'package:open_pdf/pages/home/widgets/pdf_card_options.dart';
 import 'package:open_pdf/pages/home/widgets/pdf_info_widget.dart';
 import 'package:open_pdf/pages/pdfViewer/view_pdf_page.dart';
@@ -24,8 +24,8 @@ class DownloadPdfCard extends StatelessWidget {
         builder: (context, pdfProvider, downloadProvider, _) {
       return GestureDetector(
         onTap: () {
-          debugPrint("pdf  ${pdf.toJson()}");
-          // onSingleTap(pdfProvider, context);
+          // debugPrint("pdf  ${pdf.toJson()}");
+          onSingleTap(pdfProvider, context);
         },
         child: Container(
           padding: const EdgeInsets.all(8),
