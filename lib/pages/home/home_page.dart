@@ -61,31 +61,26 @@ class _HomePageState extends State<HomePage> {
           builder: (context, provider, _) {
             final List<PdfModel> pdfList =
                 provider.getFilteredAndSortedPdfList();
-            return Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                pdfList.isEmpty
-                    ? const EmptyPdfListWidget()
-                    : Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Column(
-                          children: [
-                            const ViewModeButtonsRow(),
-                            10.vSpace,
-                            Expanded(
-                              child: provider.viewMode == ViewMode.list
-                                  ? HomePdfListView(
-                                      pdfLists: pdfList,
-                                    )
-                                  : HomePdfGridView(
-                                      pdfLists: pdfList,
-                                    ),
-                            ),
-                          ],
+            return pdfList.isEmpty
+                ? const EmptyPdfListWidget()
+                : Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      children: [
+                        const ViewModeButtonsRow(),
+                        10.vSpace,
+                        Expanded(
+                          child: provider.viewMode == ViewMode.list
+                              ? HomePdfListView(
+                                  pdfLists: pdfList,
+                                )
+                              : HomePdfGridView(
+                                  pdfLists: pdfList,
+                                ),
                         ),
-                      ),
-              ],
-            );
+                      ],
+                    ),
+                  );
           },
         ),
         floatingActionButton: const FloatingDial(),

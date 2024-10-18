@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:open_pdf/models/pdf_model.dart';
 import 'package:open_pdf/pages/home/widgets/pdf_card_options.dart';
-import 'package:open_pdf/pages/pdfViewer/view_pdf_page.dart';
+import 'package:open_pdf/pages/pdfViewer/pdf_js_view.dart';
 import 'package:open_pdf/providers/download_provider.dart';
 import 'package:open_pdf/providers/pdf_control_provider.dart';
 import 'package:open_pdf/providers/pdf_provider.dart';
@@ -39,9 +39,10 @@ class GridPdfCard extends StatelessWidget {
 
             pdfProvider.clearSelectedFiles();
             context.push(
-              navigateTo: ViewPdfPage(
-                pdf: pdf,
-              ),
+              navigateTo: PdfJsView(),
+              //  ViewPdfPage(
+              //   pdf: pdf,
+              // ),
             );
           }
         },
