@@ -19,3 +19,9 @@ enum AppTheme {
   dark,
   system,
 }
+
+enum CheckList {
+  all,
+  downloads,
+  local,
+}

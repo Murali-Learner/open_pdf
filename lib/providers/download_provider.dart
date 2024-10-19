@@ -17,7 +17,7 @@ import 'package:pdf_render/pdf_render.dart';
 
 class DownloadProvider extends ChangeNotifier {
   DownloadProvider() {
-    getHivePdfList();
+    getPdfFromLocalStorage();
     _bindBackgroundIsolate();
     // _initializeTempFilePath();
 
@@ -25,7 +25,7 @@ class DownloadProvider extends ChangeNotifier {
   }
 
   final Dio dio = Dio();
-  static Map<String, PdfModel> _downloadedPdfMap = {};
+  final Map<String, PdfModel> _downloadedPdfMap = {};
   Map<String, PdfModel> get downloadedPdfMap => _downloadedPdfMap;
   final String _tempFilePath = Directory('/storage/emulated/0/Download/').path;
   var random = Random();
@@ -144,12 +144,15 @@ class DownloadProvider extends ChangeNotifier {
     sendPort?.send([id, status, progress]);
   }
 
-  Future<void> getHivePdfList() async {
-    _downloadedPdfMap = HiveHelper.getHivePdfList();
+  Future<void> getPdfFromLocalStorage() async {
+    HiveHelper.getHivePdfList().forEach(
+      (key, value) {
+        if (value.networkUrl != null && value.networkUrl!.isNotEmpty) {
+          _downloadedPdfMap[key] = value;
+        }
+      },
+    );
     notifyListeners();
-    _downloadedPdfMap.forEach((key, pdf) {
-      debugPrint("download pdfs ${pdf.toJson()}");
-    });
   }
 
   List<PdfModel> getFilteredListByStatus(List<DownloadTaskStatus> statuses) {
@@ -192,6 +195,7 @@ class DownloadProvider extends ChangeNotifier {
         debugPrint("I'm here delete");
         removeFromDownloadedMap(pdf);
       }
+
       await HiveHelper.addOrUpdatePdf(pdf);
       _downloadedPdfMap[pdf.id] = pdf;
       notifyListeners();

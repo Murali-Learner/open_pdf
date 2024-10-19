@@ -11,32 +11,27 @@ class ViewModeButtonsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(3),
-            color: context.theme.primaryColor.withOpacity(0.5),
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(3),
+        color: context.theme.primaryColor.withOpacity(0.5),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const ViewModeButton(
+            icon: Icons.window,
+            viewMode: ViewMode.grid,
           ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.end,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const ViewModeButton(
-                icon: Icons.window,
-                viewMode: ViewMode.grid,
-              ),
-              10.hSpace,
-              const ViewModeButton(
-                icon: Icons.list,
-                viewMode: ViewMode.list,
-              ),
-            ],
+          10.hSpace,
+          const ViewModeButton(
+            icon: Icons.list,
+            viewMode: ViewMode.list,
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

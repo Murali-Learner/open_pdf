@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:open_pdf/models/pdf_model.dart';
 import 'package:open_pdf/pages/home/widgets/empty_pdf_list_widget.dart';
 import 'package:open_pdf/pages/home/widgets/floating_dial_widget.dart';
+import 'package:open_pdf/pages/home/widgets/home_list_selector.dart';
 import 'package:open_pdf/pages/home/widgets/home_pdf_grid.dart';
 import 'package:open_pdf/pages/home/widgets/home_pdf_list.dart';
 import 'package:open_pdf/pages/home/widgets/multi_select_button.dart';
 import 'package:open_pdf/pages/home/widgets/pop_up_menu_button.dart';
 import 'package:open_pdf/pages/home/widgets/view_mode_buttons_row.dart';
+import 'package:open_pdf/providers/download_provider.dart';
 import 'package:open_pdf/providers/pdf_provider.dart';
 import 'package:open_pdf/utils/constants.dart';
 import 'package:open_pdf/utils/enumerates.dart';
@@ -22,11 +25,45 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   late final PdfProvider pdfProvider;
+  late final DownloadProvider downloadProvider;
+
+  List<PdfModel> getFilteredAndSortedPdfList() {
+    final Map<String, PdfModel> pdfMap =
+        pdfProvider.selectedCheckList == CheckList.all
+            ? getTotalPdfMap(
+                pdfProvider.totalPdfList, downloadProvider.downloadedPdfMap)
+            : pdfProvider.selectedCheckList == CheckList.local
+                ? pdfProvider.totalPdfList
+                : downloadProvider.downloadedPdfMap;
+
+    List<PdfModel> pdfList = pdfMap.values
+        .where((pdf) =>
+            pdf.downloadStatus == DownloadTaskStatus.complete.name &&
+            pdf.lastOpened != null)
+        .toList();
+
+    pdfList.sort((a, b) => b.lastOpened!.compareTo(a.lastOpened!));
+
+    // log("sorted pdf list ${pdfList.length} map ${pdfMap.length} ${pdfProvider.selectedCheckList}");
+    List<PdfModel> uniquePdfList = pdfList.toSet().toList();
+
+    // for (PdfModel element in uniquePdfList) {
+    //   debugPrint("Sorted ${element.id} ${element.fileName}");
+    // }
+
+    return uniquePdfList;
+  }
+
+  Map<String, PdfModel> getTotalPdfMap(
+      Map<String, PdfModel> map1, Map<String, PdfModel> map2) {
+    return {...map1, ...map2};
+  }
 
   @override
   void initState() {
     super.initState();
     pdfProvider = context.read<PdfProvider>();
+    downloadProvider = context.read<DownloadProvider>();
   }
 
   @override
@@ -57,35 +94,33 @@ class _HomePageState extends State<HomePage> {
             10.hSpace,
           ],
         ),
-        body: Consumer<PdfProvider>(
-          builder: (context, provider, _) {
-            final List<PdfModel> pdfList =
-                provider.getFilteredAndSortedPdfList();
-            return Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                pdfList.isEmpty
-                    ? const EmptyPdfListWidget()
-                    : Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Column(
+        body: Consumer2<PdfProvider, DownloadProvider>(
+          builder: (context, pdfProvider, downloadProvider, _) {
+            final List<PdfModel> pdfList = getFilteredAndSortedPdfList();
+            return pdfList.isEmpty
+                ? const EmptyPdfListWidget()
+                : Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      children: [
+                        const Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const ViewModeButtonsRow(),
-                            10.vSpace,
-                            Expanded(
-                              child: provider.viewMode == ViewMode.list
-                                  ? HomePdfListView(
-                                      pdfLists: pdfList,
-                                    )
-                                  : HomePdfGridView(
-                                      pdfLists: pdfList,
-                                    ),
-                            ),
+                            HomeListSelector(),
+                            ViewModeButtonsRow(),
                           ],
                         ),
-                      ),
-              ],
-            );
+                        10.vSpace,
+                        pdfProvider.viewMode == ViewMode.list
+                            ? HomePdfListView(
+                                pdfLists: pdfList,
+                              )
+                            : HomePdfGridView(
+                                pdfLists: pdfList,
+                              ),
+                      ],
+                    ),
+                  );
           },
         ),
         floatingActionButton: const FloatingDial(),
