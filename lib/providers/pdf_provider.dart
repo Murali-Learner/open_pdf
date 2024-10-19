@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 import 'dart:ui';
@@ -380,6 +381,13 @@ class PdfProvider with ChangeNotifier {
     }
 
     return fileName;
+  }
+
+  Future<String> convertBase64(String filePath) async {
+    final File pdfFile = File(filePath);
+    List<int> pdfBytes = await pdfFile.readAsBytes();
+    String base64File = base64Encode(pdfBytes);
+    return base64File;
   }
 
   Future<void> pickFile() async {

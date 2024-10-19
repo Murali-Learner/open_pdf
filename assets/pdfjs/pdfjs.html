@@ -3,30 +3,65 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PDF Viewer</title>
     <style>
         body {
             margin: 0;
-            overflow: hidden;
+            background-color: #f0f0f0;
             display: flex;
             justify-content: center;
             align-items: center;
+
+            overflow: scroll;
+        }
+
+
+        #pdf-container {
+            width: 100%;
+            display: block;
+            overflow-y: auto;
+            /* Ensure vertical scrolling if needed */
+            overflow-x: hidden;
+            /* Prevent horizontal scrolling */
+            padding: 20px;
+            /* Optional padding around the PDF */
+            background-color: #f0f0f0;
+            /* Light background for clarity */
+        }
+
+
+        .pdf-page {
+            position: relative;
+            display: inline-block;
         }
 
         #pdf-canvas {
+            display: block;
+            margin: 0 auto;
+            max-width: 100vw;
+            /* Set the canvas width to the viewport width */
+            height: auto;
+            /* Adjust the height proportionally */
             border: 1px solid black;
         }
 
-        .container {
-            overflow: scroll;
+        .textLayer {
+            position: absolute;
+            left: 0;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            overflow: hidden;
+            opacity: 0.2;
         }
     </style>
 </head>
 
 <body>
-    <div id="pdf-container" style="position: relative;">
-        <canvas id="pdf-canvas"></canvas>
+    <div id="pdf-container">
+        <div class="pdf-page">
+            <canvas id="pdf-canvas"></canvas>
+        </div>
     </div>
     <script src="pdf.js"></script>
     <script src="script.js"></script>

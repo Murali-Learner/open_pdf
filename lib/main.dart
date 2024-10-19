@@ -6,6 +6,7 @@ import 'package:open_pdf/main/main_page.dart';
 import 'package:open_pdf/providers/dictionary_provider.dart';
 import 'package:open_pdf/providers/download_provider.dart';
 import 'package:open_pdf/providers/pdf_control_provider.dart';
+import 'package:open_pdf/providers/pdf_js_provider.dart';
 import 'package:open_pdf/providers/pdf_provider.dart';
 import 'package:open_pdf/providers/theme_provider.dart';
 import 'package:open_pdf/utils/theme_data.dart';
@@ -39,6 +40,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => PdfControlProvider()),
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => DownloadProvider()),
+        ChangeNotifierProvider(create: (_) => PdfJsProvider()),
       ],
       child: Consumer<ThemeProvider>(builder: (context, provider, _) {
         return MaterialApp(

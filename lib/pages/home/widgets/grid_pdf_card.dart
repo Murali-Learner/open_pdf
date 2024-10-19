@@ -38,8 +38,11 @@ class GridPdfCard extends StatelessWidget {
             await context.read<DownloadProvider>().updateLastOpenedValue(pdf);
 
             pdfProvider.clearSelectedFiles();
+            final base64 = await pdfProvider.convertBase64(pdf.filePath!);
             context.push(
-              navigateTo: PdfJsView(),
+              navigateTo: PdfJsView(
+                base64: base64,
+              ),
               //  ViewPdfPage(
               //   pdf: pdf,
               // ),

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:open_pdf/pages/download/downloads_page.dart';
-import 'package:open_pdf/pages/pdfViewer/view_pdf_page.dart';
+import 'package:open_pdf/pages/pdfViewer/pdf_js_view.dart';
 import 'package:open_pdf/providers/pdf_provider.dart';
 import 'package:open_pdf/utils/extensions/context_extension.dart';
 import 'package:provider/provider.dart';
@@ -47,13 +47,18 @@ class EmptyPdfListWidget extends StatelessWidget {
                   onPressed: () async {
                     final provider = context.read<PdfProvider>();
                     provider.clearSelectedFiles();
-                    await context
+                    context
                         .read<PdfProvider>()
                         .pickFile()
-                        .whenComplete(() {
+                        .whenComplete(() async {
                       if (provider.currentPDF != null) {
+                        final base64 = await provider
+                            .convertBase64(provider.currentPDF!.filePath!);
+
                         context.push(
-                            navigateTo: ViewPdfPage(pdf: provider.currentPDF!));
+                            navigateTo: PdfJsView(
+                          base64: base64,
+                        ));
                       }
                     });
                   },
