@@ -3,30 +3,24 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>PDF Viewer</title>
     <style>
-        body {
+        body,
+        html {
             margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            min-height: 100vh;
-            padding: 40px 20px;
-            box-sizing: border-box;
-            margin-top: 20px;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
             background-color: rgb(1, 1, 15);
         }
 
         #pdf-container {
-            width: 100%;
-            max-width: 800px;
-            padding: 20px;
-            box-sizing: border-box;
-            margin-top: 100px;
             display: flex;
-            flex-direction: column;
+            justify-content: center;
             align-items: center;
-
+            height: 100vh;
+            width: 100vw;
+            box-sizing: border-box;
+            padding: 20px;
         }
 
         .pdf-page {
@@ -34,22 +28,12 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            width: 100%;
-            max-width: 100%;
-            margin-bottom: 40px;
-            padding-bottom: 40px;
-        }
-
-        .pdf-page:last-child {
-            margin-bottom: 0;
-            padding-bottom: 0;
-            border-bottom: none;
         }
 
         canvas {
             max-width: 100%;
-            height: auto;
-            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+            max-height: 100%;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
         }
 
         .textLayer {
