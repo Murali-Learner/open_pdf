@@ -10,39 +10,33 @@
             background-color: #f0f0f0;
             display: flex;
             justify-content: center;
-            align-items: center;
-
-            overflow: scroll;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 40px 20px;
+            box-sizing: border-box;
         }
-
 
         #pdf-container {
             width: 100%;
-            display: block;
-            overflow-y: auto;
-            /* Ensure vertical scrolling if needed */
-            overflow-x: hidden;
-            /* Prevent horizontal scrolling */
+            max-width: 800px;
+            /* Adjust this value as needed */
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             padding: 20px;
-            /* Optional padding around the PDF */
-            background-color: #f0f0f0;
-            /* Light background for clarity */
+            box-sizing: border-box;
+            margin-top: 40px;
         }
-
 
         .pdf-page {
             position: relative;
-            display: inline-block;
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
         }
 
-        #pdf-canvas {
-            display: block;
-            margin: 0 auto;
-            max-width: 100vw;
-            /* Set the canvas width to the viewport width */
+        canvas {
+            max-width: 100%;
             height: auto;
-            /* Adjust the height proportionally */
-            border: 1px solid black;
         }
 
         .textLayer {
@@ -53,16 +47,25 @@
             bottom: 0;
             overflow: hidden;
             opacity: 0.2;
+            line-height: 1.0;
+        }
+
+        .textLayer>span {
+            color: transparent;
+            position: absolute;
+            white-space: pre;
+            cursor: text;
+            transform-origin: 0% 0%;
+        }
+
+        .textLayer ::selection {
+            background: rgba(0, 0, 255, 0.3);
         }
     </style>
 </head>
 
 <body>
-    <div id="pdf-container">
-        <div class="pdf-page">
-            <canvas id="pdf-canvas"></canvas>
-        </div>
-    </div>
+    <div id="pdf-container"></div>
     <script src="pdf.js"></script>
     <script src="script.js"></script>
 </body>
