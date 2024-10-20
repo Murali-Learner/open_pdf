@@ -122,7 +122,7 @@ class _ViewPdfPageState extends State<ViewPdfPage> {
                     ),
                   if (viewProvider.showAppbar)
                     PdfViewAppBar(
-                      pdf: widget.pdf,
+                      pdfName: widget.pdf.fileName!,
                     )
                 ],
               ),

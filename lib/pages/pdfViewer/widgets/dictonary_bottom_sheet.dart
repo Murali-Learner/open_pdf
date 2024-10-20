@@ -4,8 +4,9 @@ import 'package:open_pdf/pages/dictionary/widgets/dictionary_column.dart';
 class DictionaryBottomSheet extends StatelessWidget {
   const DictionaryBottomSheet({
     super.key,
+    this.searchWord = '',
   });
-
+  final String searchWord;
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -17,7 +18,9 @@ class DictionaryBottomSheet extends StatelessWidget {
           top: Radius.circular(16.0),
         ),
       ),
-      child: const DictionaryPageColumn(),
+      child: DictionaryPageColumn(
+        searchWord: searchWord,
+      ),
     );
   }
 }

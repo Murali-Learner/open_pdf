@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:open_pdf/pages/pdfViewer/widgets/dictonary_bottom_sheet.dart';
 import 'package:open_pdf/pages/pdfViewer/widgets/page_information_widget.dart';
 import 'package:open_pdf/providers/pdf_control_provider.dart';
+import 'package:open_pdf/providers/pdf_js_provider.dart';
 import 'package:open_pdf/utils/constants.dart';
 import 'package:open_pdf/utils/extensions/context_extension.dart';
 import 'package:provider/provider.dart';
@@ -12,7 +13,8 @@ class PdfControlButtons extends StatelessWidget {
   });
   @override
   Widget build(BuildContext context) {
-    return Consumer<PdfControlProvider>(builder: (context, provider, _) {
+    return Consumer2<PdfControlProvider, PdfJsProvider>(
+        builder: (context, pdfProvider, pdfJsProvider, _) {
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 10),
         child: Material(
@@ -43,22 +45,27 @@ class PdfControlButtons extends StatelessWidget {
                 // ),
 
                 IconButton(
-                  tooltip: "Next page",
-                  icon: Icon(
-                    Icons.arrow_downward,
-                    color: ColorConstants.amberColor,
-                  ),
-                  onPressed: () async => await provider.nextPage(),
-                ),
-                IconButton(
                   tooltip: "Previous page",
                   icon: Icon(
-                    Icons.arrow_upward,
+                    Icons.arrow_back,
                     color: ColorConstants.amberColor,
                   ),
-                  onPressed: () async => await provider.previousPage(),
+                  onPressed: () async {
+                    await pdfJsProvider.changePage(false);
+                    // return await provider.previousPage();
+                  },
                 ),
-
+                IconButton(
+                  tooltip: "Next page",
+                  icon: Icon(
+                    Icons.arrow_forward,
+                    color: ColorConstants.amberColor,
+                  ),
+                  onPressed: () async {
+                    await pdfJsProvider.changePage(true);
+                    // await provider.nextPage();
+                  },
+                ),
                 const PageInformationWidget(),
                 IconButton(
                   tooltip: "Open dictionary",

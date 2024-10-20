@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:open_pdf/models/pdf_model.dart';
 import 'package:open_pdf/pages/pdfViewer/view_pdf_page.dart';
 import 'package:open_pdf/utils/constants.dart';
 import 'package:open_pdf/utils/extensions/context_extension.dart';
@@ -7,9 +6,9 @@ import 'package:open_pdf/utils/extensions/context_extension.dart';
 class PdfViewAppBar extends StatelessWidget {
   const PdfViewAppBar({
     super.key,
-    required this.pdf,
+    required this.pdfName,
   });
-  final PdfModel pdf;
+  final String pdfName;
 
   @override
   Widget build(BuildContext context) {
@@ -39,9 +38,9 @@ class PdfViewAppBar extends StatelessWidget {
           Expanded(
             flex: 6,
             child: Tooltip(
-              message: pdf.fileName,
+              message: pdfName,
               child: Text(
-                "${pdf.fileName}",
+                "${pdfName}",
                 overflow: TextOverflow.ellipsis,
                 style: context.textTheme.bodyLarge!
                     .copyWith(fontSize: 20, fontWeight: FontWeight.bold),

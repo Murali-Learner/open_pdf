@@ -20,18 +20,17 @@ function base64ToUint8Array(base64) {
   return uint8Array;
 }
 
-// Render the PDF page with the current scale
 function renderPage(pageNum, scale = currentScale) {
   pdfDoc.getPage(pageNum).then((page) => {
     const viewport = page.getViewport({ scale: 1 });
-    const containerWidth = container.clientWidth - 40; // Subtract padding
-    const containerHeight = window.innerHeight; // Subtract some space for margins
+    const containerWidth = container.clientWidth - 40;
+    const containerHeight = window.innerHeight;
     const scaleWidth = containerWidth / viewport.width;
     const scaleHeight = containerHeight / viewport.height;
     const baseScale = Math.min(scaleWidth, scaleHeight);
     const scaledViewport = page.getViewport({ scale: baseScale * scale });
 
-    container.innerHTML = ""; // Clear previous content
+    container.innerHTML = "";
 
     const pageDiv = document.createElement("div");
     pageDiv.className = "pdf-page";
@@ -67,100 +66,34 @@ function renderPage(pageNum, scale = currentScale) {
       });
     });
   });
+  window.flutter_inappwebview.callHandler("onPageChanged", currentPage);
+
 }
 
-// Load the PDF document from base64 data
 function renderPdf(pdfBase64) {
   pdfjsLib
     .getDocument({ data: base64ToUint8Array(pdfBase64) })
     .promise.then((pdf) => {
       pdfDoc = pdf;
       renderPage(currentPage);
+      window.flutter_inappwebview.callHandler("totalPdfPages", pdfDoc.numPages);
+
     })
     .catch((error) => {
       console.error("Error loading PDF:", error);
     });
 }
 
-// Handle pinch to zoom
-function handlePinch(e) {
-  e.preventDefault();
-  if (e.touches.length === 2) {
-    const touch1 = e.touches[0];
-    const touch2 = e.touches[1];
-    const distance = Math.hypot(
-      touch1.clientX - touch2.clientX,
-      touch1.clientY - touch2.clientY
-    );
-
-    if (initialPinchDistance === 0) {
-      initialPinchDistance = distance;
-    } else {
-      const scale = distance / initialPinchDistance;
-      currentScale = Math.max(1, Math.min(3, currentScale * scale));
-      renderPage(currentPage, currentScale);
-    }
-    isPinching = true;
-  }
+function jumpToPage(pageNum) {
+  renderPage(pageNum);
 }
 
-function handleSwipe() {
-  const swipeThreshold = 50;
-  if (!isZoomed) {
-    if (Math.abs(startX - endX) > Math.abs(startY - endY)) {
-      // Horizontal swipe
-      if (startX - endX > swipeThreshold && currentPage < pdfDoc.numPages) {
-        currentPage++;
-        renderPage(currentPage);
-      } else if (endX - startX > swipeThreshold && currentPage > 1) {
-        currentPage--;
-        renderPage(currentPage);
-      }
-    } else {
-      // Vertical swipe
-      if (startY - endY > swipeThreshold && currentPage < pdfDoc.numPages) {
-        currentPage++;
-        renderPage(currentPage);
-      } else if (endY - startY > swipeThreshold && currentPage > 1) {
-        currentPage--;
-        renderPage(currentPage);
-      }
-    }
+function changePage(isNextPage) {
+  if (isNextPage && currentPage < pdfDoc.numPages) {
+    currentPage++;
+    renderPage(currentPage);
+  } else if (!isNextPage && currentPage > 1) {
+    currentPage--;
+    renderPage(currentPage);
   }
 }
-
-container.addEventListener("touchstart", (e) => {
-  startX = e.touches[0].clientX;
-  startY = e.touches[0].clientY;
-  initialPinchDistance = 0;
-  isPinching = false;
-
-  const currentTime = new Date().getTime();
-  const tapLength = currentTime - lastTapTime;
-  if (tapLength < 300 && tapLength > 0) {
-    e.preventDefault();
-    currentScale = isZoomed ? 1 : 2;
-    isZoomed = !isZoomed;
-    renderPage(currentPage, currentScale);
-  }
-  lastTapTime = currentTime;
-});
-
-container.addEventListener("touchmove", (e) => {
-  if (e.touches.length === 2) {
-    handlePinch(e);
-  } else if (isZoomed) {
-    // Pan logic can be implemented if necessary
-  } else {
-    endX = e.touches[0].clientX;
-    endY = e.touches[0].clientY;
-  }
-});
-
-container.addEventListener("touchend", (e) => {
-  if (!isPinching && !isZoomed) {
-    handleSwipe();
-  }
-  initialPinchDistance = 0;
-  isPinching = false;
-});

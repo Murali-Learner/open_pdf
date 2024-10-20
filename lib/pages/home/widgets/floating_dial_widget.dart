@@ -66,24 +66,16 @@ class FloatingDial extends StatelessWidget {
                     backgroundColor: ColorConstants.color,
                     onTap: () async {
                       pdfProvider.clearSelectedFiles();
-                      await context.read<PdfProvider>().pickFile().whenComplete(
+                      context.read<PdfProvider>().pickFile().whenComplete(
                         () async {
                           if (pdfProvider.currentPDF != null) {
-                            pdfProvider.clearSelectedFiles();
-                            await context
-                                .read<PdfProvider>()
-                                .pickFile()
-                                .whenComplete(() async {
-                              if (pdfProvider.currentPDF != null) {
-                                final base64 = await pdfProvider.convertBase64(
-                                    pdfProvider.currentPDF!.filePath!);
+                            final base64 = await pdfProvider.convertBase64(
+                                pdfProvider.currentPDF!.filePath!);
 
-                                context.push(
-                                    navigateTo: PdfJsView(
-                                  base64: base64,
-                                ));
-                              }
-                            });
+                            context.push(
+                                navigateTo: PdfJsView(
+                              base64: base64,
+                            ));
 
                             // context.push(
                             //     navigateTo:
