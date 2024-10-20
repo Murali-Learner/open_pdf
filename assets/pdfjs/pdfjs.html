@@ -7,36 +7,43 @@
     <style>
         body {
             margin: 0;
-            background-color: #f0f0f0;
             display: flex;
             justify-content: center;
             align-items: flex-start;
             min-height: 100vh;
             padding: 40px 20px;
             box-sizing: border-box;
+            margin-top: 20px;
+            background-color: rgba(255, 255, 255, 0.744);
         }
 
         #pdf-container {
             width: 100%;
             max-width: 800px;
-            /* Adjust this value as needed */
-            background-color: white;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             padding: 20px;
             box-sizing: border-box;
-            margin-top: 40px;
+            margin-top: 100px;
         }
 
         .pdf-page {
             position: relative;
             display: flex;
             justify-content: center;
-            margin-bottom: 20px;
+            margin-bottom: 40px;
+            /* Increased margin between pages */
+            padding-bottom: 40px;
+        }
+
+        .pdf-page:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
         }
 
         canvas {
             max-width: 100%;
             height: auto;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
         }
 
         .textLayer {
