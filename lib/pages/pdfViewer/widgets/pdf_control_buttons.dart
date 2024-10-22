@@ -117,23 +117,10 @@ class ActionsButtonRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer2<PdfControlProvider, PdfJsProvider>(
         builder: (context, pdfProvider, pdfJsProvider, _) {
-      return Row(
-        mainAxisSize: MainAxisSize.max,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.center,
+      return ListView(
+        shrinkWrap: true,
+        scrollDirection: Axis.horizontal,
         children: [
-          // IconButton(
-          //   icon: const Icon(Icons.zoom_in),
-          //   onPressed: () {
-          //     provider.nextPage();
-          //     provider.zoomUp();
-          //   },
-          // ),
-          // IconButton(
-          //   icon: const Icon(Icons.zoom_out),
-          //   onPressed: () => provider.zoomDown(),
-          // ),
-
           IconButton(
             tooltip: "Previous page",
             icon: Icon(
@@ -176,8 +163,19 @@ class ActionsButtonRow extends StatelessWidget {
               );
             },
           ),
-          // const Spacer(),
-          // const ScrollModeButtonsRow(),
+          IconButton(
+            tooltip: "Slider",
+            icon: Icon(
+              pdfJsProvider.showSlider
+                  ? Icons.arrow_drop_down_rounded
+                  : Icons.arrow_drop_up_rounded,
+              color: ColorConstants.amberColor,
+              size: 40,
+            ),
+            onPressed: () async {
+              pdfJsProvider.showSlider = !pdfJsProvider.showSlider;
+            },
+          ),
         ],
       );
     });

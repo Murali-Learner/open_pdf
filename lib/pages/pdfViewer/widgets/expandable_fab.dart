@@ -21,6 +21,7 @@ class ExpandableFabState extends State<ExpandableFab>
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 200),
+      value: 40,
     );
   }
 
@@ -40,25 +41,47 @@ class ExpandableFabState extends State<ExpandableFab>
   @override
   Widget build(BuildContext context) {
     return AnimatedContainer(
+      height: 50,
+      width: _isExpanded ? context.width(90) : 50,
+      curve: Curves.easeIn,
       duration: Constants.globalDuration,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(15),
+        shape: BoxShape.rectangle,
+        color: context.theme.scaffoldBackgroundColor,
+        borderRadius: BorderRadius.circular(20),
       ),
+      alignment: Alignment.center,
       padding: EdgeInsets.zero,
-      width: _isExpanded ? context.screenWidth * 0.9 : 56.0,
-      child: FloatingActionButton.extended(
-        onPressed: () {
-          _toggleFab();
-        },
-        extendedPadding: EdgeInsets.zero,
-
-        // backgroundColor: ColorConstants.amberColor,
-        // elevation: 4.0,
-        label: const ActionsButtonRow(),
-        icon: Padding(
-            padding: const EdgeInsets.only(left: 10),
-            child: Icon(_isExpanded ? Icons.close : Icons.arrow_back_ios)),
-        isExtended: _isExpanded,
+      child: SizedBox(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            if (_isExpanded)
+              const Expanded(
+                child: ActionsButtonRow(),
+              ),
+            IconButton(
+              color: context.theme.scaffoldBackgroundColor,
+              padding: EdgeInsets.zero,
+              onPressed: () {
+                _toggleFab();
+              },
+              icon: Align(
+                alignment:
+                    _isExpanded ? Alignment.centerRight : Alignment.center,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Icon(
+                    _isExpanded
+                        ? Icons.arrow_forward_ios_rounded
+                        : Icons.arrow_back_ios_rounded,
+                    size: 20,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

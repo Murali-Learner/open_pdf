@@ -16,9 +16,12 @@ class PdfJsProvider extends ChangeNotifier {
   int _totalPages = 0;
   bool _isPdfLoading = true;
   String pdfJsHtml = "assets/pdfjs/pdfjs.html";
+  bool _showSlider = false;
+
   int get totalPages => _totalPages;
   int get currentPage => _currentPage;
   bool get pdfLoading => _isPdfLoading;
+  bool get showSlider => _showSlider;
 
   void setTotalPages(int value) {
     _totalPages = value;
@@ -35,6 +38,11 @@ class PdfJsProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  set showSlider(bool slider) {
+    _showSlider = slider;
+    notifyListeners();
+  }
+
   String get errorMessage => _errorMessage;
 
   void setErrorMessage(String message) {
@@ -42,8 +50,11 @@ class PdfJsProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> setWebViewController(InAppWebViewController webViewController,
-      String base64, BuildContext context) async {
+  Future<void> setWebViewController(
+    InAppWebViewController webViewController,
+    String base64,
+    BuildContext context,
+  ) async {
     this.webViewController = webViewController;
     await webViewController.evaluateJavascript(source: "renderPdf('$base64')");
 
@@ -57,6 +68,7 @@ class PdfJsProvider extends ChangeNotifier {
         }
       },
     );
+
     webViewController.addJavaScriptHandler(
       handlerName: 'totalPdfPages',
       callback: (contents) {
@@ -71,7 +83,6 @@ class PdfJsProvider extends ChangeNotifier {
       handlerName: 'copyText',
       callback: (contents) async {
         String? receivedData = contents.first;
-        //  await webViewController.getSelectedText();
         if (receivedData != null) {
           log("copyText  $receivedData");
 
@@ -86,14 +97,11 @@ class PdfJsProvider extends ChangeNotifier {
       handlerName: 'searchDictionary',
       callback: (contents) async {
         String? receivedData = contents.first;
-        //  await webViewController.getSelectedText();
         if (receivedData != null) {
           log("copyText  $receivedData");
 
           final dictionaryProvider = context.read<DictionaryProvider>();
           dictionaryProvider.searchWord(receivedData);
-          webViewController.clearFocus();
-          await hideContextMenu();
 
           showModalBottomSheet(
             showDragHandle: true,
