@@ -8,7 +8,9 @@ import 'package:provider/provider.dart';
 class DictionSearchField extends StatefulWidget {
   const DictionSearchField({
     super.key,
+    this.searchWord = '',
   });
+  final String searchWord;
 
   @override
   State<DictionSearchField> createState() => _DictionSearchFieldState();
@@ -19,7 +21,12 @@ class _DictionSearchFieldState extends State<DictionSearchField> {
 
   @override
   void initState() {
-    _searchController = TextEditingController();
+    _searchController = TextEditingController(
+        text: widget.searchWord.isEmpty ? null : widget.searchWord);
+    setState(() {
+      _searchController.text = widget.searchWord;
+    });
+    debugPrint(" _searchController.text  ${_searchController.text}");
     super.initState();
   }
 

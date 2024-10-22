@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:open_pdf/models/pdf_model.dart';
 import 'package:open_pdf/pages/home/widgets/pdf_card_options.dart';
 import 'package:open_pdf/pages/home/widgets/pdf_info_widget.dart';
@@ -7,7 +8,6 @@ import 'package:open_pdf/providers/download_provider.dart';
 import 'package:open_pdf/providers/pdf_control_provider.dart';
 import 'package:open_pdf/providers/pdf_provider.dart';
 import 'package:open_pdf/utils/constants.dart';
-import 'package:open_pdf/utils/enumerates.dart';
 import 'package:open_pdf/utils/extensions/context_extension.dart';
 import 'package:open_pdf/utils/extensions/spacer_extension.dart';
 import 'package:provider/provider.dart';
@@ -35,7 +35,7 @@ class ListPdfCard extends StatelessWidget {
               },
         onTap: () async {
           debugPrint("pdf  ${pdf.fileName} ${provider.isMultiSelected}");
-          if (pdf.downloadStatus == DownloadStatus.completed.name) {
+          if (pdf.downloadStatus == DownloadTaskStatus.complete.name) {
             if (pdf.isSelected || provider.isMultiSelected) {
               provider.toggleSelectedFiles(pdf);
             } else {

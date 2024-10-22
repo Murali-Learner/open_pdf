@@ -42,92 +42,94 @@ class _ViewPdfPageState extends State<ViewPdfPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer2<PdfControlProvider, PdfProvider>(
-      builder: (context, viewProvider, pdfProvider, _) {
-        final path = widget.pdf.filePath;
+    return Scaffold(
+      body: Consumer2<PdfControlProvider, PdfProvider>(
+        builder: (context, viewProvider, pdfProvider, _) {
+          final path = widget.pdf.filePath;
 
-        if (provider.isLoading) {
-          return const GlobalLoadingWidget();
-        }
+          if (provider.isLoading) {
+            return const GlobalLoadingWidget();
+          }
 
-        if (provider.errorMessage.isNotEmpty) {
-          return Center(child: Text("Error: ${provider.errorMessage}"));
-        }
+          if (provider.errorMessage.isNotEmpty) {
+            return Center(child: Text("Error: ${provider.errorMessage}"));
+          }
 
-        if (path == null || !File(path).existsSync()) {
-          return const Center(child: Text("PDF file not found"));
-        }
-        log("path checking finished ${viewProvider.pdfCurrentPage}");
+          if (path == null || !File(path).existsSync()) {
+            return const Center(child: Text("PDF file not found"));
+          }
+          debugPrint("path checking finished ${viewProvider.pdfCurrentPage}");
 
-        return Scaffold(
-          body: SafeArea(
-            child: Stack(
-              children: [
-                GestureDetector(
-                  onTap: () {
-                    if (viewProvider.showAppbar) {
-                      log("app bar visible, hiding it");
-                      viewProvider.setAppBarVisibility(false);
-                      viewProvider.setPdfToolsVisibility(false);
-                    } else {
-                      log("app bar not visible, showing it");
-                      viewProvider.setAppBarVisibility(true);
-                      viewProvider.setPdfToolsVisibility(true);
-                    }
-                  },
-                  child: AnimatedPadding(
-                    duration: Constants.globalDuration,
-                    padding: EdgeInsets.only(
-                      top: context.height(
-                        viewProvider.showAppbar &&
-                                viewProvider.pdfCurrentPage == 1
-                            ? 7.5
-                            : 0,
+          return Scaffold(
+            body: SafeArea(
+              child: Stack(
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      if (viewProvider.showAppbar) {
+                        log("app bar visible, hiding it");
+                        viewProvider.setAppBarVisibility(false);
+                        viewProvider.setPdfToolsVisibility(false);
+                      } else {
+                        log("app bar not visible, showing it");
+                        viewProvider.setAppBarVisibility(true);
+                        viewProvider.setPdfToolsVisibility(true);
+                      }
+                    },
+                    child: AnimatedPadding(
+                      duration: Constants.globalDuration,
+                      padding: EdgeInsets.only(
+                        top: context.height(
+                          viewProvider.showAppbar &&
+                                  viewProvider.pdfCurrentPage == 1
+                              ? 7.5
+                              : 0,
+                        ),
                       ),
-                    ),
-                    child: SizedBox(
-                      height: MediaQuery.of(context).size.height,
-                      child: PdfViewPinch(
-                        key: ValueKey(path),
-                        controller: pinchController,
-                        padding: viewProvider.showAppbar &&
-                                viewProvider.pdfCurrentPage == 1
-                            ? 20
-                            : 10,
-                        maxScale: 20,
-                        scrollDirection: viewProvider.pdfScrollMode,
-                        onDocumentError: (error) =>
-                            viewProvider.setErrorMessage,
-                        onDocumentLoaded: (document) async {
-                          viewProvider.setTotalPages(document.pagesCount);
-                          viewProvider.init(pinchController);
-                        },
-                        onPageChanged: (page) {
-                          debugPrint(
-                              'page change: $page/${viewProvider.totalPages}');
+                      child: SizedBox(
+                        height: MediaQuery.of(context).size.height,
+                        child: PdfViewPinch(
+                          key: ValueKey(path),
+                          controller: pinchController,
+                          padding: viewProvider.showAppbar &&
+                                  viewProvider.pdfCurrentPage == 1
+                              ? 20
+                              : 10,
+                          maxScale: 20,
+                          scrollDirection: viewProvider.pdfScrollMode,
+                          onDocumentError: (error) =>
+                              viewProvider.setErrorMessage,
+                          onDocumentLoaded: (document) async {
+                            viewProvider.setTotalPages(document.pagesCount);
+                            viewProvider.init(pinchController);
+                          },
+                          onPageChanged: (page) {
+                            debugPrint(
+                                'page change: $page/${viewProvider.totalPages}');
 
-                          provider.setCurrentPage(page);
-                        },
+                            provider.setCurrentPage(page);
+                          },
+                        ),
                       ),
                     ),
                   ),
-                ),
-                if (viewProvider.showPdfTools)
-                  Positioned(
-                    bottom: context.height(5),
-                    left: 0,
-                    right: 0,
-                    child: const PdfControlButtons(),
-                  ),
-                if (viewProvider.showAppbar)
-                  PdfViewAppBar(
-                    pdf: widget.pdf,
-                  )
-              ],
+                  if (viewProvider.showPdfTools)
+                    Positioned(
+                      bottom: context.height(5),
+                      left: 0,
+                      right: 0,
+                      child: const PdfControlButtons(),
+                    ),
+                  if (viewProvider.showAppbar)
+                    PdfViewAppBar(
+                      pdfName: widget.pdf.fileName!,
+                    )
+                ],
+              ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 }

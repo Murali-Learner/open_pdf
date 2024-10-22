@@ -1,14 +1,14 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
-import 'dart:math' hide log;
 import 'dart:ui';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
-import 'package:media_store_plus/media_store_plus.dart';
 import 'package:open_pdf/helpers/hive_helper.dart';
 import 'package:open_pdf/models/pdf_model.dart';
 import 'package:open_pdf/pages/pdfViewer/view_pdf_page.dart';
@@ -22,15 +22,10 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:printing/printing.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
-final mediaStorePlugin = MediaStore();
-
 class PdfProvider with ChangeNotifier {
-  // final NotificationHelper notificationHelper = NotificationHelper();
-
   PdfProvider() {
-    _loadPdfListFromHive();
+    loadPdfListFromHive();
   }
-  var random = Random();
 
   PdfModel? _currentPDF;
   bool _isLoading = false;
@@ -118,8 +113,7 @@ class PdfProvider with ChangeNotifier {
   List<PdfModel> getFilteredAndSortedPdfList() {
     List<PdfModel> pdfList = _totalPdfList.values
         .where((pdf) =>
-            pdf.downloadStatus != DownloadStatus.cancelled.name &&
-            pdf.downloadStatus != DownloadStatus.ongoing.name &&
+            pdf.downloadStatus == DownloadTaskStatus.complete.name &&
             pdf.lastOpened != null)
         .toList();
 
@@ -128,16 +122,19 @@ class PdfProvider with ChangeNotifier {
     return pdfList;
   }
 
-  Future<void> _loadPdfListFromHive() async {
+  Future<void> loadPdfListFromHive() async {
     _totalPdfList = HiveHelper.getHivePdfList();
     debugPrint("_totalPdfList ${_totalPdfList.length}");
     notifyListeners();
+    _totalPdfList.forEach((key, pdf) {
+      debugPrint("_totalPdfList pdfs ${pdf.toJson()}");
+    });
   }
 
   Future<void> askPermissions() async {
     List<Permission> permissions = [
       Permission.storage,
-      // Permission.notification,
+      Permission.notification,
     ];
 
     Map<Permission, PermissionStatus> permissionStatus =
@@ -170,6 +167,7 @@ class PdfProvider with ChangeNotifier {
     notifyListeners();
     log("_isInternetConnected $_isInternetConnected");
     _internetSubscription = connectionChecker.onStatusChange.listen(
+      //Todo: fix it
       (InternetConnectionStatus status) {
         if (status == InternetConnectionStatus.connected) {
           _isInternetConnected = true;
@@ -187,7 +185,7 @@ class PdfProvider with ChangeNotifier {
 
     if (!pdf.isSelected) {
       isMultiSelected = true;
-      //  (true);
+
       _selectedFiles[pdf.id] = pdf;
 
       notifyListeners();
@@ -257,9 +255,7 @@ class PdfProvider with ChangeNotifier {
       await HiveHelper.addOrUpdatePdf(pdf);
       _totalPdfList[pdf.id] = pdf;
       notifyListeners();
-    } else {
-      ToastUtils.showErrorToast("Pdf already exists");
-    }
+    } else {}
   }
 
   void deleteFormHistory(PdfModel pdf) {
@@ -388,6 +384,13 @@ class PdfProvider with ChangeNotifier {
     return fileName;
   }
 
+  Future<String> convertBase64(String filePath) async {
+    final File pdfFile = File(filePath);
+    List<int> pdfBytes = await pdfFile.readAsBytes();
+    String base64File = base64Encode(pdfBytes);
+    return base64File;
+  }
+
   Future<void> pickFile() async {
     setCurrentPDF(null);
     isLoading = true;
@@ -410,7 +413,7 @@ class PdfProvider with ChangeNotifier {
             fileSize: file.lengthSync().readableFileSize,
             fileName: getFileNameFromPath(file.path),
             pageNumber: 0,
-            downloadStatus: DownloadStatus.completed.name,
+            downloadStatus: DownloadTaskStatus.complete.name,
             lastOpened: DateTime.now(),
             createdAt: DateTime.now(),
             thumbnail: thumbnailBytes);

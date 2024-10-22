@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:open_pdf/models/pdf_model.dart';
 import 'package:open_pdf/pages/home/widgets/pdf_card_options.dart';
-import 'package:open_pdf/pages/pdfViewer/view_pdf_page.dart';
+import 'package:open_pdf/pages/pdfViewer/pdf_js_view.dart';
 import 'package:open_pdf/providers/download_provider.dart';
 import 'package:open_pdf/providers/pdf_control_provider.dart';
 import 'package:open_pdf/providers/pdf_provider.dart';
@@ -29,6 +29,7 @@ class GridPdfCard extends StatelessWidget {
           debugPrint("long press ${pdfProvider.selectedFiles.length}");
         },
         onTap: () async {
+          debugPrint("statement ${pdf.toJson()}");
           if (pdf.isSelected || pdfProvider.isMultiSelected) {
             pdfProvider.toggleSelectedFiles(pdf);
           } else {
@@ -37,11 +38,16 @@ class GridPdfCard extends StatelessWidget {
             await context.read<DownloadProvider>().updateLastOpenedValue(pdf);
 
             pdfProvider.clearSelectedFiles();
+            final base64 = await pdfProvider.convertBase64(pdf.filePath!);
+            // if (pdfProvider.currentPDF != null) {
             context.push(
-              navigateTo: ViewPdfPage(
-                pdf: pdf,
-              ),
+              navigateTo: PdfJsView(base64: base64, pdfName: pdf.fileName!),
+
+              //  ViewPdfPage(
+              //   pdf: pdf,
+              // ),
             );
+            // }
           }
         },
         child: Container(

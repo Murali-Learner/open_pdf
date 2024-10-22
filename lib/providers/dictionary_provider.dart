@@ -40,6 +40,7 @@ class DictionaryProvider with ChangeNotifier {
         Word word = Word.fromMap(result);
         _results[word.id] = word;
       }
+      debugPrint("Search Words ${results.length}");
     } catch (e) {
       debugPrint('Error searching word: $e');
     } finally {

@@ -1,8 +1,8 @@
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
+import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:hive/hive.dart';
-import 'package:open_pdf/utils/enumerates.dart';
 
 part 'pdf_model.g.dart';
 
@@ -11,36 +11,39 @@ class PdfModel {
   @HiveField(0)
   final String id;
   @HiveField(1)
+  final String? taskId;
+  @HiveField(2)
   final String? filePath;
-  @HiveField(3)
-  final String? fileName;
   @HiveField(4)
-  final int? pageNumber;
+  final String? fileName;
   @HiveField(5)
-  final DateTime? lastOpened;
+  final int? pageNumber;
   @HiveField(6)
-  final DateTime? createdAt;
+  final DateTime? lastOpened;
   @HiveField(7)
-  final String? networkUrl;
+  final DateTime? createdAt;
   @HiveField(8)
-  final String? fileSize;
+  final String? networkUrl;
   @HiveField(9)
-  final double? downloadProgress;
+  final String? fileSize;
   @HiveField(10)
-  final bool isOpened;
+  final double? downloadProgress;
   @HiveField(11)
-  bool isFav;
+  final bool isOpened;
   @HiveField(12)
-  final String? downloadStatus;
+  bool isFav;
   @HiveField(13)
-  final Uint8List? thumbnail;
+  final String? downloadStatus;
   @HiveField(14)
+  final Uint8List? thumbnail;
+  @HiveField(15)
   final bool isSelected;
 
   final CancelToken? cancelToken;
 
   PdfModel({
     required this.id,
+    this.taskId,
     this.filePath,
     this.fileName,
     this.pageNumber,
@@ -70,10 +73,12 @@ class PdfModel {
       networkUrl: json['networkUrl'] ?? '',
       isOpened: json['isOpened'] ?? false,
       isFav: json['isFav'] ?? false,
-      downloadStatus: DownloadStatus.values[json['downloadStatus'] ?? 0].name,
+      downloadStatus:
+          DownloadTaskStatus.values[json['downloadStatus'] ?? 0].name,
       thumbnail: json['thumbnail'],
       isSelected: json['isSelected'],
       cancelToken: json['cancelToken'],
+      taskId: json['taskId'] ?? '',
     );
   }
 
@@ -91,6 +96,7 @@ class PdfModel {
       'isOpened': isOpened,
       'isFav': isFav,
       'downloadStatus': downloadStatus,
+      'taskId': taskId,
       // 'thumbnail': thumbnail,
       'isSelected': isSelected,
       'cancelToken': cancelToken,
@@ -110,6 +116,7 @@ class PdfModel {
     bool? isOpened,
     bool? isFav,
     String? downloadStatus,
+    String? taskId,
     Uint8List? thumbnail,
     bool? isSelected,
     CancelToken? cancelToken,
@@ -123,6 +130,7 @@ class PdfModel {
       createdAt: createdAt ?? this.createdAt,
       networkUrl: networkUrl ?? this.networkUrl,
       fileSize: fileSize ?? this.fileSize,
+      taskId: taskId ?? this.taskId,
       downloadProgress: downloadProgress ?? this.downloadProgress,
       isOpened: isOpened ?? this.isOpened,
       isFav: isFav ?? this.isFav,

@@ -33,7 +33,7 @@ class NoInternetScreen extends StatelessWidget {
           const SizedBox(height: 20),
           ElevatedButton(
             onPressed: () async {
-              await context.read<PdfProvider>().internetSubscription();
+              context.read<PdfProvider>().internetSubscription();
             },
             child: Text('Retry', style: context.textTheme.bodyMedium),
           ),

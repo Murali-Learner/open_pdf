@@ -18,53 +18,56 @@ class PdfModelAdapter extends TypeAdapter<PdfModel> {
     };
     return PdfModel(
       id: fields[0] as String,
-      filePath: fields[1] as String?,
-      fileName: fields[3] as String?,
-      pageNumber: fields[4] as int?,
-      lastOpened: fields[5] as DateTime?,
-      createdAt: fields[6] as DateTime?,
-      fileSize: fields[8] as String?,
-      networkUrl: fields[7] as String?,
-      downloadProgress: fields[9] as double?,
-      isOpened: fields[10] as bool,
-      isFav: fields[11] as bool,
-      downloadStatus: fields[12] as String?,
-      thumbnail: fields[13] as Uint8List?,
-      isSelected: fields[14] as bool,
+      taskId: fields[1] as String?,
+      filePath: fields[2] as String?,
+      fileName: fields[4] as String?,
+      pageNumber: fields[5] as int?,
+      lastOpened: fields[6] as DateTime?,
+      createdAt: fields[7] as DateTime?,
+      fileSize: fields[9] as String?,
+      networkUrl: fields[8] as String?,
+      downloadProgress: fields[10] as double?,
+      isOpened: fields[11] as bool,
+      isFav: fields[12] as bool,
+      downloadStatus: fields[13] as String?,
+      thumbnail: fields[14] as Uint8List?,
+      isSelected: fields[15] as bool,
     );
   }
 
   @override
   void write(BinaryWriter writer, PdfModel obj) {
     writer
-      ..writeByte(14)
+      ..writeByte(15)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
+      ..write(obj.taskId)
+      ..writeByte(2)
       ..write(obj.filePath)
-      ..writeByte(3)
-      ..write(obj.fileName)
       ..writeByte(4)
-      ..write(obj.pageNumber)
+      ..write(obj.fileName)
       ..writeByte(5)
-      ..write(obj.lastOpened)
+      ..write(obj.pageNumber)
       ..writeByte(6)
-      ..write(obj.createdAt)
+      ..write(obj.lastOpened)
       ..writeByte(7)
-      ..write(obj.networkUrl)
+      ..write(obj.createdAt)
       ..writeByte(8)
-      ..write(obj.fileSize)
+      ..write(obj.networkUrl)
       ..writeByte(9)
-      ..write(obj.downloadProgress)
+      ..write(obj.fileSize)
       ..writeByte(10)
-      ..write(obj.isOpened)
+      ..write(obj.downloadProgress)
       ..writeByte(11)
-      ..write(obj.isFav)
+      ..write(obj.isOpened)
       ..writeByte(12)
-      ..write(obj.downloadStatus)
+      ..write(obj.isFav)
       ..writeByte(13)
-      ..write(obj.thumbnail)
+      ..write(obj.downloadStatus)
       ..writeByte(14)
+      ..write(obj.thumbnail)
+      ..writeByte(15)
       ..write(obj.isSelected);
   }
 

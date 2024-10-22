@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:open_pdf/pages/download/downloads_page.dart';
-import 'package:open_pdf/pages/pdfViewer/view_pdf_page.dart';
+import 'package:open_pdf/pages/pdfViewer/pdf_js_view.dart';
 import 'package:open_pdf/providers/pdf_provider.dart';
 import 'package:open_pdf/providers/theme_provider.dart';
 import 'package:open_pdf/utils/constants.dart';
@@ -66,12 +66,22 @@ class FloatingDial extends StatelessWidget {
                     backgroundColor: ColorConstants.color,
                     onTap: () async {
                       pdfProvider.clearSelectedFiles();
-                      await context.read<PdfProvider>().pickFile().whenComplete(
-                        () {
+                      context.read<PdfProvider>().pickFile().whenComplete(
+                        () async {
                           if (pdfProvider.currentPDF != null) {
+                            final base64 = await pdfProvider.convertBase64(
+                                pdfProvider.currentPDF!.filePath!);
+
                             context.push(
-                                navigateTo:
-                                    ViewPdfPage(pdf: pdfProvider.currentPDF!));
+                              navigateTo: PdfJsView(
+                                base64: base64,
+                                pdfName: pdfProvider.currentPDF!.fileName!,
+                              ),
+                            );
+
+                            // context.push(
+                            //     navigateTo:
+                            //         ViewPdfPage(pdf: pdfProvider.currentPDF!));
                           }
                         },
                       );

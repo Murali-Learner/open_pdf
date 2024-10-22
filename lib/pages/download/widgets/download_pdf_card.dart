@@ -1,40 +1,36 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
+import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:open_pdf/models/pdf_model.dart';
-import 'package:open_pdf/pages/home/widgets/download_action_button.dart';
+import 'package:open_pdf/pages/download/widgets/download_action_button.dart';
 import 'package:open_pdf/pages/home/widgets/pdf_card_options.dart';
 import 'package:open_pdf/pages/home/widgets/pdf_info_widget.dart';
 import 'package:open_pdf/pages/pdfViewer/view_pdf_page.dart';
+import 'package:open_pdf/providers/download_provider.dart';
 import 'package:open_pdf/providers/pdf_control_provider.dart';
 import 'package:open_pdf/providers/pdf_provider.dart';
-import 'package:open_pdf/utils/enumerates.dart';
 import 'package:open_pdf/utils/extensions/context_extension.dart';
 import 'package:open_pdf/utils/extensions/spacer_extension.dart';
 import 'package:provider/provider.dart';
 
 class DownloadPdfCard extends StatelessWidget {
   final PdfModel pdf;
-
   final int index;
 
   const DownloadPdfCard({super.key, required this.pdf, required this.index});
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<PdfProvider>(builder: (context, provider, _) {
-      log("pdf ${pdf.toJson()}");
+    return Consumer2<PdfProvider, DownloadProvider>(
+        builder: (context, pdfProvider, downloadProvider, _) {
       return GestureDetector(
         onTap: () {
-          debugPrint("pdf  ${pdf.fileName} ${provider.isMultiSelected}");
-          onSingleTap(provider, context);
+          // debugPrint("pdf  ${pdf.toJson()}");
+          onSingleTap(pdfProvider, context);
         },
         child: Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: pdf.isSelected
-                ? context.theme.primaryColor.withOpacity(0.8)
-                : context.theme.primaryColor.withOpacity(0.1),
+            color: context.theme.primaryColor.withOpacity(0.1),
             borderRadius: BorderRadius.circular(8),
             border:
                 Border.all(color: context.theme.primaryColor.withOpacity(0.5)),
@@ -50,8 +46,8 @@ class DownloadPdfCard extends StatelessWidget {
                       pdf: pdf,
                       isDownloadCard: true,
                     ),
-                    // 5.vSpace,
-                    if (pdf.downloadStatus == DownloadStatus.ongoing.name)
+                    if (pdf.downloadStatus == DownloadTaskStatus.running.name ||
+                        pdf.downloadStatus == DownloadTaskStatus.paused.name)
                       Row(
                         children: [
                           Expanded(
@@ -61,16 +57,16 @@ class DownloadPdfCard extends StatelessWidget {
                           ),
                           5.hSpace,
                           Text(
-                            "${(pdf.downloadProgress! * 100).toStringAsFixed(0)}%",
+                            "${(pdf.downloadProgress!).toStringAsFixed(0)}%",
                             style: context.textTheme.bodyLarge,
-                          )
+                          ),
                         ],
-                      )
+                      ),
                   ],
                 ),
               ),
               10.hSpace,
-              pdf.downloadStatus == DownloadStatus.completed.name
+              pdf.downloadStatus == DownloadTaskStatus.complete.name
                   ? PdfCardOptions(pdf: pdf, index: index)
                   : DownloadActionButton(pdf: pdf),
             ],
@@ -80,19 +76,14 @@ class DownloadPdfCard extends StatelessWidget {
     });
   }
 
-  void onSingleTap(PdfProvider provider, BuildContext context) {
-    if (pdf.downloadStatus == DownloadStatus.completed.name) {
-      if (pdf.isSelected || provider.isMultiSelected) {
-        provider.toggleSelectedFiles(pdf);
-      } else {
-        context.read<PdfControlProvider>().resetValues();
-
-        context.push(
-          navigateTo: ViewPdfPage(
-            pdf: pdf,
-          ),
-        );
-      }
+  void onSingleTap(PdfProvider provider, BuildContext context) async {
+    if (pdf.downloadStatus == DownloadTaskStatus.complete.name) {
+      context.read<PdfControlProvider>().resetValues();
+      context.push(
+        navigateTo: ViewPdfPage(
+          pdf: pdf,
+        ),
+      );
     }
   }
 }

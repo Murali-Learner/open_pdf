@@ -16,7 +16,7 @@ description: "OpenPDF is a Flutter-based app for efficient PDF management, allow
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.0.0+1
+version: 1.0.0+2
 
 environment:
   sdk: ^3.5.1
@@ -47,6 +47,7 @@ dependencies:
   permission_handler: ^11.3.1
   media_store_plus: ^0.1.2
   dio:
+  path:
   hive: ^2.2.3
   hive_flutter: ^1.1.0
   flutter_speed_dial: ^7.0.0
@@ -60,6 +61,10 @@ dependencies:
   modal_progress_hud_nsn: ^0.5.1
   pdfx: ^2.8.0
   pdf_render: ^1.4.7
+  flutter_downloader: ^1.11.8
+  flutter_inappwebview:
+  context_menus: ^2.0.0+1
+  url_launcher: ^6.3.1
 
 
 dev_dependencies:
@@ -89,6 +94,7 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/
+    - assets/pdfjs/
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

@@ -1,18 +1,18 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
+import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:open_pdf/pages/download/widgets/download_pdf_card.dart';
 import 'package:open_pdf/providers/download_provider.dart';
 import 'package:open_pdf/providers/pdf_provider.dart';
-import 'package:open_pdf/utils/enumerates.dart';
+import 'package:open_pdf/utils/constants.dart';
+import 'package:open_pdf/utils/extensions/context_extension.dart';
 import 'package:provider/provider.dart';
 
 class DownloadListView extends StatefulWidget {
   const DownloadListView({
-    required this.status,
+    required this.statuses,
     super.key,
   });
-  final DownloadStatus status;
+  final List<DownloadTaskStatus> statuses;
 
   @override
   DownloadListViewState createState() => DownloadListViewState();
@@ -24,11 +24,19 @@ class DownloadListViewState extends State<DownloadListView> {
     return Consumer2<DownloadProvider, PdfProvider>(
       builder: (context, downloadProvider, pdfProvider, _) {
         final filteredPdfList =
-            downloadProvider.getFilteredListByStatus(widget.status);
-        log("_total Pdf list ${pdfProvider.totalPdfList.length}");
+            downloadProvider.getFilteredListByStatus(widget.statuses);
+
         if (filteredPdfList.isEmpty) {
           return Center(
-            child: Text("No ${widget.status.name} downloads."),
+            child: Text(
+              "No ${widget.statuses.first.name} downloads.",
+              style: context.textTheme.labelLarge!.copyWith(
+                color: ColorConstants.amberColor,
+                fontSize: 20,
+                // letterSpacing: 0.5,
+                // fontWeight: FontWeight.bold,
+              ),
+            ),
           );
         }
 
@@ -40,6 +48,9 @@ class DownloadListViewState extends State<DownloadListView> {
             return const SizedBox(height: 10);
           },
           itemBuilder: (BuildContext context, int index) {
+            debugPrint(
+                "filteredPdfList ${filteredPdfList[index].downloadStatus}");
+
             return DownloadPdfCard(
               pdf: filteredPdfList[index],
               index: index,

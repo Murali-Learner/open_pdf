@@ -18,18 +18,25 @@ class DownloadPage extends StatefulWidget {
 
 class DownloadPageState extends State<DownloadPage> {
   late final PdfProvider provider;
+  late final DownloadProvider downloadProvider;
 
   @override
   void initState() {
     super.initState();
     provider = context.read<PdfProvider>();
+    downloadProvider = context.read<DownloadProvider>();
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      init();
+    });
+  }
+
+  void init() async {
     provider.internetSubscription();
   }
 
   @override
   void dispose() {
     provider.internetDispose();
-    provider.internetSubscription();
     super.dispose();
   }
 

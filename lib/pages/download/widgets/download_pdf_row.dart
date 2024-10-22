@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:open_pdf/global_widgets/global_text_form_fields.dart';
 import 'package:open_pdf/pages/download/widgets/download_button.dart';
+import 'package:open_pdf/providers/download_provider.dart';
 import 'package:open_pdf/providers/theme_provider.dart';
 import 'package:open_pdf/utils/extensions/context_extension.dart';
 import 'package:provider/provider.dart';
@@ -15,11 +16,11 @@ class DownloadPdfRow extends StatefulWidget {
 class DownloadPdfRowState extends State<DownloadPdfRow> {
   final TextEditingController searchController = TextEditingController();
   String _pdfUrl = '';
-
+  late final DownloadProvider downloadProvider;
   @override
   void initState() {
     super.initState();
-
+    downloadProvider = context.read<DownloadProvider>();
     searchController.addListener(() {
       setState(() {
         _pdfUrl = searchController.text.trim();

@@ -22,7 +22,7 @@ class PdfOptionItem extends StatelessWidget {
       ),
       title: Text(
         text,
-        style: TextStyle(
+        style: const TextStyle(
           fontSize: 14,
         ),
       ),

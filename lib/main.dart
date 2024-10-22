@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:media_store_plus/media_store_plus.dart';
 import 'package:open_pdf/helpers/hive_helper.dart';
 import 'package:open_pdf/main/main_page.dart';
 import 'package:open_pdf/providers/dictionary_provider.dart';
 import 'package:open_pdf/providers/download_provider.dart';
 import 'package:open_pdf/providers/pdf_control_provider.dart';
+import 'package:open_pdf/providers/pdf_js_provider.dart';
 import 'package:open_pdf/providers/pdf_provider.dart';
 import 'package:open_pdf/providers/theme_provider.dart';
 import 'package:open_pdf/utils/theme_data.dart';
@@ -19,8 +21,9 @@ void main() async {
   HiveHelper hiveHelper = HiveHelper();
   await hiveHelper.initHive();
 
-  // NotificationHelper notificationHelper = NotificationHelper();
-  // notificationHelper.initializeNotifications();
+  await FlutterDownloader.initialize(
+    ignoreSsl: false,
+  );
 
   runApp(const MyApp());
 }
@@ -36,13 +39,8 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => DictionaryProvider()),
         ChangeNotifierProvider(create: (_) => PdfControlProvider()),
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
-        ChangeNotifierProxyProvider<PdfProvider, DownloadProvider>(
-          create: (context) => DownloadProvider(
-              Provider.of<PdfProvider>(context, listen: false)),
-          update: (context, pdfProvider, downloadProvider) =>
-              (downloadProvider ?? DownloadProvider(pdfProvider))
-                ..pdfProvider = pdfProvider,
-        ),
+        ChangeNotifierProvider(create: (_) => DownloadProvider()),
+        ChangeNotifierProvider(create: (_) => PdfJsProvider()),
       ],
       child: Consumer<ThemeProvider>(builder: (context, provider, _) {
         return MaterialApp(
