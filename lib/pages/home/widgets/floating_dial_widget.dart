@@ -70,12 +70,12 @@ class FloatingDial extends StatelessWidget {
                         () async {
                           if (pdfProvider.currentPDF != null) {
                             final base64 = await pdfProvider.convertBase64(
-                                pdfProvider.currentPDF!.filePath!);
+                                pdfProvider.currentPDF!.filePath ?? '');
 
                             context.push(
                               navigateTo: PdfJsView(
                                 base64: base64,
-                                pdfName: pdfProvider.currentPDF!.fileName!,
+                                pdfName: pdfProvider.currentPDF!.fileName ?? '',
                               ),
                             );
 

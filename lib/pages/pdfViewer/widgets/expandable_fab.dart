@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:open_pdf/pages/pdfViewer/widgets/pdf_control_buttons.dart';
+import 'package:open_pdf/pages/pdfViewer/widgets/action_buttons_row.dart';
 import 'package:open_pdf/utils/constants.dart';
 import 'package:open_pdf/utils/extensions/context_extension.dart';
 
@@ -12,7 +12,7 @@ class ExpandableFab extends StatefulWidget {
 
 class ExpandableFabState extends State<ExpandableFab>
     with SingleTickerProviderStateMixin {
-  bool _isExpanded = false;
+  bool _isExpanded = true;
   late AnimationController _controller;
 
   @override

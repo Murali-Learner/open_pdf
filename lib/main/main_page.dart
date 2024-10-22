@@ -24,18 +24,13 @@ class _MainPageState extends State<MainPage> {
   void init() async {
     pdfProvider = context.read<PdfProvider>();
 
-    await Future.delayed(Duration.zero).whenComplete(() async {
-      await pdfProvider.handleIntent(context);
-      pdfProvider.internetSubscription();
-      await pdfProvider.askPermissions();
-    });
-  }
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) async {
+        await pdfProvider.handleIntent(context);
 
-  @override
-  void dispose() {
-    super.dispose();
-    pdfProvider.internetDispose();
-    pdfProvider.dispose();
+        await pdfProvider.askPermissions();
+      },
+    );
   }
 
   @override

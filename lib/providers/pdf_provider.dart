@@ -32,7 +32,6 @@ class PdfProvider with ChangeNotifier {
   bool _isInternetConnected = false;
   List<SharedMediaFile> sharedFiles = [];
   Map<String, PdfModel> _totalPdfList = {};
-  Map<String, PdfModel> _favoritesList = {};
   Map<String, PdfModel> _selectedFiles = {};
   late StreamSubscription _intentSubscription;
   late StreamSubscription _internetSubscription;
@@ -40,6 +39,13 @@ class PdfProvider with ChangeNotifier {
   int _currentNavIndex = 0;
   bool _isMultiSelected = false;
   int _currentTabIndex = 1;
+  CheckList _selectedCheckList = CheckList.all;
+  CheckList get selectedCheckList => _selectedCheckList;
+
+  void setSelectedCheckList(CheckList checkValue, {bool notify = true}) {
+    _selectedCheckList = checkValue;
+    notifyListeners();
+  }
 
   PdfModel? get currentPDF => _currentPDF;
   set currentPDF(PdfModel? pdf) {
@@ -62,12 +68,6 @@ class PdfProvider with ChangeNotifier {
   Map<String, PdfModel> get totalPdfList => _totalPdfList;
   set totalPdfList(Map<String, PdfModel> list) {
     _totalPdfList = list;
-    notifyListeners();
-  }
-
-  Map<String, PdfModel> get favoritesList => _favoritesList;
-  set favoritesList(Map<String, PdfModel> list) {
-    _favoritesList = list;
     notifyListeners();
   }
 
@@ -123,12 +123,15 @@ class PdfProvider with ChangeNotifier {
   }
 
   Future<void> loadPdfListFromHive() async {
-    _totalPdfList = HiveHelper.getHivePdfList();
+    HiveHelper.getHivePdfList().forEach(
+      (key, value) {
+        if (value.networkUrl == null) {
+          _totalPdfList[key] = value;
+        }
+      },
+    );
     debugPrint("_totalPdfList ${_totalPdfList.length}");
     notifyListeners();
-    _totalPdfList.forEach((key, pdf) {
-      debugPrint("_totalPdfList pdfs ${pdf.toJson()}");
-    });
   }
 
   Future<void> askPermissions() async {
@@ -218,7 +221,7 @@ class PdfProvider with ChangeNotifier {
 
     _selectedFiles.forEach((key, pdf) {
       removeFromTotalPdfList(pdf);
-      _favoritesList.removeWhere((key, pdf) => key == pdf.id);
+      _totalPdfList.removeWhere((key, pdf) => key == pdf.id);
     });
 
     selectedFiles.clear();
@@ -227,19 +230,9 @@ class PdfProvider with ChangeNotifier {
 
   Future<void> toggleFavorite(PdfModel pdf) async {
     try {
-      await HiveHelper.toggleFavorite(pdf);
+      final updatedPdf = pdf.copyWith(isFav: !pdf.isFav);
 
-      _totalPdfList[pdf.id] = pdf.copyWith(isFav: !pdf.isFav);
-
-      if (_totalPdfList[pdf.id]!.isFav) {
-        _favoritesList[pdf.id] = _totalPdfList[pdf.id]!;
-      } else {
-        _favoritesList.removeWhere(
-          (key, value) {
-            return key == pdf.id;
-          },
-        );
-      }
+      await addToTotalPdfList(updatedPdf);
 
       notifyListeners();
     } catch (e) {
@@ -261,18 +254,12 @@ class PdfProvider with ChangeNotifier {
   void deleteFormHistory(PdfModel pdf) {
     if (_totalPdfList.isNotEmpty) {
       _totalPdfList.remove(pdf.id);
-      _favoritesList.remove(pdf.id);
       notifyListeners();
     }
   }
 
   void removeFromTotalPdfList(PdfModel pdf) {
     _totalPdfList.removeWhere(
-      (key, value) {
-        return key == pdf.id;
-      },
-    );
-    _favoritesList.removeWhere(
       (key, value) {
         return key == pdf.id;
       },
@@ -359,10 +346,6 @@ class PdfProvider with ChangeNotifier {
 
   void internetDispose() {
     _internetSubscription.cancel();
-  }
-
-  void disposeIntentListener() {
-    _intentSubscription.cancel();
   }
 
   void updateLastOpenedValue(PdfModel pdf) {

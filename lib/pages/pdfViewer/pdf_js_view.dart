@@ -2,16 +2,11 @@ import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
-import 'package:open_pdf/pages/pdfViewer/widgets/dictonary_bottom_sheet.dart';
 import 'package:open_pdf/pages/pdfViewer/widgets/expandable_fab.dart';
 import 'package:open_pdf/pages/pdfViewer/widgets/pdf_view_app_bar.dart';
-import 'package:open_pdf/providers/dictionary_provider.dart';
 import 'package:open_pdf/providers/pdf_js_provider.dart';
-import 'package:open_pdf/utils/constants.dart';
 import 'package:open_pdf/utils/extensions/context_extension.dart';
-import 'package:open_pdf/utils/toast_utils.dart';
 import 'package:provider/provider.dart';
 
 class PdfJsView extends StatefulWidget {
@@ -37,65 +32,6 @@ class PdfJsViewState extends State<PdfJsView> {
   void initState() {
     super.initState();
     provider = context.read<PdfJsProvider>();
-
-    contextMenu = ContextMenu(
-      menuItems: [
-        ContextMenuItem(
-            id: 1,
-            title: "Dictionary",
-            action: () async {
-              String selectedText =
-                  await provider.webViewController?.getSelectedText() ?? "";
-
-              final dictionaryProvider = context.read<DictionaryProvider>();
-              dictionaryProvider.searchWord(selectedText);
-              provider.webViewController?.clearFocus();
-
-              showModalBottomSheet(
-                showDragHandle: true,
-                context: context,
-                backgroundColor: context.theme.scaffoldBackgroundColor,
-                barrierColor: ColorConstants.color.withOpacity(0.5),
-                isScrollControlled: true,
-                useSafeArea: true,
-                builder: (context) => DictionaryBottomSheet(
-                  searchWord: selectedText.trim(),
-                ),
-              );
-            }),
-        ContextMenuItem(
-          id: 2,
-          title: "Copy",
-          action: () async {
-            String selectedText =
-                await provider.webViewController?.getSelectedText() ?? "";
-
-            final ClipboardData data = ClipboardData(text: selectedText);
-            Clipboard.setData(data);
-            provider.webViewController?.clearFocus();
-
-            ToastUtils.showSuccessToast("Copied $selectedText to clipboard");
-          },
-        ),
-        ContextMenuItem(
-          id: 3,
-          title: "SelectAll",
-          action: () async {
-            await provider.selectAllContent();
-          },
-        ),
-      ],
-      settings: ContextMenuSettings(hideDefaultSystemContextMenuItems: true),
-      onCreateContextMenu: (hitTestResult) async {
-        String selectedText =
-            await provider.webViewController?.getSelectedText() ?? "";
-
-        debugPrint("hit test result: $hitTestResult $selectedText");
-      },
-      onContextMenuActionItemClicked: (menuItem) {
-        debugPrint("menuItem result: $menuItem");
-      },
-    );
   }
 
   @override
@@ -138,10 +74,15 @@ class PdfJsViewState extends State<PdfJsView> {
                 PdfViewAppBar(
                   pdfName: widget.pdfName,
                 ),
+                const Positioned(
+                  right: 10,
+                  bottom: 10,
+                  child: ExpandableFab(),
+                ),
               ],
             ),
           ),
-          floatingActionButton: const ExpandableFab(),
+          // floatingActionButton: const ExpandableFab(),
         ),
       );
     });

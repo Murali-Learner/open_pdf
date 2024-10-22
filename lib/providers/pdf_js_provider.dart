@@ -83,11 +83,14 @@ class PdfJsProvider extends ChangeNotifier {
           log("copyText  $receivedData");
 
           final dictionaryProvider = context.read<DictionaryProvider>();
-          dictionaryProvider.searchWord(receivedData);
-          webViewController.clearFocus();
+
+          await dictionaryProvider.searchWord(receivedData);
+          dictionaryProvider.toggleClearButton(receivedData.isNotEmpty);
+
+          await webViewController.clearFocus();
           await hideContextMenu();
 
-          showModalBottomSheet(
+          await showModalBottomSheet(
             showDragHandle: true,
             context: context,
             backgroundColor: context.theme.scaffoldBackgroundColor,

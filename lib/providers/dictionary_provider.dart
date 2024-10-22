@@ -29,18 +29,19 @@ class DictionaryProvider with ChangeNotifier {
   Future<void> searchWord(String query) async {
     if (query.isEmpty) return;
 
-    _isLoading = true;
-    _results.clear();
-    notifyListeners();
-
     try {
       List<Map<String, dynamic>> results =
           await SearchDbHelper.searchWord(query);
+
+      _isLoading = true;
+      _results.clear();
+      notifyListeners();
+
       for (var result in results) {
         Word word = Word.fromMap(result);
         _results[word.id] = word;
       }
-      debugPrint("Search Words ${results.length}");
+      notifyListeners();
     } catch (e) {
       debugPrint('Error searching word: $e');
     } finally {
@@ -50,16 +51,16 @@ class DictionaryProvider with ChangeNotifier {
   }
 
   Future<void> fetchAllWords() async {
-    _isLoading = true;
-    _results.clear();
-    notifyListeners();
-
     try {
       List<Map<String, dynamic>> results = await SearchDbHelper.fetchAllWords();
+      _isLoading = true;
+      _results.clear();
+      notifyListeners();
       for (var result in results) {
         Word word = Word.fromMap(result);
         _results[word.id] = word;
       }
+      notifyListeners();
     } catch (e) {
       debugPrint('Error fetching words: $e');
     } finally {

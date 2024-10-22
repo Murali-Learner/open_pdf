@@ -6,9 +6,9 @@ import 'package:open_pdf/utils/extensions/spacer_extension.dart';
 class DictionaryPageColumn extends StatelessWidget {
   const DictionaryPageColumn({
     super.key,
-    this.searchWord = '',
+    this.searchWord,
   });
-  final String searchWord;
+  final String? searchWord;
 
   @override
   Widget build(BuildContext context) {

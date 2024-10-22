@@ -39,27 +39,29 @@ class EmptyPdfListWidget extends StatelessWidget {
             ),
             const SizedBox(height: 30),
 
-            // Buttons for action
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 ElevatedButton.icon(
-                  onPressed: () async {
+                  onPressed: () {
                     final provider = context.read<PdfProvider>();
                     provider.clearSelectedFiles();
-                    context
-                        .read<PdfProvider>()
-                        .pickFile()
-                        .whenComplete(() async {
-                      if (provider.currentPDF != null) {
-                        final base64 = await provider
-                            .convertBase64(provider.currentPDF!.filePath!);
 
-                        context.push(
-                            navigateTo: PdfJsView(
-                          base64: base64,
-                          pdfName: provider.currentPDF!.fileName!,
-                        ));
+                    provider.pickFile().whenComplete(() {
+                      if (provider.currentPDF != null) {
+                        provider
+                            .convertBase64(provider.currentPDF!.filePath!)
+                            .then(
+                          (value) {
+                            final base64 = value;
+                            context.push(
+                              navigateTo: PdfJsView(
+                                base64: base64,
+                                pdfName: provider.currentPDF!.fileName!,
+                              ),
+                            );
+                          },
+                        );
                       }
                     });
                   },
