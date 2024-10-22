@@ -73,9 +73,11 @@ class FloatingDial extends StatelessWidget {
                                 pdfProvider.currentPDF!.filePath!);
 
                             context.push(
-                                navigateTo: PdfJsView(
-                              base64: base64,
-                            ));
+                              navigateTo: PdfJsView(
+                                base64: base64,
+                                pdfName: pdfProvider.currentPDF!.fileName!,
+                              ),
+                            );
 
                             // context.push(
                             //     navigateTo:

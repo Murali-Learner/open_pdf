@@ -40,7 +40,7 @@ class PdfViewAppBar extends StatelessWidget {
             child: Tooltip(
               message: pdfName,
               child: Text(
-                "${pdfName}",
+                pdfName,
                 overflow: TextOverflow.ellipsis,
                 style: context.textTheme.bodyLarge!
                     .copyWith(fontSize: 20, fontWeight: FontWeight.bold),

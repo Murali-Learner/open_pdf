@@ -25,6 +25,12 @@ class DownloadPageState extends State<DownloadPage> {
     super.initState();
     provider = context.read<PdfProvider>();
     downloadProvider = context.read<DownloadProvider>();
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      init();
+    });
+  }
+
+  void init() async {
     provider.internetSubscription();
   }
 

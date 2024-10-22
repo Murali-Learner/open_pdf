@@ -39,14 +39,15 @@ class GridPdfCard extends StatelessWidget {
 
             pdfProvider.clearSelectedFiles();
             final base64 = await pdfProvider.convertBase64(pdf.filePath!);
+            // if (pdfProvider.currentPDF != null) {
             context.push(
-              navigateTo: PdfJsView(
-                base64: base64,
-              ),
+              navigateTo: PdfJsView(base64: base64, pdfName: pdf.fileName!),
+
               //  ViewPdfPage(
               //   pdf: pdf,
               // ),
             );
+            // }
           }
         },
         child: Container(

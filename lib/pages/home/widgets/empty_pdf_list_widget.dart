@@ -58,6 +58,7 @@ class EmptyPdfListWidget extends StatelessWidget {
                         context.push(
                             navigateTo: PdfJsView(
                           base64: base64,
+                          pdfName: provider.currentPDF!.fileName!,
                         ));
                       }
                     });

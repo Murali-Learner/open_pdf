@@ -1,9 +1,11 @@
+import 'dart:developer';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:open_pdf/pages/pdfViewer/widgets/dictonary_bottom_sheet.dart';
-import 'package:open_pdf/pages/pdfViewer/widgets/pdf_control_buttons.dart';
+import 'package:open_pdf/pages/pdfViewer/widgets/expandable_fab.dart';
 import 'package:open_pdf/pages/pdfViewer/widgets/pdf_view_app_bar.dart';
 import 'package:open_pdf/providers/dictionary_provider.dart';
 import 'package:open_pdf/providers/pdf_js_provider.dart';
@@ -13,13 +15,18 @@ import 'package:open_pdf/utils/toast_utils.dart';
 import 'package:provider/provider.dart';
 
 class PdfJsView extends StatefulWidget {
-  const PdfJsView({Key? key, required this.base64}) : super(key: key);
+  const PdfJsView({
+    super.key,
+    required this.base64,
+    required this.pdfName,
+  });
   final String base64;
+  final String pdfName;
   @override
-  _PdfJsViewState createState() => _PdfJsViewState();
+  PdfJsViewState createState() => PdfJsViewState();
 }
 
-class _PdfJsViewState extends State<PdfJsView> {
+class PdfJsViewState extends State<PdfJsView> {
   InAppWebViewSettings settings =
       InAppWebViewSettings(isInspectable: kDebugMode);
   late ContextMenu contextMenu;
@@ -105,31 +112,36 @@ class _PdfJsViewState extends State<PdfJsView> {
                   child: InAppWebView(
                     key: webViewKey,
                     initialFile: "assets/pdfjs/pdfjs.html",
-                    contextMenu: contextMenu,
+                    // contextMenu: contextMenu,
                     initialSettings: settings,
                     onReceivedError: (controller, request, error) {
                       provider.setErrorMessage(error.description);
+                    },
+                    onNavigationResponse:
+                        (controller, navigationResponse) async {
+                      debugPrint(
+                          "navigationResponse ${navigationResponse.response}");
+                      return null;
+                    },
+                    onConsoleMessage: (controller, consoleMessage) {
+                      log("on console message ${consoleMessage.message}");
                     },
                     onLoadStop: (controller, url) {
                       provider.setWebViewController(
                         controller,
                         widget.base64,
+                        context,
                       );
                     },
                   ),
                 ),
-                Positioned(
-                  bottom: context.height(5),
-                  left: 0,
-                  right: 0,
-                  child: const PdfControlButtons(),
-                ),
                 PdfViewAppBar(
-                  pdfName: "Pdf",
-                )
+                  pdfName: widget.pdfName,
+                ),
               ],
             ),
           ),
+          floatingActionButton: const ExpandableFab(),
         ),
       );
     });

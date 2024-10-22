@@ -167,6 +167,7 @@ class PdfProvider with ChangeNotifier {
     notifyListeners();
     log("_isInternetConnected $_isInternetConnected");
     _internetSubscription = connectionChecker.onStatusChange.listen(
+      //Todo: fix it
       (InternetConnectionStatus status) {
         if (status == InternetConnectionStatus.connected) {
           _isInternetConnected = true;

@@ -1,7 +1,13 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:open_pdf/pages/pdfViewer/widgets/dictonary_bottom_sheet.dart';
+import 'package:open_pdf/providers/dictionary_provider.dart';
+import 'package:open_pdf/utils/constants.dart';
+import 'package:open_pdf/utils/extensions/context_extension.dart';
+import 'package:provider/provider.dart';
 
 class PdfJsProvider extends ChangeNotifier {
   InAppWebViewController? webViewController;
@@ -28,11 +34,21 @@ class PdfJsProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> setWebViewController(
-      InAppWebViewController webViewController, String base64) async {
+  Future<void> setWebViewController(InAppWebViewController webViewController,
+      String base64, BuildContext context) async {
     this.webViewController = webViewController;
     await webViewController.evaluateJavascript(source: "renderPdf('$base64')");
 
+    webViewController.addJavaScriptHandler(
+      handlerName: 'onPageChanged',
+      callback: (contents) {
+        var receivedData = contents.first;
+        if (receivedData != null && receivedData is int) {
+          debugPrint("onPageChanged  $receivedData");
+          setCurrentPage(receivedData);
+        }
+      },
+    );
     webViewController.addJavaScriptHandler(
       handlerName: 'totalPdfPages',
       callback: (contents) {
@@ -42,17 +58,53 @@ class PdfJsProvider extends ChangeNotifier {
         }
       },
     );
+
     webViewController.addJavaScriptHandler(
-      handlerName: 'onPageChanged',
-      callback: (contents) {
-        var receivedData = contents.first;
-        if (receivedData != null && receivedData is int) {
-          log("current  $receivedData");
-          setCurrentPage(receivedData);
+      handlerName: 'copyText',
+      callback: (contents) async {
+        String? receivedData = contents.first;
+        //  await webViewController.getSelectedText();
+        if (receivedData != null) {
+          log("copyText  $receivedData");
+
+          final ClipboardData data = ClipboardData(text: receivedData);
+          Clipboard.setData(data);
+          // webViewController.clearFocus();
+          await hideContextMenu();
+        }
+      },
+    );
+    webViewController.addJavaScriptHandler(
+      handlerName: 'searchDictionary',
+      callback: (contents) async {
+        String? receivedData = await webViewController.getSelectedText();
+        if (receivedData != null) {
+          log("searchDictionary  $receivedData");
+
+          final dictionaryProvider = context.read<DictionaryProvider>();
+          dictionaryProvider.searchWord(receivedData);
+          webViewController.clearFocus();
+          await hideContextMenu();
+
+          showModalBottomSheet(
+            showDragHandle: true,
+            context: context,
+            backgroundColor: context.theme.scaffoldBackgroundColor,
+            barrierColor: ColorConstants.color.withOpacity(0.5),
+            isScrollControlled: true,
+            useSafeArea: true,
+            builder: (context) => DictionaryBottomSheet(
+              searchWord: receivedData.trim(),
+            ),
+          );
         }
       },
     );
     notifyListeners();
+  }
+
+  Future<void> hideContextMenu() async {
+    await webViewController!.evaluateJavascript(source: "hideContextMenu()");
   }
 
   Future<void> selectAllContent() async {

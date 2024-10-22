@@ -25,10 +25,11 @@ class _PageInformationWidgetState extends State<PageInformationWidget> {
   void initState() {
     super.initState();
 
-    pageController = TextEditingController();
     pdfProvider = context.read<PdfControlProvider>();
     pdfJsProvider = context.read<PdfJsProvider>();
 
+    pageController =
+        TextEditingController(text: pdfJsProvider!.currentPage.toString());
     WidgetsBinding.instance.addPostFrameCallback(
       (_) {
         pdfJsProvider!.addListener(_updatePageController);
@@ -75,7 +76,7 @@ class _PageInformationWidgetState extends State<PageInformationWidget> {
                   fontSize: 18,
                 ),
                 onTap: () {
-                  context.read<PdfControlProvider>().setConsiderScroll(false);
+                  controlProvider.setConsiderScroll(false);
                 },
                 onSubmitted: (value) {
                   final newPage = int.tryParse(value);
@@ -88,7 +89,7 @@ class _PageInformationWidgetState extends State<PageInformationWidget> {
                   } else {
                     ToastUtils.showErrorToast("Invalid page number");
                   }
-                  context.read<PdfControlProvider>().setConsiderScroll(true);
+                  controlProvider.setConsiderScroll(true);
                 },
               ),
             ),
