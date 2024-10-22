@@ -77,9 +77,10 @@ class PdfJsProvider extends ChangeNotifier {
     webViewController.addJavaScriptHandler(
       handlerName: 'searchDictionary',
       callback: (contents) async {
-        String? receivedData = await webViewController.getSelectedText();
+        String? receivedData = contents.first;
+        //  await webViewController.getSelectedText();
         if (receivedData != null) {
-          log("searchDictionary  $receivedData");
+          log("copyText  $receivedData");
 
           final dictionaryProvider = context.read<DictionaryProvider>();
           dictionaryProvider.searchWord(receivedData);

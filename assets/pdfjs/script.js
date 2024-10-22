@@ -1,11 +1,7 @@
 pdfjsLib.GlobalWorkerOptions.workerSrc = "pdf.worker.js";
 
 const container = document.getElementById("pdf-container");
-const contextMenu = document.getElementById('context-menu');
-
-let longPressTimer;
-const longPressDuration = 500; // 500ms for long press
-let isLongPress = false;
+const contextMenu = document.getElementById("context-menu");
 
 let currentScale = 1;
 let pdfDoc = null;
@@ -15,6 +11,7 @@ let initialPinchDistance = 0;
 let isPinching = false;
 let isZoomed = false;
 let lastTapTime = 0;
+var selectedPdfText = "";
 
 function base64ToUint8Array(base64) {
   const raw = atob(base64);
@@ -24,93 +21,59 @@ function base64ToUint8Array(base64) {
   }
   return uint8Array;
 }
-// Show context menu when long press is detected
+
 function showContextMenu(event) {
   const selectedText = window.getSelection().toString().trim();
-  if (!selectedText) return; // Show menu only if text is selected
+  if (!selectedText) return;
 
-  event.preventDefault(); // Prevent default browser context menu
+  event.preventDefault();
 
-  // Get dimensions of the context menu
   const menuWidth = contextMenu.offsetWidth;
   const menuHeight = contextMenu.offsetHeight;
 
-  // Position the menu at the cursor's position
-  contextMenu.style.left = `${Math.min(event.pageX, window.innerWidth - menuWidth)}px`;
-  contextMenu.style.top = `${Math.min(event.pageY, window.innerHeight - menuHeight)}px`;
-  contextMenu.style.display = 'block';
+  contextMenu.style.left = `${Math.min(
+    event.pageX,
+    window.innerWidth - menuWidth
+  )}px`;
+  contextMenu.style.top = `${Math.min(
+    event.pageY,
+    window.innerHeight - menuHeight
+  )}px`;
+  contextMenu.style.display = "block";
 }
 
-
-
-
-// Handle long press for text selection
-container.addEventListener('mousedown', (event) => {
-  // Start a timer for the long press
-  isLongPress = false;
-  longPressTimer = setTimeout(() => {
-    isLongPress = true;
-    const selectedText = window.getSelection().toString().trim();
-    console.log(`selectedText ${selectedText}`);
-
-    if (selectedText) {
-      showContextMenu(event); // Show context menu after long press
-    }
-  }, longPressDuration);
-});
-
-container.addEventListener('mouseup', () => {
-  // Clear the timer on mouse up to avoid long press action
-  clearTimeout(longPressTimer);
-});
-
-container.addEventListener('mouseleave', () => {
-  // Clear the timer if the mouse leaves the container area
-  clearTimeout(longPressTimer);
-});
-
-// Hide the custom context menu
 function hideContextMenu() {
-  const selectedText = window.getSelection().toString().trim();
-
-  console.log("this is click event" + selectedText);
-  contextMenu.style.display = 'none';
+  contextMenu.style.display = "none";
+  selectedPdfText = "";
 }
 
-container.addEventListener('contextmenu', (event) => {
-  const selectedText = window.getSelection().toString().trim();
-  if (selectedText) {
-    showContextMenu(event); // Show menu if text is selected
+container.addEventListener("contextmenu", (event) => {
+  selectedPdfText = window.getSelection().toString().trim();
+
+  if (selectedPdfText) {
+    showContextMenu(event);
   } else {
-    hideContextMenu(); // Otherwise, hide the custom menu
+    hideContextMenu();
   }
 });
 
-// Hide the custom context menu when clicking anywhere else
-window.addEventListener('click', hideContextMenu);
-console.log(`copy-text ${document.getElementById('copy-text')}`);
+window.addEventListener("click", hideContextMenu);
+console.log(`copy-text ${document.getElementById("copy-text")}`);
 const selectedText = window.getSelection().toString().trim();
-// Add functionality for menu items
-document.getElementById('copy-text').addEventListener('click', () => {
 
-  window.flutter_inappwebview.callHandler("copyText", selectedText);
-
-
-  // hideContextMenu();
+document.getElementById("copy-text").addEventListener("click", () => {
+  window.flutter_inappwebview.callHandler("copyText", selectedPdfText);
 });
 
-console.log(`search dictionary ${document.getElementById('search-dictionary')}`);
+console.log(
+  `search dictionary ${document.getElementById("search-dictionary")}`
+);
 
-document.getElementById('search-dictionary').addEventListener('click', () => {
-
-  window.flutter_inappwebview.callHandler("searchDictionary", null);
-
-
-  // hideContextMenu();
+document.getElementById("search-dictionary").addEventListener("click", () => {
+  window.flutter_inappwebview.callHandler("searchDictionary", selectedPdfText);
 });
 
-// Make sure the context menu hides when clicking elsewhere
-container.addEventListener('click', hideContextMenu);
+container.addEventListener("click", hideContextMenu);
 
 function renderPage(pageNum, scale = currentScale) {
   pdfDoc.getPage(pageNum).then((page) => {
@@ -159,7 +122,6 @@ function renderPage(pageNum, scale = currentScale) {
     });
   });
   window.flutter_inappwebview.callHandler("onPageChanged", pageNum);
-
 }
 
 function renderPdf(pdfBase64) {
@@ -169,7 +131,6 @@ function renderPdf(pdfBase64) {
       pdfDoc = pdf;
       renderPage(currentPage);
       window.flutter_inappwebview.callHandler("totalPdfPages", pdfDoc.numPages);
-
     })
     .catch((error) => {
       console.error("Error loading PDF:", error);
