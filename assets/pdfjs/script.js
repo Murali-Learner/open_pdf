@@ -76,6 +76,8 @@ document.getElementById("search-dictionary").addEventListener("click", () => {
 container.addEventListener("click", hideContextMenu);
 
 function renderPage(pageNum, scale = currentScale) {
+  window.flutter_inappwebview.callHandler("loadingListener", true);
+
   pdfDoc.getPage(pageNum).then((page) => {
     const viewport = page.getViewport({ scale: 1 });
     const containerWidth = container.clientWidth - 40;
@@ -111,6 +113,7 @@ function renderPage(pageNum, scale = currentScale) {
     };
 
     page.render(renderContext);
+    window.flutter_inappwebview.callHandler("loadingListener", false);
 
     page.getTextContent().then((textContent) => {
       pdfjsLib.renderTextLayer({

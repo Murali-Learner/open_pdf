@@ -78,10 +78,38 @@
         .textLayer ::selection {
             background: rgba(0, 0, 255, 0.3);
         }
+
+        #loading-spinner {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 9999;
+            font-size: 18px;
+            color: #000;
+        }
+
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: #000;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
     </style>
 </head>
 
 <body>
+    <div id="loading-spinner" style="display: none;">
+        <div class="spinner"></div> Loading...
+    </div>
     <div id="pdf-container"></div>
     <ul class="custom-context-menu" id="context-menu">
         <li id="copy-text">Copy</li>

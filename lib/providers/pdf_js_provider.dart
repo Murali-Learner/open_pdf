@@ -14,8 +14,11 @@ class PdfJsProvider extends ChangeNotifier {
   String _errorMessage = '';
   int _currentPage = 1;
   int _totalPages = 0;
+  bool _isPdfLoading = true;
+  String pdfJsHtml = "assets/pdfjs/pdfjs.html";
   int get totalPages => _totalPages;
   int get currentPage => _currentPage;
+  bool get pdfLoading => _isPdfLoading;
 
   void setTotalPages(int value) {
     _totalPages = value;
@@ -24,6 +27,11 @@ class PdfJsProvider extends ChangeNotifier {
 
   void setCurrentPage(int value) {
     _currentPage = value;
+    notifyListeners();
+  }
+
+  set pdfLoading(bool isLoading) {
+    _isPdfLoading = isLoading;
     notifyListeners();
   }
 
@@ -98,6 +106,15 @@ class PdfJsProvider extends ChangeNotifier {
               searchWord: receivedData.trim(),
             ),
           );
+        }
+      },
+    );
+    webViewController.addJavaScriptHandler(
+      handlerName: 'loadingListener',
+      callback: (contents) {
+        var isLoading = contents.first;
+        if (isLoading != null && isLoading is bool) {
+          pdfLoading = isLoading;
         }
       },
     );
