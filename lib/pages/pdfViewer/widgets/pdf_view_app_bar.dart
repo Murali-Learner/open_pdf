@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:open_pdf/pages/pdfViewer/view_pdf_page.dart';
 import 'package:open_pdf/utils/constants.dart';
 import 'package:open_pdf/utils/extensions/context_extension.dart';
 
@@ -54,13 +53,13 @@ class PdfViewAppBar extends StatelessWidget {
   }
 }
 
-Future<String?> _passwordDialog(BuildContext context) async {
-  final textController = TextEditingController();
-  return await showDialog<String?>(
-    context: context,
-    barrierDismissible: false,
-    builder: (context) {
-      return PasswordDialogWidget(textController: textController);
-    },
-  );
-}
+// Future<String?> _passwordDialog(BuildContext context) async {
+//   final textController = TextEditingController();
+//   return await showDialog<String?>(
+//     context: context,
+//     barrierDismissible: false,
+//     builder: (context) {
+//       return PasswordDialogWidget(textController: textController);
+//     },
+//   );
+// }

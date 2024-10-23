@@ -23,23 +23,16 @@ class EmptyPdfListWidget extends StatelessWidget {
               "No PDFs Available",
               style: context.textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.bold,
-                // color: Colors.grey.shade700,
               ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 10),
-
-            // Secondary description text
             Text(
               "Pick or download your first PDF to get started!",
-              style: context.textTheme.bodyMedium?.copyWith(
-                  // color: Colors.grey.shade600,
-                  ),
+              style: context.textTheme.bodyMedium?.copyWith(),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 30),
-
-            // Buttons for action
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [

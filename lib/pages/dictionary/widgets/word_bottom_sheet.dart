@@ -11,7 +11,7 @@ class WordBottomSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme;
+    final theme = context.textTheme;
 
     return Container(
       width: double.infinity,
@@ -29,19 +29,19 @@ class WordBottomSheet extends StatelessWidget {
             children: [
               Text(
                 word.word,
-                style: theme.textTheme.headlineSmall,
+                style: theme.headlineSmall,
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 8),
               Text(
                 word.definition,
-                style: theme.textTheme.bodyMedium,
+                style: theme.bodyMedium,
               ),
               const SizedBox(height: 16),
               if (word.examples.isNotEmpty) ...[
                 Text(
                   'Examples:',
-                  style: theme.textTheme.titleMedium,
+                  style: theme.titleMedium,
                 ),
                 const SizedBox(height: 8),
                 ...word.examples.map((example) => Text('• $example')),
@@ -59,7 +59,7 @@ class WordBottomSheet extends StatelessWidget {
               if (word.antonyms.isNotEmpty) ...[
                 Text(
                   'Antonyms:',
-                  style: theme.textTheme.titleMedium,
+                  style: theme.titleMedium,
                 ),
                 const SizedBox(height: 8),
                 Text(word.antonyms.join(', ')),

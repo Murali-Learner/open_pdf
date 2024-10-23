@@ -11,7 +11,7 @@ import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:open_pdf/helpers/hive_helper.dart';
 import 'package:open_pdf/models/pdf_model.dart';
-import 'package:open_pdf/pages/pdfViewer/view_pdf_page.dart';
+import 'package:open_pdf/pages/pdfViewer/pdf_js_view.dart';
 import 'package:open_pdf/utils/enumerates.dart';
 import 'package:open_pdf/utils/extensions/context_extension.dart';
 import 'package:open_pdf/utils/extensions/size_extension.dart';
@@ -31,8 +31,7 @@ class PdfProvider with ChangeNotifier {
   bool _isLoading = false;
   bool _isInternetConnected = false;
   List<SharedMediaFile> sharedFiles = [];
-  Map<String, PdfModel> _totalPdfList = {};
-  Map<String, PdfModel> _favoritesList = {};
+  Map<String, PdfModel> _localPdfList = {};
   Map<String, PdfModel> _selectedFiles = {};
   late StreamSubscription _intentSubscription;
   late StreamSubscription _internetSubscription;
@@ -40,6 +39,13 @@ class PdfProvider with ChangeNotifier {
   int _currentNavIndex = 0;
   bool _isMultiSelected = false;
   int _currentTabIndex = 1;
+  CheckList _selectedCheckList = CheckList.all;
+  CheckList get selectedCheckList => _selectedCheckList;
+
+  void setSelectedCheckList(CheckList checkValue, {bool notify = true}) {
+    _selectedCheckList = checkValue;
+    notifyListeners();
+  }
 
   PdfModel? get currentPDF => _currentPDF;
   set currentPDF(PdfModel? pdf) {
@@ -59,15 +65,9 @@ class PdfProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  Map<String, PdfModel> get totalPdfList => _totalPdfList;
-  set totalPdfList(Map<String, PdfModel> list) {
-    _totalPdfList = list;
-    notifyListeners();
-  }
-
-  Map<String, PdfModel> get favoritesList => _favoritesList;
-  set favoritesList(Map<String, PdfModel> list) {
-    _favoritesList = list;
+  Map<String, PdfModel> get localPdfList => _localPdfList;
+  set localPdfList(Map<String, PdfModel> list) {
+    _localPdfList = list;
     notifyListeners();
   }
 
@@ -104,17 +104,19 @@ class PdfProvider with ChangeNotifier {
   }
 
   Future<void> clearData() async {
-    _totalPdfList.clear();
+    _localPdfList.clear();
 
     notifyListeners();
-    debugPrint("_total list ${_totalPdfList.length}");
+    debugPrint("_total list ${_localPdfList.length}");
   }
 
   List<PdfModel> getFilteredAndSortedPdfList() {
-    List<PdfModel> pdfList = _totalPdfList.values
-        .where((pdf) =>
-            pdf.downloadStatus == DownloadTaskStatus.complete.name &&
-            pdf.lastOpened != null)
+    List<PdfModel> pdfList = _localPdfList.values
+        .where(
+          (pdf) =>
+              pdf.downloadStatus == DownloadTaskStatus.complete.name &&
+              pdf.lastOpened != null,
+        )
         .toList();
 
     pdfList.sort((a, b) => b.lastOpened!.compareTo(a.lastOpened!));
@@ -123,12 +125,15 @@ class PdfProvider with ChangeNotifier {
   }
 
   Future<void> loadPdfListFromHive() async {
-    _totalPdfList = HiveHelper.getHivePdfList();
-    debugPrint("_totalPdfList ${_totalPdfList.length}");
+    HiveHelper.getHivePdfList().forEach(
+      (key, value) {
+        if (value.networkUrl == null) {
+          _localPdfList[key] = value;
+        }
+      },
+    );
+    debugPrint("_totalPdfList ${_localPdfList.length}");
     notifyListeners();
-    _totalPdfList.forEach((key, pdf) {
-      debugPrint("_totalPdfList pdfs ${pdf.toJson()}");
-    });
   }
 
   Future<void> askPermissions() async {
@@ -181,7 +186,7 @@ class PdfProvider with ChangeNotifier {
   }
 
   Future<void> toggleSelectedFiles(PdfModel pdf) async {
-    _totalPdfList[pdf.id] = pdf.copyWith(isSelected: !pdf.isSelected);
+    _localPdfList[pdf.id] = pdf.copyWith(isSelected: !pdf.isSelected);
 
     if (!pdf.isSelected) {
       isMultiSelected = true;
@@ -207,7 +212,7 @@ class PdfProvider with ChangeNotifier {
   void clearSelectedFiles() {
     isMultiSelected = false;
     _selectedFiles.forEach((key, pdf) {
-      _totalPdfList[key] = pdf.copyWith(isSelected: false);
+      _localPdfList[key] = pdf.copyWith(isSelected: false);
     });
     _selectedFiles.clear();
     notifyListeners();
@@ -218,7 +223,7 @@ class PdfProvider with ChangeNotifier {
 
     _selectedFiles.forEach((key, pdf) {
       removeFromTotalPdfList(pdf);
-      _favoritesList.removeWhere((key, pdf) => key == pdf.id);
+      _localPdfList.removeWhere((key, pdf) => key == pdf.id);
     });
 
     selectedFiles.clear();
@@ -227,19 +232,9 @@ class PdfProvider with ChangeNotifier {
 
   Future<void> toggleFavorite(PdfModel pdf) async {
     try {
-      await HiveHelper.toggleFavorite(pdf);
+      final updatedPdf = pdf.copyWith(isFav: !pdf.isFav);
 
-      _totalPdfList[pdf.id] = pdf.copyWith(isFav: !pdf.isFav);
-
-      if (_totalPdfList[pdf.id]!.isFav) {
-        _favoritesList[pdf.id] = _totalPdfList[pdf.id]!;
-      } else {
-        _favoritesList.removeWhere(
-          (key, value) {
-            return key == pdf.id;
-          },
-        );
-      }
+      await addToTotalPdfList(updatedPdf);
 
       notifyListeners();
     } catch (e) {
@@ -250,29 +245,24 @@ class PdfProvider with ChangeNotifier {
   Future<void> addToTotalPdfList(PdfModel pdf) async {
     log("i'm here in the add pdf  ${pdf.id}");
     final contain =
-        _totalPdfList.values.where((e) => e.fileName == pdf.fileName);
+        _localPdfList.values.where((e) => e.fileName == pdf.fileName);
     if (contain.isEmpty) {
       await HiveHelper.addOrUpdatePdf(pdf);
-      _totalPdfList[pdf.id] = pdf;
+      _localPdfList[pdf.id] = pdf;
       notifyListeners();
     } else {}
   }
 
   void deleteFormHistory(PdfModel pdf) {
-    if (_totalPdfList.isNotEmpty) {
-      _totalPdfList.remove(pdf.id);
-      _favoritesList.remove(pdf.id);
+    if (_localPdfList.isNotEmpty) {
+      _localPdfList.remove(pdf.id);
+
       notifyListeners();
     }
   }
 
   void removeFromTotalPdfList(PdfModel pdf) {
-    _totalPdfList.removeWhere(
-      (key, value) {
-        return key == pdf.id;
-      },
-    );
-    _favoritesList.removeWhere(
+    _localPdfList.removeWhere(
       (key, value) {
         return key == pdf.id;
       },
@@ -312,7 +302,10 @@ class PdfProvider with ChangeNotifier {
       final pdf = await _processSharedFiles(initialMedia);
 
       if (pdf != null) {
-        context.push(navigateTo: ViewPdfPage(pdf: pdf));
+        final base64 = await convertBase64(pdf.filePath!);
+        context.push(
+          navigateTo: PdfJsView(base64: base64, pdfName: pdf.fileName!),
+        );
       }
       isLoading = false;
       return pdf;
@@ -366,9 +359,11 @@ class PdfProvider with ChangeNotifier {
   }
 
   void updateLastOpenedValue(PdfModel pdf) {
+    _localPdfList.remove(pdf.id);
+    notifyListeners();
     final updatedPdf = pdf.copyWith(lastOpened: DateTime.now());
     debugPrint("updatedPdf ${updatedPdf.lastOpened}");
-    _totalPdfList[pdf.id] = updatedPdf;
+    _localPdfList[pdf.id] = updatedPdf;
     notifyListeners();
   }
 

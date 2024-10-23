@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:open_pdf/pages/dictionary/widgets/dictionary_column.dart';
+import 'package:open_pdf/providers/dictionary_provider.dart';
 import 'package:open_pdf/utils/constants.dart';
+import 'package:provider/provider.dart';
 
 class DictionaryPage extends StatefulWidget {
   const DictionaryPage({
@@ -12,6 +14,18 @@ class DictionaryPage extends StatefulWidget {
 }
 
 class DictionaryPageState extends State<DictionaryPage> {
+  @override
+  void initState() {
+    super.initState();
+    init();
+  }
+
+  init() async {
+    final provider = context.read<DictionaryProvider>();
+    await provider.fetchAllWords();
+    provider.toggleClearButton(false);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

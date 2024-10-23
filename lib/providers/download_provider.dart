@@ -17,7 +17,7 @@ import 'package:pdf_render/pdf_render.dart';
 
 class DownloadProvider extends ChangeNotifier {
   DownloadProvider() {
-    getHivePdfList();
+    getPdfFromLocalStorage();
     _bindBackgroundIsolate();
     // _initializeTempFilePath();
 
@@ -144,12 +144,15 @@ class DownloadProvider extends ChangeNotifier {
     sendPort?.send([id, status, progress]);
   }
 
-  Future<void> getHivePdfList() async {
-    _downloadedPdfMap = HiveHelper.getHivePdfList();
+  Future<void> getPdfFromLocalStorage() async {
+    HiveHelper.getHivePdfList().forEach(
+      (key, value) {
+        if (value.networkUrl != null && value.networkUrl!.isNotEmpty) {
+          _downloadedPdfMap[key] = value;
+        }
+      },
+    );
     notifyListeners();
-    _downloadedPdfMap.forEach((key, pdf) {
-      debugPrint("download pdfs ${pdf.toJson()}");
-    });
   }
 
   List<PdfModel> getFilteredListByStatus(List<DownloadTaskStatus> statuses) {
@@ -178,9 +181,12 @@ class DownloadProvider extends ChangeNotifier {
   Future<void> updateLastOpenedValue(PdfModel pdf) async {
     try {
       final updatedPdf = pdf.copyWith(lastOpened: DateTime.now());
-      await HiveHelper.addOrUpdatePdf(updatedPdf);
-      _downloadedPdfMap[pdf.id] = updatedPdf;
-      notifyListeners();
+      HiveHelper.addOrUpdatePdf(updatedPdf).whenComplete(
+        () {
+          _downloadedPdfMap[pdf.id] = updatedPdf;
+          notifyListeners();
+        },
+      );
     } catch (e) {
       debugPrint(e.toString());
     }

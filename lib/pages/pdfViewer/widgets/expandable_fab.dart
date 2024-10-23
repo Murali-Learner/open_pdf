@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:open_pdf/pages/pdfViewer/widgets/pdf_control_buttons.dart';
+import 'package:open_pdf/pages/pdfViewer/widgets/pdf_actions_buttons_row.dart';
 import 'package:open_pdf/utils/constants.dart';
 import 'package:open_pdf/utils/extensions/context_extension.dart';
 
@@ -58,7 +58,7 @@ class ExpandableFabState extends State<ExpandableFab>
           children: [
             if (_isExpanded)
               const Expanded(
-                child: ActionsButtonRow(),
+                child: PdfActionsButtonRow(),
               ),
             IconButton(
               color: context.theme.scaffoldBackgroundColor,

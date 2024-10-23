@@ -9,10 +9,12 @@ Future<void> showGlobalBottomSheet({
   bool isScrollControlled = true,
   bool useSafeArea = true,
   bool showDragHandle = true,
+  BoxConstraints? constraints,
 }) async {
   return showModalBottomSheet(
     showDragHandle: showDragHandle,
     context: context,
+    constraints: constraints,
     backgroundColor: context.theme.scaffoldBackgroundColor,
     barrierColor: ColorConstants.color.withOpacity(0.5),
     isScrollControlled: isScrollControlled,

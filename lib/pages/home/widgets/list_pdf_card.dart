@@ -1,9 +1,11 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:open_pdf/models/pdf_model.dart';
 import 'package:open_pdf/pages/home/widgets/pdf_card_options.dart';
 import 'package:open_pdf/pages/home/widgets/pdf_info_widget.dart';
-import 'package:open_pdf/pages/pdfViewer/view_pdf_page.dart';
+import 'package:open_pdf/pages/pdfViewer/pdf_js_view.dart';
 import 'package:open_pdf/providers/download_provider.dart';
 import 'package:open_pdf/providers/pdf_control_provider.dart';
 import 'package:open_pdf/providers/pdf_provider.dart';
@@ -34,22 +36,8 @@ class ListPdfCard extends StatelessWidget {
                 debugPrint("long press ${provider.selectedFiles.length}");
               },
         onTap: () async {
-          debugPrint("pdf  ${pdf.fileName} ${provider.isMultiSelected}");
-          if (pdf.downloadStatus == DownloadTaskStatus.complete.name) {
-            if (pdf.isSelected || provider.isMultiSelected) {
-              provider.toggleSelectedFiles(pdf);
-            } else {
-              context.read<PdfControlProvider>().resetValues();
-              provider.updateLastOpenedValue(pdf);
-              await context.read<DownloadProvider>().updateLastOpenedValue(pdf);
-
-              context.push(
-                navigateTo: ViewPdfPage(
-                  pdf: pdf,
-                ),
-              );
-            }
-          }
+          log("the single tap list pdf card");
+          await onListPdfCardSingleTap(provider, context);
         },
         child: Container(
           padding: const EdgeInsets.all(12),
@@ -77,5 +65,25 @@ class ListPdfCard extends StatelessWidget {
         ),
       );
     });
+  }
+
+  Future<void> onListPdfCardSingleTap(
+      PdfProvider provider, BuildContext context) async {
+    debugPrint("pdf  ${pdf.fileName} ${provider.isMultiSelected}");
+    if (pdf.downloadStatus == DownloadTaskStatus.complete.name) {
+      if (pdf.isSelected || provider.isMultiSelected) {
+        provider.toggleSelectedFiles(pdf);
+      } else {
+        context.read<PdfControlProvider>().resetValues();
+        provider.updateLastOpenedValue(pdf);
+        await context.read<DownloadProvider>().updateLastOpenedValue(pdf);
+
+        final base64 = await provider.convertBase64(pdf.filePath!);
+
+        context.push(
+          navigateTo: PdfJsView(base64: base64, pdfName: pdf.fileName ?? ''),
+        );
+      }
+    }
   }
 }

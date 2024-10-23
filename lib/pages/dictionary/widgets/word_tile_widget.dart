@@ -16,8 +16,6 @@ class WordTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme;
-
     return Material(
       borderRadius: BorderRadius.circular(12),
       child: GestureDetector(
@@ -47,7 +45,7 @@ class WordTile extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.w600,
-                        color: theme.textTheme.titleLarge!.color,
+                        color: context.textTheme.titleLarge!.color,
                       ),
                     ),
                     4.vSpace,
@@ -55,8 +53,8 @@ class WordTile extends StatelessWidget {
                       word.definition,
                       style: TextStyle(
                         fontSize: 16,
-                        color:
-                            theme.textTheme.bodyMedium!.color?.withOpacity(0.8),
+                        color: context.textTheme.bodyMedium!.color
+                            ?.withOpacity(0.8),
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,

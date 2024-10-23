@@ -65,6 +65,7 @@ dependencies:
   flutter_inappwebview:
   context_menus: ^2.0.0+1
   url_launcher: ^6.3.1
+  wikipedia: ^0.0.8
 
 
 dev_dependencies:

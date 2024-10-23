@@ -73,6 +73,10 @@ document.getElementById("search-dictionary").addEventListener("click", () => {
   window.flutter_inappwebview.callHandler("searchDictionary", selectedPdfText);
 });
 
+document.getElementById("search-wikipedia").addEventListener("click", () => {
+  window.flutter_inappwebview.callHandler("searchWikipedia", selectedPdfText);
+});
+
 container.addEventListener("click", hideContextMenu);
 
 function renderPage(pageNum, scale = currentScale) {

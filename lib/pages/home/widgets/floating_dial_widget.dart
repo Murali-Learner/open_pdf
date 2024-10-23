@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:open_pdf/pages/download/downloads_page.dart';
 import 'package:open_pdf/pages/pdfViewer/pdf_js_view.dart';
+import 'package:open_pdf/providers/download_provider.dart';
 import 'package:open_pdf/providers/pdf_provider.dart';
-import 'package:open_pdf/providers/theme_provider.dart';
 import 'package:open_pdf/utils/constants.dart';
 import 'package:open_pdf/utils/extensions/context_extension.dart';
 import 'package:provider/provider.dart';
@@ -13,9 +13,13 @@ class FloatingDial extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer2<PdfProvider, ThemeProvider>(
-      builder: (context, pdfProvider, themeProvider, _) {
-        return pdfProvider.totalPdfList.isEmpty
+    return Consumer2<PdfProvider, DownloadProvider>(
+      builder: (context, pdfProvider, downloadProvider, _) {
+        var list = [
+          ...pdfProvider.localPdfList.values,
+          ...downloadProvider.downloadedPdfMap.values
+        ];
+        return list.isEmpty
             ? const SizedBox.shrink()
             : SpeedDial(
                 icon: Icons.add,
@@ -28,23 +32,6 @@ class FloatingDial extends StatelessWidget {
                 overlayColor: Colors.black,
                 overlayOpacity: 0,
                 children: [
-                  // SpeedDialChild(
-                  //   shape: const CircleBorder(),
-                  //   child: Icon(
-                  //     themeProvider.themeMode == ThemeMode.dark
-                  //         ? Icons.light_mode
-                  //         : Icons.dark_mode,
-                  //     color: context.theme.primaryColor,
-                  //   ),
-                  //   backgroundColor: Colors.white,
-                  //   onTap: () {
-                  //     if (themeProvider.themeMode == ThemeMode.dark) {
-                  //       themeProvider.setTheme(AppTheme.light);
-                  //     } else {
-                  //       themeProvider.setTheme(AppTheme.dark);
-                  //     }
-                  //   },
-                  // ),
                   SpeedDialChild(
                     child: Icon(
                       Icons.download,
@@ -78,10 +65,6 @@ class FloatingDial extends StatelessWidget {
                                 pdfName: pdfProvider.currentPDF!.fileName!,
                               ),
                             );
-
-                            // context.push(
-                            //     navigateTo:
-                            //         ViewPdfPage(pdf: pdfProvider.currentPDF!));
                           }
                         },
                       );

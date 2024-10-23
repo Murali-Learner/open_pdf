@@ -4,7 +4,7 @@ import 'package:open_pdf/models/pdf_model.dart';
 import 'package:open_pdf/pages/download/widgets/download_action_button.dart';
 import 'package:open_pdf/pages/home/widgets/pdf_card_options.dart';
 import 'package:open_pdf/pages/home/widgets/pdf_info_widget.dart';
-import 'package:open_pdf/pages/pdfViewer/view_pdf_page.dart';
+import 'package:open_pdf/pages/pdfViewer/pdf_js_view.dart';
 import 'package:open_pdf/providers/download_provider.dart';
 import 'package:open_pdf/providers/pdf_control_provider.dart';
 import 'package:open_pdf/providers/pdf_provider.dart';
@@ -79,9 +79,12 @@ class DownloadPdfCard extends StatelessWidget {
   void onSingleTap(PdfProvider provider, BuildContext context) async {
     if (pdf.downloadStatus == DownloadTaskStatus.complete.name) {
       context.read<PdfControlProvider>().resetValues();
+      final base64 = await provider.convertBase64(pdf.filePath!);
+
       context.push(
-        navigateTo: ViewPdfPage(
-          pdf: pdf,
+        navigateTo: PdfJsView(
+          pdfName: pdf.fileName ?? '',
+          base64: base64,
         ),
       );
     }

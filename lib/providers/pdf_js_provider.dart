@@ -88,25 +88,27 @@ class PdfJsProvider extends ChangeNotifier {
 
           final ClipboardData data = ClipboardData(text: receivedData);
           Clipboard.setData(data);
-          // webViewController.clearFocus();
           await hideContextMenu();
         }
       },
     );
+
     webViewController.addJavaScriptHandler(
       handlerName: 'searchDictionary',
       callback: (contents) async {
         String? receivedData = contents.first;
         if (receivedData != null) {
-          log("copyText  $receivedData");
+          log("searchDictionary  $receivedData");
 
           final dictionaryProvider = context.read<DictionaryProvider>();
           dictionaryProvider.searchWord(receivedData);
+          dictionaryProvider.toggleClearButton(receivedData.isNotEmpty);
 
           showModalBottomSheet(
             showDragHandle: true,
             context: context,
             backgroundColor: context.theme.scaffoldBackgroundColor,
+            constraints: BoxConstraints(maxHeight: context.height(70)),
             barrierColor: ColorConstants.color.withOpacity(0.5),
             isScrollControlled: true,
             useSafeArea: true,
@@ -114,6 +116,32 @@ class PdfJsProvider extends ChangeNotifier {
               searchWord: receivedData.trim(),
             ),
           );
+        }
+      },
+    );
+    webViewController.addJavaScriptHandler(
+      handlerName: 'searchWikipedia',
+      callback: (contents) async {
+        String? receivedData = contents.first;
+        if (receivedData != null) {
+          log("searchWikipedia $receivedData");
+
+          showModalBottomSheet(
+            showDragHandle: true,
+            context: context,
+            backgroundColor: context.theme.scaffoldBackgroundColor,
+            constraints: BoxConstraints(maxHeight: context.height(70)),
+            barrierColor: ColorConstants.color.withOpacity(0.5),
+            isScrollControlled: true,
+            useSafeArea: true,
+            builder: (context) => DictionaryBottomSheet(
+              searchWord: receivedData.trim(),
+              isWikiSearch: true,
+            ),
+          );
+
+          final dictionaryProvider = context.read<DictionaryProvider>();
+          await dictionaryProvider.searchWikipedia(receivedData);
         }
       },
     );

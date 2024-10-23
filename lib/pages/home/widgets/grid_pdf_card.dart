@@ -22,42 +22,21 @@ class GridPdfCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<PdfProvider>(builder: (context, pdfProvider, _) {
+    return Consumer<PdfProvider>(builder: (_, pdfProvider, __) {
       return GestureDetector(
         onLongPress: () {
           pdfProvider.toggleSelectedFiles(pdf);
           debugPrint("long press ${pdfProvider.selectedFiles.length}");
         },
         onTap: () async {
-          debugPrint("statement ${pdf.toJson()}");
-          if (pdf.isSelected || pdfProvider.isMultiSelected) {
-            pdfProvider.toggleSelectedFiles(pdf);
-          } else {
-            context.read<PdfControlProvider>().resetValues();
-            pdfProvider.updateLastOpenedValue(pdf);
-            await context.read<DownloadProvider>().updateLastOpenedValue(pdf);
-
-            pdfProvider.clearSelectedFiles();
-            final base64 = await pdfProvider.convertBase64(pdf.filePath!);
-            // if (pdfProvider.currentPDF != null) {
-            context.push(
-              navigateTo: PdfJsView(base64: base64, pdfName: pdf.fileName!),
-
-              //  ViewPdfPage(
-              //   pdf: pdf,
-              // ),
-            );
-            // }
-          }
+          await onGridPdfCardSingleTap(pdfProvider, context);
         },
         child: Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(6),
-            color:
-                // context.theme.primaryColor.withOpacity(0.8)
-                pdf.isSelected
-                    ? ColorConstants.amberColor
-                    : context.theme.primaryColor.withOpacity(0.3),
+            color: pdf.isSelected
+                ? ColorConstants.amberColor
+                : context.theme.primaryColor.withOpacity(0.3),
           ),
           padding: const EdgeInsets.all(5),
           child: Stack(
@@ -123,5 +102,42 @@ class GridPdfCard extends StatelessWidget {
         ),
       );
     });
+  }
+
+  Future<void> onGridPdfCardSingleTap(
+      PdfProvider pdfProvider, BuildContext context) async {
+    final downloadProvider = context.read<DownloadProvider>();
+    final pdfControlProvider = context.read<PdfControlProvider>();
+
+    if (pdf.isSelected || pdfProvider.isMultiSelected) {
+      pdfProvider.toggleSelectedFiles(pdf);
+    } else {
+      pdfControlProvider.resetValues();
+      debugPrint("pdf.networkUrl ${pdf.networkUrl}");
+
+      pdfProvider.clearSelectedFiles();
+
+      final base64 = await pdfProvider.convertBase64(pdf.filePath!);
+
+      context.push(
+        navigateTo: PdfJsView(base64: base64, pdfName: pdf.fileName!),
+      );
+      Future.delayed(const Duration(seconds: 1)).whenComplete(
+        () async {
+          await updateLastOpenedValue(downloadProvider, pdfProvider);
+        },
+      );
+    }
+  }
+
+  Future<void> updateLastOpenedValue(
+      DownloadProvider downloadProvider, PdfProvider pdfProvider) async {
+    {
+      if (pdf.networkUrl != null && pdf.networkUrl != '') {
+        await downloadProvider.updateLastOpenedValue(pdf);
+      } else {
+        pdfProvider.updateLastOpenedValue(pdf);
+      }
+    }
   }
 }
