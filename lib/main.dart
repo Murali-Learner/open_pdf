@@ -28,10 +28,7 @@ void main() async {
   );
 
   runApp(
-    DevicePreview(
-      enabled: !kReleaseMode,
-      builder: (context) => const MyApp(),
-    ),
+    const MyApp(),
   );
 }
 
