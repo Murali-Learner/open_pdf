@@ -171,11 +171,13 @@ class PdfJsProvider extends ChangeNotifier {
     await webViewController!.evaluateJavascript(
       source: "changePage($isNextPage)",
     );
+    await webViewController!.zoomBy(zoomFactor: 0.1);
   }
 
   Future<void> jumpPage(int newPage) async {
     await webViewController!.evaluateJavascript(
       source: "jumpToPage($newPage)",
     );
+    webViewController!.zoomBy(zoomFactor: 0.1);
   }
 }
