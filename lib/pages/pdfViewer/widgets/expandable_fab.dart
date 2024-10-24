@@ -40,9 +40,14 @@ class ExpandableFabState extends State<ExpandableFab>
 
   @override
   Widget build(BuildContext context) {
+    debugPrint("context.isTablet ${context.screenWidth}");
     return AnimatedContainer(
       height: 50,
-      width: _isExpanded ? context.width(90) : 50,
+      width: _isExpanded
+          ? !context.isMobile
+              ? context.width(30)
+              : context.width(90)
+          : 50,
       curve: Curves.easeIn,
       duration: Constants.globalDuration,
       decoration: BoxDecoration(
@@ -54,6 +59,7 @@ class ExpandableFabState extends State<ExpandableFab>
       padding: EdgeInsets.zero,
       child: SizedBox(
         child: Row(
+          mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
             if (_isExpanded)

@@ -129,13 +129,15 @@ class _HomePageState extends State<HomePage> {
                                 ),
                               ),
                             )
-                          : pdfProvider.viewMode == ViewMode.list
-                              ? HomePdfListView(
-                                  pdfLists: pdfList,
-                                )
-                              : HomePdfGridView(
-                                  pdfLists: pdfList,
-                                ),
+                          : Expanded(
+                              child: pdfProvider.viewMode == ViewMode.list
+                                  ? HomePdfListView(
+                                      pdfLists: pdfList,
+                                    )
+                                  : HomePdfGridView(
+                                      pdfLists: pdfList,
+                                    ),
+                            ),
                     ],
                   ),
                 ),

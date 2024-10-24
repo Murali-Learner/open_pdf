@@ -3,7 +3,6 @@ import 'package:open_pdf/models/pdf_model.dart';
 import 'package:open_pdf/pages/home/widgets/pdf_card_options.dart';
 import 'package:open_pdf/pages/pdfViewer/pdf_js_view.dart';
 import 'package:open_pdf/providers/download_provider.dart';
-import 'package:open_pdf/providers/pdf_control_provider.dart';
 import 'package:open_pdf/providers/pdf_provider.dart';
 import 'package:open_pdf/utils/constants.dart';
 import 'package:open_pdf/utils/extensions/context_extension.dart';
@@ -107,12 +106,10 @@ class GridPdfCard extends StatelessWidget {
   Future<void> onGridPdfCardSingleTap(
       PdfProvider pdfProvider, BuildContext context) async {
     final downloadProvider = context.read<DownloadProvider>();
-    final pdfControlProvider = context.read<PdfControlProvider>();
 
     if (pdf.isSelected || pdfProvider.isMultiSelected) {
       pdfProvider.toggleSelectedFiles(pdf);
     } else {
-      pdfControlProvider.resetValues();
       debugPrint("pdf.networkUrl ${pdf.networkUrl}");
 
       pdfProvider.clearSelectedFiles();

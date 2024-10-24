@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:open_pdf/pages/pdfViewer/widgets/dictonary_bottom_sheet.dart';
 import 'package:open_pdf/pages/pdfViewer/widgets/page_information_widget.dart';
 import 'package:open_pdf/providers/dictionary_provider.dart';
-import 'package:open_pdf/providers/pdf_control_provider.dart';
 import 'package:open_pdf/providers/pdf_js_provider.dart';
 import 'package:open_pdf/utils/constants.dart';
 import 'package:open_pdf/utils/extensions/context_extension.dart';
@@ -15,8 +14,7 @@ class PdfActionsButtonRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer2<PdfControlProvider, PdfJsProvider>(
-        builder: (context, pdfProvider, pdfJsProvider, _) {
+    return Consumer<PdfJsProvider>(builder: (context, pdfJsProvider, _) {
       return ListView(
         shrinkWrap: true,
         scrollDirection: Axis.horizontal,

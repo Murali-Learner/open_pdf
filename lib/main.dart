@@ -2,12 +2,10 @@ import 'package:device_preview/device_preview.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
-import 'package:media_store_plus/media_store_plus.dart';
 import 'package:open_pdf/helpers/hive_helper.dart';
 import 'package:open_pdf/main/main_page.dart';
 import 'package:open_pdf/providers/dictionary_provider.dart';
 import 'package:open_pdf/providers/download_provider.dart';
-import 'package:open_pdf/providers/pdf_control_provider.dart';
 import 'package:open_pdf/providers/pdf_js_provider.dart';
 import 'package:open_pdf/providers/pdf_provider.dart';
 import 'package:open_pdf/providers/theme_provider.dart';
@@ -16,9 +14,6 @@ import 'package:provider/provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  await MediaStore.ensureInitialized();
-  MediaStore.appFolder = "OpenPdf";
 
   HiveHelper hiveHelper = HiveHelper();
   await hiveHelper.initHive();
@@ -44,21 +39,22 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => PdfProvider()),
         ChangeNotifierProvider(create: (_) => DictionaryProvider()),
-        ChangeNotifierProvider(create: (_) => PdfControlProvider()),
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => DownloadProvider()),
         ChangeNotifierProvider(create: (_) => PdfJsProvider()),
       ],
-      child: Consumer<ThemeProvider>(builder: (context, provider, _) {
-        return MaterialApp(
-          title: 'Open PDF',
-          debugShowCheckedModeBanner: false,
-          theme: appTheme,
-          // darkTheme: darkTheme,
-          themeMode: provider.themeMode,
-          home: const MainPage(),
-        );
-      }),
+      child: Consumer<ThemeProvider>(
+        builder: (context, provider, _) {
+          return MaterialApp(
+            title: 'Open PDF',
+            debugShowCheckedModeBanner: false,
+            theme: appTheme,
+            // darkTheme: darkTheme,
+            themeMode: provider.themeMode,
+            home: const MainPage(),
+          );
+        },
+      ),
     );
   }
 }

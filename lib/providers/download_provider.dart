@@ -25,7 +25,7 @@ class DownloadProvider extends ChangeNotifier {
   }
 
   final Dio dio = Dio();
-  static Map<String, PdfModel> _downloadedPdfMap = {};
+  static final Map<String, PdfModel> _downloadedPdfMap = {};
   Map<String, PdfModel> get downloadedPdfMap => _downloadedPdfMap;
   final String _tempFilePath = Directory('/storage/emulated/0/Download/').path;
   var random = Random();
@@ -228,7 +228,6 @@ class DownloadProvider extends ChangeNotifier {
     // log("selectedFiles ${selectedFiles.length}");
     try {
       for (var entry in selectedFiles.entries) {
-        final key = entry.key;
         final pdf = entry.value;
 
         await removeTaskFormDownloader(pdf.taskId!);
