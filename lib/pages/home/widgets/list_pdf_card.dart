@@ -1,13 +1,11 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:open_pdf/models/pdf_model.dart';
 import 'package:open_pdf/pages/home/widgets/pdf_card_options.dart';
 import 'package:open_pdf/pages/home/widgets/pdf_info_widget.dart';
 import 'package:open_pdf/pages/pdfViewer/pdf_js_view.dart';
 import 'package:open_pdf/providers/download_provider.dart';
-import 'package:open_pdf/providers/pdf_control_provider.dart';
 import 'package:open_pdf/providers/pdf_provider.dart';
 import 'package:open_pdf/utils/constants.dart';
 import 'package:open_pdf/utils/extensions/context_extension.dart';
@@ -70,19 +68,35 @@ class ListPdfCard extends StatelessWidget {
   Future<void> onListPdfCardSingleTap(
       PdfProvider provider, BuildContext context) async {
     debugPrint("pdf  ${pdf.fileName} ${provider.isMultiSelected}");
-    if (pdf.downloadStatus == DownloadTaskStatus.complete.name) {
-      if (pdf.isSelected || provider.isMultiSelected) {
-        provider.toggleSelectedFiles(pdf);
+    final downloadProvider = context.read<DownloadProvider>();
+
+    if (pdf.isSelected || provider.isMultiSelected) {
+      provider.toggleSelectedFiles(pdf);
+    } else {
+      debugPrint("pdf.networkUrl ${pdf.networkUrl}");
+
+      provider.clearSelectedFiles();
+
+      final base64 = await provider.convertBase64(pdf.filePath!);
+
+      context.push(
+        navigateTo: PdfJsView(base64: base64, pdfName: pdf.fileName!),
+      );
+      Future.delayed(const Duration(seconds: 1)).whenComplete(
+        () async {
+          await updateLastOpenedValue(downloadProvider, provider);
+        },
+      );
+    }
+  }
+
+  Future<void> updateLastOpenedValue(
+      DownloadProvider downloadProvider, PdfProvider pdfProvider) async {
+    {
+      if (pdf.networkUrl != null && pdf.networkUrl != '') {
+        await downloadProvider.updateLastOpenedValue(pdf);
       } else {
-        context.read<PdfControlProvider>().resetValues();
-        provider.updateLastOpenedValue(pdf);
-        await context.read<DownloadProvider>().updateLastOpenedValue(pdf);
-
-        final base64 = await provider.convertBase64(pdf.filePath!);
-
-        context.push(
-          navigateTo: PdfJsView(base64: base64, pdfName: pdf.fileName ?? ''),
-        );
+        pdfProvider.updateLastOpenedValue(pdf);
       }
     }
   }

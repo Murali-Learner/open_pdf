@@ -40,19 +40,20 @@ class EmptyPdfListWidget extends StatelessWidget {
                   onPressed: () async {
                     final provider = context.read<PdfProvider>();
                     provider.clearSelectedFiles();
-                    context
-                        .read<PdfProvider>()
-                        .pickFile()
-                        .whenComplete(() async {
-                      if (provider.currentPDF != null) {
-                        final base64 = await provider
-                            .convertBase64(provider.currentPDF!.filePath!);
 
-                        context.push(
-                            navigateTo: PdfJsView(
-                          base64: base64,
-                          pdfName: provider.currentPDF!.fileName!,
-                        ));
+                    provider.pickFile().whenComplete(() async {
+                      if (provider.currentPDF != null) {
+                        provider
+                            .convertBase64(provider.currentPDF!.filePath!)
+                            .then(
+                          (base64) {
+                            context.push(
+                                navigateTo: PdfJsView(
+                              base64: base64,
+                              pdfName: provider.currentPDF!.fileName!,
+                            ));
+                          },
+                        );
                       }
                     });
                   },

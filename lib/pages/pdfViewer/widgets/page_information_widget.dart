@@ -1,7 +1,6 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
-import 'package:open_pdf/providers/pdf_control_provider.dart';
 import 'package:open_pdf/providers/pdf_js_provider.dart';
 import 'package:open_pdf/utils/extensions/context_extension.dart';
 import 'package:open_pdf/utils/toast_utils.dart';
@@ -18,14 +17,12 @@ class PageInformationWidget extends StatefulWidget {
 
 class _PageInformationWidgetState extends State<PageInformationWidget> {
   late TextEditingController pageController;
-  PdfControlProvider? pdfProvider;
   PdfJsProvider? pdfJsProvider;
 
   @override
   void initState() {
     super.initState();
 
-    pdfProvider = context.read<PdfControlProvider>();
     pdfJsProvider = context.read<PdfJsProvider>();
 
     pageController =
@@ -57,8 +54,8 @@ class _PageInformationWidgetState extends State<PageInformationWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer2<PdfControlProvider, PdfJsProvider>(
-      builder: (context, controlProvider, jsProvider, _) {
+    return Consumer<PdfJsProvider>(
+      builder: (context, jsProvider, _) {
         return Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -75,9 +72,6 @@ class _PageInformationWidgetState extends State<PageInformationWidget> {
                   fontWeight: FontWeight.w500,
                   fontSize: 18,
                 ),
-                onTap: () {
-                  controlProvider.setConsiderScroll(false);
-                },
                 onSubmitted: (value) {
                   final newPage = int.tryParse(value);
                   log("newPage $newPage");
@@ -89,7 +83,6 @@ class _PageInformationWidgetState extends State<PageInformationWidget> {
                   } else {
                     ToastUtils.showErrorToast("Invalid page number");
                   }
-                  controlProvider.setConsiderScroll(true);
                 },
               ),
             ),

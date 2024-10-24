@@ -38,7 +38,7 @@ extension ContextExtensions on BuildContext {
   void hideKeyBoard() => FocusScope.of(this).unfocus();
 
   static const double _tabletThreshold = 600.0;
-  static const double _desktopThreshold = 900.0;
+  static const double _desktopThreshold = 1290.0;
 
   bool get isTablet {
     final double screenWidth = MediaQuery.of(this).size.width;

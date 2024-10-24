@@ -6,7 +6,6 @@ import 'package:open_pdf/pages/home/widgets/pdf_card_options.dart';
 import 'package:open_pdf/pages/home/widgets/pdf_info_widget.dart';
 import 'package:open_pdf/pages/pdfViewer/pdf_js_view.dart';
 import 'package:open_pdf/providers/download_provider.dart';
-import 'package:open_pdf/providers/pdf_control_provider.dart';
 import 'package:open_pdf/providers/pdf_provider.dart';
 import 'package:open_pdf/utils/extensions/context_extension.dart';
 import 'package:open_pdf/utils/extensions/spacer_extension.dart';
@@ -78,15 +77,26 @@ class DownloadPdfCard extends StatelessWidget {
 
   void onSingleTap(PdfProvider provider, BuildContext context) async {
     if (pdf.downloadStatus == DownloadTaskStatus.complete.name) {
-      context.read<PdfControlProvider>().resetValues();
-      final base64 = await provider.convertBase64(pdf.filePath!);
-
-      context.push(
-        navigateTo: PdfJsView(
-          pdfName: pdf.fileName ?? '',
-          base64: base64,
-        ),
-      );
+      if (pdf.isSelected || provider.isMultiSelected) {
+        provider.toggleSelectedFiles(pdf);
+      } else {
+        provider.updateLastOpenedValue(pdf);
+        context
+            .read<DownloadProvider>()
+            .updateLastOpenedValue(pdf)
+            .whenComplete(
+          () {
+            provider.convertBase64(pdf.filePath!).then(
+              (base64) {
+                context.push(
+                  navigateTo:
+                      PdfJsView(base64: base64, pdfName: pdf.fileName ?? ''),
+                );
+              },
+            );
+          },
+        );
+      }
     }
   }
 }
