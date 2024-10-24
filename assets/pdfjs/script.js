@@ -101,8 +101,8 @@ function renderPage(pageNum, scale = currentScale) {
     const ctx = canvas.getContext("2d");
     canvas.width = scaledViewport.width;
     canvas.height = scaledViewport.height;
-    var displayWidth = 1.5;
-    canvas.style.width = `${(viewport.width * displayWidth) / scale}px`;
+    // var displayWidth = 1.5;
+    // canvas.style.width = `${(viewport.width * displayWidth) / scale}px`;
     // canvas.style.height = `${(viewport.height * displayWidth) / scale}px`;
     pageDiv.appendChild(canvas);
 
@@ -116,6 +116,7 @@ function renderPage(pageNum, scale = currentScale) {
 
     const renderContext = {
       canvasContext: ctx,
+      intent: "print",
       viewport: scaledViewport,
     };
 
