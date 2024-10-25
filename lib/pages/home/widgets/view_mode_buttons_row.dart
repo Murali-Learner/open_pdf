@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:open_pdf/pages/home/widgets/view_mode_button.dart';
 import 'package:open_pdf/utils/enumerates.dart';
@@ -41,10 +42,11 @@ class ViewModeButtonsRow extends StatelessWidget {
   }
 }
 
-void showDeleteConfirmationDialog(
-    BuildContext context, VoidCallback onConfirmDelete,
-    {String content = 'Are you sure you want to delete selected items?'}) {
-  showDialog(
+Future<void> showDeleteConfirmationDialog(
+    BuildContext context, AsyncCallback onConfirmDelete,
+    {String content =
+        'Are you sure you want to delete selected items?'}) async {
+  await showDialog(
     context: context,
     builder: (BuildContext context) {
       return AlertDialog(
@@ -58,8 +60,8 @@ void showDeleteConfirmationDialog(
             child: const Text('Cancel'),
           ),
           TextButton(
-            onPressed: () {
-              onConfirmDelete();
+            onPressed: () async {
+              await onConfirmDelete();
               context.pop();
             },
             child: const Text(

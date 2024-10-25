@@ -78,26 +78,31 @@ class _HomePageState extends State<HomePage> {
 
         return Scaffold(
           appBar: AppBar(
-            leading: pdfProvider.selectedFiles.isEmpty
+            leading: (pdfProvider.selectedFiles.isEmpty &&
+                    downloadProvider.selectedFiles.isEmpty)
                 ? null
                 : IconButton(
                     onPressed: () {
                       pdfProvider.clearSelectedFiles();
+
+                      downloadProvider.clearSelectedFiles();
                     },
                     icon: const Icon(
                       Icons.arrow_back,
                     ),
                   ),
             title: Text(
-              " ${pdfProvider.selectedFiles.isEmpty ? 'Open PDF' : pdfProvider.selectedFiles.length} ",
+              " ${downloadProvider.selectedFiles.isEmpty && pdfProvider.selectedFiles.isEmpty ? 'Open PDF' : pdfProvider.selectedFiles.length + downloadProvider.selectedFiles.length} ",
               style: TextStyle(
                 color: ColorConstants.amberColor,
               ),
             ),
             actions: [
-              if (pdfProvider.selectedFiles.isEmpty)
+              if ((pdfProvider.selectedFiles.isEmpty &&
+                  downloadProvider.selectedFiles.isEmpty))
                 const PopupMenuButtonWidget(),
-              if (pdfProvider.selectedFiles.isNotEmpty)
+              if ((pdfProvider.selectedFiles.isNotEmpty ||
+                  downloadProvider.selectedFiles.isNotEmpty))
                 const MultiSelectionDeleteButton(),
               10.hSpace,
             ],

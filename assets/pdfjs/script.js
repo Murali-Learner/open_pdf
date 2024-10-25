@@ -6,78 +6,83 @@ const contextMenu = document.getElementById("context-menu");
 let currentScale = 1;
 let pdfDoc = null;
 let currentPage = 1;
-let startX, startY, endX, endY;
-let initialPinchDistance = 0;
-let isPinching = false;
-let isZoomed = false;
-let lastTapTime = 0;
-var selectedPdfText = "";
+let selectedPdfText = "";
 
-function base64ToUint8Array(base64) {
-  const raw = atob(base64);
-  const uint8Array = new Uint8Array(raw.length);
-  for (let i = 0; i < raw.length; i++) {
-    uint8Array[i] = raw.charCodeAt(i);
-  }
-  return uint8Array;
-}
+
+document.addEventListener('contextmenu', (e) => {
+  e.preventDefault();
+});
 
 function showContextMenu(event) {
-  const selectedText = window.getSelection().toString().trim();
-  if (!selectedText) return;
-
   event.preventDefault();
+  event.stopPropagation();
+
+  const selectedText = window.getSelection().toString().trim();
+  if (!selectedText) {
+    hideContextMenu();
+    return;
+  }
+
+  selectedPdfText = selectedText;
+
+
+  const x = event.pageX;
+  const y = event.pageY;
+
 
   const menuWidth = contextMenu.offsetWidth;
   const menuHeight = contextMenu.offsetHeight;
+  const windowWidth = window.innerWidth;
+  const windowHeight = window.innerHeight;
 
-  contextMenu.style.left = `${Math.min(
-    event.pageX,
-    window.innerWidth - menuWidth
-  )}px`;
-  contextMenu.style.top = `${Math.min(
-    event.pageY,
-    window.innerHeight - menuHeight
-  )}px`;
-  contextMenu.style.display = "block";
+
+  const adjustedX = Math.min(x, windowWidth - menuWidth - 10);
+  const adjustedY = Math.min(y, windowHeight - menuHeight - 10);
+
+  contextMenu.style.left = `${adjustedX}px`;
+  contextMenu.style.top = `${adjustedY}px`;
+  contextMenu.style.display = 'block';
+  contextMenu.style.zIndex = '1000';
 }
 
 function hideContextMenu() {
-  contextMenu.style.display = "none";
+  contextMenu.style.display = 'none';
   selectedPdfText = "";
 }
 
-container.addEventListener("contextmenu", (event) => {
-  selectedPdfText = window.getSelection().toString().trim();
 
-  if (selectedPdfText) {
+
+document.addEventListener('contextmenu', (event) => {
+  const selection = window.getSelection();
+  const selectedText = selection.toString().trim();
+
+  if (selectedText) {
     showContextMenu(event);
-  } else {
+  }
+});
+
+
+document.addEventListener('click', (event) => {
+  if (!contextMenu.contains(event.target)) {
     hideContextMenu();
   }
 });
 
-window.addEventListener("click", hideContextMenu);
-console.log(`copy-text ${document.getElementById("copy-text")}`);
-const selectedText = window.getSelection().toString().trim();
 
 document.getElementById("copy-text").addEventListener("click", () => {
   window.flutter_inappwebview.callHandler("copyText", selectedPdfText);
+  hideContextMenu();
 });
-
-console.log(
-  `search dictionary ${document.getElementById("search-dictionary")}`
-);
 
 document.getElementById("search-dictionary").addEventListener("click", () => {
   window.flutter_inappwebview.callHandler("searchDictionary", selectedPdfText);
+  hideContextMenu();
 });
 
 document.getElementById("search-wikipedia").addEventListener("click", () => {
   window.flutter_inappwebview.callHandler("searchWikipedia", selectedPdfText);
+  hideContextMenu();
 });
-
-container.addEventListener("click", hideContextMenu);
 
 function renderPage(pageNum, scale = currentScale) {
   window.flutter_inappwebview.callHandler("loadingListener", true);
@@ -101,9 +106,8 @@ function renderPage(pageNum, scale = currentScale) {
     const ctx = canvas.getContext("2d");
     canvas.width = scaledViewport.width;
     canvas.height = scaledViewport.height;
-    var displayWidth = 1.5;
-    canvas.style.width = `${(viewport.width * displayWidth) / scale}px`;
-    // canvas.style.height = `${(viewport.height * displayWidth) / scale}px`;
+    canvas.style.width = `${scaledViewport.width}px`;
+    canvas.style.height = `${scaledViewport.height}px`;
     pageDiv.appendChild(canvas);
 
     const textLayer = document.createElement("div");
@@ -119,10 +123,11 @@ function renderPage(pageNum, scale = currentScale) {
       viewport: scaledViewport,
     };
 
-    page.render(renderContext);
-    window.flutter_inappwebview.callHandler("loadingListener", false);
+    page.render(renderContext).promise.then(() => {
+      window.flutter_inappwebview.callHandler("loadingListener", false);
 
-    page.getTextContent().then((textContent) => {
+      return page.getTextContent();
+    }).then((textContent) => {
       pdfjsLib.renderTextLayer({
         textContent: textContent,
         container: textLayer,
@@ -131,6 +136,7 @@ function renderPage(pageNum, scale = currentScale) {
       });
     });
   });
+
   window.flutter_inappwebview.callHandler("onPageChanged", pageNum);
 }
 
@@ -147,8 +153,18 @@ function renderPdf(pdfBase64) {
     });
 }
 
+function base64ToUint8Array(base64) {
+  const raw = atob(base64);
+  const uint8Array = new Uint8Array(raw.length);
+  for (let i = 0; i < raw.length; i++) {
+    uint8Array[i] = raw.charCodeAt(i);
+  }
+  return uint8Array;
+}
+
 function jumpToPage(pageNum) {
-  renderPage(pageNum);
+  currentPage = pageNum;
+  renderPage(currentPage);
 }
 
 function changePage(isNextPage) {

@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:developer';
 import 'dart:io';
 import 'dart:isolate';
-import 'dart:math' hide log;
 import 'dart:typed_data';
 import 'dart:ui';
 
@@ -11,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:open_pdf/helpers/hive_helper.dart';
 import 'package:open_pdf/models/pdf_model.dart';
+import 'package:open_pdf/providers/download_progress.dart';
 import 'package:open_pdf/utils/toast_utils.dart';
 import 'package:path/path.dart' as path;
 import 'package:pdf_render/pdf_render.dart';
@@ -28,16 +28,34 @@ class DownloadProvider extends ChangeNotifier {
   static final Map<String, PdfModel> _downloadedPdfMap = {};
   Map<String, PdfModel> get downloadedPdfMap => _downloadedPdfMap;
   final String _tempFilePath = Directory('/storage/emulated/0/Download/').path;
-  var random = Random();
+  Map<String, PdfModel> _selectedFiles = {};
+  bool _isDownloadLoading = false;
   int _currentIndex = 0;
-  final TextEditingController searchController = TextEditingController();
-
+  bool _isMultiSelected = false;
   StreamSubscription<dynamic>? _portSubscription;
   final ReceivePort _port = ReceivePort();
+
+  bool get isMultiSelected => _isMultiSelected;
+  set isMultiSelected(bool value) {
+    _isMultiSelected = value;
+    notifyListeners();
+  }
+
+  bool get isDownloadLoading => _isDownloadLoading;
+  set isDownloadLoading(bool value) {
+    _isDownloadLoading = value;
+    notifyListeners();
+  }
 
   int get currentIndex => _currentIndex;
   void setTabIndex(int newIndex) {
     _currentIndex = newIndex;
+    notifyListeners();
+  }
+
+  Map<String, PdfModel> get selectedFiles => _selectedFiles;
+  set selectedFiles(Map<String, PdfModel> list) {
+    _selectedFiles = list;
     notifyListeners();
   }
 
@@ -69,36 +87,76 @@ class DownloadProvider extends ChangeNotifier {
 
   void _listenFromPort() async {
     _cancelPortSubscription();
+    _portSubscription = _port.listen(_handleDownloadProgress);
+  }
 
-    _portSubscription = _port.listen((dynamic data) async {
-      final taskId = (data as List<dynamic>)[0] as String;
-      final status = DownloadTaskStatus.fromInt(data[1] as int);
-      final progress = data[2] as int;
+  Future<void> _handleDownloadProgress(dynamic data) async {
+    try {
+      final progress = _parseDownloadProgress(data);
+      debugPrint('Download Progress: ${progress.progress}');
 
-      debugPrint(
-        'Callback on UI isolate: '
-        'task ($taskId) is in status ($status) and progress ($progress)',
+      final model = await _findPdfModel(progress.taskId);
+      PdfModel updatedModel = await _updatePdfModel(model, progress);
+      updatedModel = updatedModel.copyWith(
+          downloadProgress: (progress.progress).toDouble());
+      await addToDownloadedMap(updatedModel);
+      showToastAccordingToTheStatus(progress.status);
+    } catch (e, stackTrace) {
+      debugPrint('Error in download progress handler: $e');
+      debugPrint('Stack trace: $stackTrace');
+      ToastUtils.showErrorToast('Error updating download progress');
+    }
+  }
+
+  DownloadProgress _parseDownloadProgress(dynamic data) {
+    if (data is! List || data.length < 3) {
+      throw const FormatException('Invalid download progress data format');
+    }
+
+    return DownloadProgress(
+      taskId: data[0] as String,
+      status: DownloadTaskStatus.fromInt(data[1] as int),
+      progress: data[2] as int,
+    );
+  }
+
+  Future<PdfModel> _findPdfModel(String taskId) async {
+    try {
+      return _downloadedPdfMap.values.firstWhere(
+        (element) => element.taskId == taskId,
+        orElse: () => throw StateError('No PDF found with taskId: $taskId'),
       );
-      PdfModel model = _downloadedPdfMap.values
-          .where((element) => element.taskId == taskId)
-          .first;
-      // listedFormPort(model);
-      debugPrint("model ${model.toJson()}");
-      Uint8List? thumbnailBytes;
-      if (progress == 100) {
-        thumbnailBytes = await getPdfThumbNail(_tempFilePath + model.fileName!);
+    } catch (e) {
+      debugPrint('Error finding PDF model: $e');
+      rethrow;
+    }
+  }
+
+  Future<PdfModel> _updatePdfModel(
+    PdfModel model,
+    DownloadProgress progress,
+  ) async {
+    Uint8List? thumbnailBytes;
+
+    if (progress.progress == 100) {
+      try {
+        final filePath = '$_tempFilePath${model.fileName}';
+        thumbnailBytes = await getPdfThumbNail(filePath);
+      } catch (e) {
+        debugPrint('Error generating thumbnail: $e');
+        // Continue without thumbnail if generation fails
       }
-      model = model.copyWith(
-        taskId: taskId,
-        downloadProgress: progress.toDouble(),
-        thumbnail: thumbnailBytes,
-        downloadStatus:
-            progress == 100 ? DownloadTaskStatus.complete.name : status.name,
-        filePath: _tempFilePath + model.fileName!,
-      );
-      await addToDownloadedMap(model);
-      showToastAccordingToTheStatus(status);
-    });
+    }
+
+    return model.copyWith(
+      taskId: progress.taskId,
+      downloadProgress: progress.progress.toDouble(),
+      thumbnail: thumbnailBytes,
+      downloadStatus: progress.progress == 100
+          ? DownloadTaskStatus.complete.name
+          : progress.status.name,
+      filePath: '$_tempFilePath${model.fileName}',
+    );
   }
 
   void showToastAccordingToTheStatus(DownloadTaskStatus status) {
@@ -194,10 +252,6 @@ class DownloadProvider extends ChangeNotifier {
 
   Future<void> addToDownloadedMap(PdfModel pdf) async {
     try {
-      if (_downloadedPdfMap.containsKey(pdf.id)) {
-        debugPrint("I'm here delete");
-        removeFromDownloadedMap(pdf);
-      }
       await HiveHelper.addOrUpdatePdf(pdf);
       _downloadedPdfMap[pdf.id] = pdf;
       notifyListeners();
@@ -224,18 +278,27 @@ class DownloadProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> deleteSelectedFiles(Map<String, PdfModel> selectedFiles) async {
+  Future<void> deleteSelectedFiles() async {
     // log("selectedFiles ${selectedFiles.length}");
     try {
       for (var entry in selectedFiles.entries) {
         final pdf = entry.value;
+        debugPrint("selected file delete ${pdf.networkUrl}");
 
-        await removeTaskFormDownloader(pdf.taskId!);
-        await deletePdfFormLocalStorage(pdf);
-        await removeFromDownloadedMap(pdf);
+        await removeTaskFormDownloader(pdf.taskId!).whenComplete(
+          () async {
+            await deletePdfFormLocalStorage(pdf).whenComplete(
+              () async {
+                await removeFromDownloadedMap(pdf);
+              },
+            );
+          },
+        );
+        debugPrint("selected file delete complete");
       }
       notifyListeners();
     } catch (e) {
+      debugPrint("error while deleting selected files $e");
       ToastUtils.showErrorToast("Failed to delete selected files.");
     }
   }
@@ -303,15 +366,10 @@ class DownloadProvider extends ChangeNotifier {
     debugPrint("_downloadedPdfMap ${_downloadedPdfMap.length}");
   }
 
-  // Future<void> _initializeTempFilePath() async {
-  //   Directory directory = await getApplicationSupportDirectory();
-  //   _tempFilePath = directory.absolute.path;
-  // }
-
   Future<bool> validateUrl(String url) async {
     try {
       final response = await dio.head(url);
-
+      debugPrint("url valid response $response");
       if (response.statusCode == 200 &&
           response.headers.value("content-type") == "application/pdf") {
         return true;
@@ -323,7 +381,6 @@ class DownloadProvider extends ChangeNotifier {
   }
 
   String getFileNameFromPath(String url) {
-    // log("url $url");
     String fileName;
     if (url.contains("https") || url.contains("http")) {
       fileName = path.basename(Uri.parse(url).path);
@@ -354,16 +411,16 @@ class DownloadProvider extends ChangeNotifier {
     return downloadPdf;
   }
 
-  Future<String> downloadPdfFile(
-      String url, String fileName, PdfModel downloadPdf) async {
+  Future<String> downloadPdfFile(String url, String fileName) async {
+    isDownloadLoading = true;
+    notifyListeners();
     final downloadedTaskId = await networkDownload(
       url: url,
       fileName: fileName,
     );
-
+    isDownloadLoading = false;
+    notifyListeners();
     if (downloadedTaskId != null && downloadedTaskId.isNotEmpty) {
-      downloadPdf = downloadPdf.copyWith(taskId: downloadedTaskId);
-      addToDownloadedMap(downloadPdf);
       return downloadedTaskId;
     } else {
       throw Exception("Failed to download the file");
@@ -386,29 +443,72 @@ class DownloadProvider extends ChangeNotifier {
       ToastUtils.showErrorToast("Enter a valid URL");
       return;
     }
+    log("valid url $validUrl $url");
     String fileNameFromUrl = getFileNameFromPath(url);
+
     final bool localExists =
         await checkIfFileExistsInDownloads("$_tempFilePath/$fileNameFromUrl");
-    if (localExists) {
-      ToastUtils.showErrorToast("File Already Exists In Downloads");
-      return;
-    }
-
     final bool mapExists = checkIfFileExists(fileNameFromUrl);
+
     if (mapExists) {
       ToastUtils.showErrorToast("File Already Exists");
       return;
     }
 
+    if (localExists) {
+      ToastUtils.showErrorToast("File Already Exists In Downloads");
+      return;
+    }
+
     try {
-      PdfModel downloadPdf = await setupOngoingDownload(url, fileNameFromUrl);
-      String downloadTaskId =
-          await downloadPdfFile(url, fileNameFromUrl, downloadPdf);
-      log("download task ID $downloadTaskId");
+      await downloadPdfFile(url, fileNameFromUrl).then(
+        (downloadTaskId) async {
+          PdfModel downloadPdf =
+              await setupOngoingDownload(url, fileNameFromUrl);
+
+          log("download first task id $downloadTaskId");
+          downloadPdf = downloadPdf.copyWith(taskId: downloadTaskId);
+          await addToDownloadedMap(downloadPdf);
+          log("download task ID $downloadTaskId");
+        },
+      );
     } catch (e) {
       debugPrint("File Download Error $e");
       ToastUtils.showErrorToast("Error while downloading file");
     }
+  }
+
+  Future<void> toggleSelectedFiles(PdfModel pdf) async {
+    _downloadedPdfMap[pdf.id] = pdf.copyWith(isSelected: !pdf.isSelected);
+
+    if (!pdf.isSelected) {
+      isMultiSelected = true;
+
+      _selectedFiles[pdf.id] = pdf;
+
+      notifyListeners();
+    } else {
+      _selectedFiles.removeWhere((key, val) {
+        return key == pdf.id;
+      });
+      isMultiSelected = true;
+
+      if (_selectedFiles.isEmpty) {
+        isMultiSelected = false;
+      }
+      notifyListeners();
+    }
+
+    debugPrint("_selectedFiles ${_selectedFiles.length}");
+  }
+
+  void clearSelectedFiles() {
+    isMultiSelected = false;
+    _selectedFiles.forEach((key, pdf) {
+      _downloadedPdfMap[key] = pdf.copyWith(isSelected: false);
+    });
+    _selectedFiles.clear();
+    notifyListeners();
   }
 
   Future<Uint8List> getPdfThumbNail(String path) async {

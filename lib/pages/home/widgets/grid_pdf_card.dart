@@ -21,11 +21,15 @@ class GridPdfCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<PdfProvider>(builder: (_, pdfProvider, __) {
+    return Consumer2<PdfProvider, DownloadProvider>(
+        builder: (_, pdfProvider, downloadProvider, __) {
       return GestureDetector(
         onLongPress: () {
-          pdfProvider.toggleSelectedFiles(pdf);
-          debugPrint("long press ${pdfProvider.selectedFiles.length}");
+          if (pdf.networkUrl != null && pdf.networkUrl != '') {
+            downloadProvider.toggleSelectedFiles(pdf);
+          } else {
+            pdfProvider.toggleSelectedFiles(pdf);
+          }
         },
         onTap: () async {
           await onGridPdfCardSingleTap(pdfProvider, context);
@@ -107,12 +111,19 @@ class GridPdfCard extends StatelessWidget {
       PdfProvider pdfProvider, BuildContext context) async {
     final downloadProvider = context.read<DownloadProvider>();
 
-    if (pdf.isSelected || pdfProvider.isMultiSelected) {
-      pdfProvider.toggleSelectedFiles(pdf);
+    if (pdf.isSelected ||
+        pdfProvider.isMultiSelected ||
+        downloadProvider.isMultiSelected) {
+      if (pdf.networkUrl != null && pdf.networkUrl != '') {
+        downloadProvider.toggleSelectedFiles(pdf);
+      } else {
+        pdfProvider.toggleSelectedFiles(pdf);
+      }
     } else {
       debugPrint("pdf.networkUrl ${pdf.networkUrl}");
 
       pdfProvider.clearSelectedFiles();
+      downloadProvider.clearSelectedFiles();
 
       final base64 = await pdfProvider.convertBase64(pdf.filePath!);
 

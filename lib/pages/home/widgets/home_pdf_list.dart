@@ -20,7 +20,6 @@ class HomePdfListView extends StatelessWidget {
         return 6.vSpace;
       },
       itemBuilder: (BuildContext context, int index) {
-        debugPrint("pdfLists[index] ${pdfLists[index].toJson()}");
         return ListPdfCard(
           pdf: pdfLists[index],
           index: index,

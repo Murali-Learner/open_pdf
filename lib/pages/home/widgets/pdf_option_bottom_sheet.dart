@@ -124,7 +124,7 @@ void showDeleteConfirmationDialog(
               final pdfProvider = context.read<PdfProvider>();
               final downloadProvider = context.read<DownloadProvider>();
 
-              pdfProvider.removeFromTotalPdfList(pdf);
+              await pdfProvider.removeFromTotalPdfList(pdf);
               await downloadProvider.deleteCompletely(pdf);
               context.pop();
               context.pop();

@@ -89,6 +89,7 @@ class PdfJsProvider extends ChangeNotifier {
           final ClipboardData data = ClipboardData(text: receivedData);
           Clipboard.setData(data);
           await hideContextMenu();
+          webViewController.clearFocus();
         }
       },
     );
@@ -103,6 +104,7 @@ class PdfJsProvider extends ChangeNotifier {
           final dictionaryProvider = context.read<DictionaryProvider>();
           dictionaryProvider.searchWord(receivedData);
           dictionaryProvider.toggleClearButton(receivedData.isNotEmpty);
+          webViewController.clearFocus();
 
           showModalBottomSheet(
             showDragHandle: true,
@@ -125,6 +127,7 @@ class PdfJsProvider extends ChangeNotifier {
         String? receivedData = contents.first;
         if (receivedData != null) {
           log("searchWikipedia $receivedData");
+          webViewController.clearFocus();
 
           showModalBottomSheet(
             showDragHandle: true,

@@ -261,7 +261,9 @@ class PdfProvider with ChangeNotifier {
     }
   }
 
-  void removeFromTotalPdfList(PdfModel pdf) {
+  Future<void> removeFromTotalPdfList(PdfModel pdf) async {
+    await HiveHelper.removeFromCache(pdf.id);
+
     _localPdfList.removeWhere(
       (key, value) {
         return key == pdf.id;

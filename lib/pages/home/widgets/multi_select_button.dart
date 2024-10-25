@@ -16,11 +16,11 @@ class MultiSelectionDeleteButton extends StatelessWidget {
     return Tooltip(
       message: "Delete Selection",
       child: GestureDetector(
-        onTap: () {
-          showDeleteConfirmationDialog(context, () async {
+        onTap: () async {
+          await showDeleteConfirmationDialog(context, () async {
             final downloadProvider = context.read<DownloadProvider>();
-            await downloadProvider.deleteSelectedFiles(provider.selectedFiles);
 
+            await downloadProvider.deleteSelectedFiles();
             provider.deleteSelectedFiles();
           });
         },

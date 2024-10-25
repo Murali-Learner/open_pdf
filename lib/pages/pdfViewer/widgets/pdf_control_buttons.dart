@@ -4,6 +4,7 @@ import 'package:open_pdf/pages/pdfViewer/widgets/page_information_widget.dart';
 import 'package:open_pdf/providers/pdf_js_provider.dart';
 import 'package:open_pdf/utils/constants.dart';
 import 'package:open_pdf/utils/extensions/context_extension.dart';
+import 'package:open_pdf/utils/extensions/spacer_extension.dart';
 import 'package:provider/provider.dart';
 
 class PdfControlButtons extends StatefulWidget {
@@ -88,6 +89,7 @@ class PdfControlButtonsState extends State<PdfControlButtons>
                     );
                   },
                 ),
+                5.hSpace,
                 const PageInformationWidget(),
               ],
             ],

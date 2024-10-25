@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:open_pdf/models/pdf_model.dart';
 import 'package:open_pdf/pages/download/widgets/download_action_button.dart';
+import 'package:open_pdf/pages/download/widgets/download_progress_bar.dart';
 import 'package:open_pdf/pages/home/widgets/pdf_card_options.dart';
 import 'package:open_pdf/pages/home/widgets/pdf_info_widget.dart';
 import 'package:open_pdf/pages/pdfViewer/pdf_js_view.dart';
@@ -45,22 +46,7 @@ class DownloadPdfCard extends StatelessWidget {
                       pdf: pdf,
                       isDownloadCard: true,
                     ),
-                    if (pdf.downloadStatus == DownloadTaskStatus.running.name ||
-                        pdf.downloadStatus == DownloadTaskStatus.paused.name)
-                      Row(
-                        children: [
-                          Expanded(
-                            child: LinearProgressIndicator(
-                              value: pdf.downloadProgress,
-                            ),
-                          ),
-                          5.hSpace,
-                          Text(
-                            "${(pdf.downloadProgress!).toStringAsFixed(0)}%",
-                            style: context.textTheme.bodyLarge,
-                          ),
-                        ],
-                      ),
+                    DownloadProgressIndicator(pdf: pdf),
                   ],
                 ),
               ),

@@ -60,7 +60,7 @@ class _PageInformationWidgetState extends State<PageInformationWidget> {
           mainAxisSize: MainAxisSize.min,
           children: [
             ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 25),
+              constraints: BoxConstraints(maxWidth: context.width(12)),
               child: TextField(
                 controller: pageController,
                 keyboardType: TextInputType.number,

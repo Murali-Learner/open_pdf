@@ -25,17 +25,23 @@ class ListPdfCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<PdfProvider>(builder: (context, provider, _) {
+    return Consumer2<PdfProvider, DownloadProvider>(
+        builder: (context, pdfProvider, downloadProvider, _) {
       return GestureDetector(
         onLongPress: isDownloadCard
             ? null
             : () {
-                provider.toggleSelectedFiles(pdf);
-                debugPrint("long press ${provider.selectedFiles.length}");
+                if (pdf.networkUrl != null && pdf.networkUrl != '') {
+                  downloadProvider.toggleSelectedFiles(pdf);
+                } else {
+                  pdfProvider.toggleSelectedFiles(pdf);
+                }
+
+                debugPrint("long press ${pdfProvider.selectedFiles.length}");
               },
         onTap: () async {
           log("the single tap list pdf card");
-          await onListPdfCardSingleTap(provider, context);
+          await onListPdfCardSingleTap(pdfProvider, context);
         },
         child: Container(
           padding: const EdgeInsets.all(12),
@@ -70,12 +76,19 @@ class ListPdfCard extends StatelessWidget {
     debugPrint("pdf  ${pdf.fileName} ${provider.isMultiSelected}");
     final downloadProvider = context.read<DownloadProvider>();
 
-    if (pdf.isSelected || provider.isMultiSelected) {
-      provider.toggleSelectedFiles(pdf);
+    if (pdf.isSelected ||
+        provider.isMultiSelected ||
+        downloadProvider.isMultiSelected) {
+      if (pdf.networkUrl != null && pdf.networkUrl != '') {
+        downloadProvider.toggleSelectedFiles(pdf);
+      } else {
+        provider.toggleSelectedFiles(pdf);
+      }
     } else {
       debugPrint("pdf.networkUrl ${pdf.networkUrl}");
 
       provider.clearSelectedFiles();
+      downloadProvider.clearSelectedFiles();
 
       final base64 = await provider.convertBase64(pdf.filePath!);
 
